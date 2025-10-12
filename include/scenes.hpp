@@ -7,7 +7,7 @@ enum Scenes
     SCENE_MAIN_MENU,
     SCENE_SINGLEP_GAMES,
     SCENE_MULTIP_GAMES,
-    SCENE_CREDITS,
+    SCENE_SETTINGS,
 };
 
 enum ScenesMainMenu
@@ -15,7 +15,7 @@ enum ScenesMainMenu
     SCENE_MAIN_MENU_NONE = 10,
     SCENE_MAIN_MENU_SINGLEP,
     SCENE_MAIN_MENU_MULTIP,
-    SCENE_MAIN_MENU_CREDITS,
+    SCENE_MAIN_MENU_SETTINGS,
 };
 
 enum selectedSinglePGame
@@ -27,10 +27,18 @@ enum selectedSinglePGame
 
 enum selectedMultiPGame
 {
-    GAME_MULTIP_NONE = 300,
+    GAME_MULTIP_NONE = 40,
     GAME_MULTIP_RPS,
     GAME_MULTIP_PING_PONG,
     GAME_MULTIP_TTT,
+};
+
+enum ScenesSettings
+{
+    SCENE_SETTINGS_KEY_UP = 60,
+    SCENE_SETTINGS_KEY_DOWN,
+    SCENE_SETTINGS_KEY_LEFT,
+    SCENE_SETTINGS_KEY_RIGHT,
 };
 
 inline int currentScene = SCENE_MAIN_MENU;

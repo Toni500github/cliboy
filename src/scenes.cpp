@@ -1,6 +1,22 @@
 #include "scenes.hpp"
 
+#include <vector>
+
+#include "settings.hpp"
 #include "terminal_display.hpp"
+#include "util.hpp"
+
+void drawMenu(int y, int distance, int current_choice, const std::vector<MenuItem>& items)
+{
+    for (const auto& item : items)
+    {
+        if (current_choice == item.id)
+            display.centerText(y, "> {}", item.text);
+        else
+            display.centerText(y, "{}", item.text);
+        y += distance;
+    }
+}
 
 static void load_scene_game(int game)
 {
@@ -22,13 +38,20 @@ static void load_scene_game(int game)
     display.display();
 }
 
-void load_scene_game_credits()
+void load_scene_game_settings(int choice)
 {
     display.clearDisplay();
     display.setTextColor(0xFFFFFF);
 
-    display.centerText(10, "Created on");
-    display.centerText(20, "Toni500github/cliboy");
+    display.centerText(10, "Settings");
+
+    const std::vector<MenuItem> menu_items{
+        { SCENE_SETTINGS_KEY_UP, std::format("Up key: {:c}", settings.ch_up) },
+        { SCENE_SETTINGS_KEY_DOWN, std::format("Down key: {:c}", settings.ch_down) },
+        { SCENE_SETTINGS_KEY_LEFT, std::format("Left key: {:c}", settings.ch_left) },
+        { SCENE_SETTINGS_KEY_RIGHT, std::format("Right key: {:c}", settings.ch_right) },
+    };
+    drawMenu(display.getCursorY() + 4, 2, choice, menu_items);
 
     display.display();
 }
@@ -40,9 +63,10 @@ void load_scene_main_menu(int choice)
 
     display.centerText(5, "CliBoy v0.0.1");
 
-    display.centerText(35, choice == SCENE_MAIN_MENU_SINGLEP ? "> Single-Player" : "Single-Player");
-    display.centerText(45, choice == SCENE_MAIN_MENU_MULTIP ? "> Multi-Player" : "Multi-Player");
-    display.centerText(55, choice == SCENE_MAIN_MENU_CREDITS ? "> Credits" : "Credits");
+    static const std::vector<MenuItem> menu_items{ { SCENE_MAIN_MENU_SINGLEP, "Single-Player" },
+                                                   { SCENE_MAIN_MENU_MULTIP, "Multi-Player" },
+                                                   { SCENE_MAIN_MENU_SETTINGS, "Settings" } };
+    drawMenu(15, 5, choice, menu_items);
 
     display.display();
 }
@@ -54,6 +78,6 @@ void load_scene(int scene, int game)
         case SCENE_MAIN_MENU:     load_scene_main_menu(game); break;
         case SCENE_MULTIP_GAMES:
         case SCENE_SINGLEP_GAMES: load_scene_game(game); break;
-        case SCENE_CREDITS:       load_scene_game_credits(); break;
+        case SCENE_SETTINGS:      load_scene_game_settings(game); break;
     }
 }
