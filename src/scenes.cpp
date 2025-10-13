@@ -23,15 +23,15 @@ static void load_scene_game(int game)
     display.clearDisplay();
     display.setTextColor(0xFFFFFF);
 
-    display.setCursor(0, 35);
+    display.setCursor(0, display.getHeight() / 2);
     display.print("<");
 
     switch (game)
     {
-        case GAME_SINGLEP_RPS: display.centerText(10, "Rock Paper Scissors"); break;
+        case GAME_SINGLEP_RPS: display.centerText(display.getHeight() / 2, "Rock Paper Scissors"); break;
     }
 
-    display.setCursor(display.getWidth() - 7, 35);
+    display.setCursor(display.getWidth() - 7, display.getCursorY());
     display.print(">");
 
     display.display();
@@ -63,7 +63,7 @@ void load_scene_main_menu(int choice)
 
     display.centerText(5, "CliBoy v0.0.1");
 
-    static const std::vector<MenuItem> menu_items{ { SCENE_MAIN_MENU_SINGLEP, "Single-Player" },
+    static const std::vector<MenuItem> menu_items{ { SCENE_MAIN_MENU_SINGLEP, "Games" },
                                                    { SCENE_MAIN_MENU_SETTINGS, "Settings" } };
     drawMenu(15, 5, choice, menu_items);
 

@@ -26,19 +26,19 @@ static void print_count_down(uint8_t n)
     display.clearDisplay();
     char str[16];
     sprintf(str, "%hu", n);
-    display.centerText(28, str);
+    display.centerText(display.getHeight() / 2, str);
     display.display();
     std::this_thread::sleep_for(850ms);
 }
 
-static char get_move_ascii(Moves whos_move)
+static std::string get_move_ascii(Moves whos_move)
 {
     switch (whos_move)
     {
-        case ROCK:     return 'R';
-        case PAPER:    return 'P';
-        case SCISSORS: return 'S';
-        default:       return ' ';
+        case ROCK:     return "Rock";
+        case PAPER:    return "Paper";
+        case SCISSORS: return "Scissors";
+        default:       return "";
     }
 }
 
@@ -59,9 +59,9 @@ static void print_winner(Winner winner)
     display.clearDisplay();
     switch (winner)
     {
-        case CPU:    display.centerText(28, "CPU Wins"); break;
-        case DRAW:   display.centerText(28, "Draw!"); break;
-        case PLAYER: display.centerText(28, "Player Wins!"); break;
+        case CPU:    display.centerText(display.getHeight() / 2, "CPU Wins"); break;
+        case DRAW:   display.centerText(display.getHeight() / 2, "Draw!"); break;
+        case PLAYER: display.centerText(display.getHeight() / 2, "Player Wins!"); break;
     }
 
     display.display();
@@ -84,11 +84,8 @@ static Winner calculate_winner(Moves cpu_move, Moves player_move)
 static void print_player_move(Moves player_move)
 {
     display.clearDisplay();
-    display.setCursor(0, 28);
-    display.print("Your move: ");
-    display.setCursor(70, 25);
-    display.print("{}", get_move_ascii(player_move));
-    display.centerText(display.getHeight() * 0.9, "Rock: {:c} || Paper: {:c} || Scissors: {:c}", settings.ch_up,
+    display.centerText((display.getHeight() + 5) / 2, "Your move: {}", get_move_ascii(player_move));
+    display.centerText(display.getHeight() * 0.9, "Rock: {:c} || Paper: {:c} || Scissors: {:c} || Play: ENTER", settings.ch_up,
                        settings.ch_left, settings.ch_down);
 
     display.display();
@@ -97,17 +94,17 @@ static void print_player_move(Moves player_move)
 static void print_moves(Moves computer_move, Moves player_move)
 {
     display.clearDisplay();
-    display.setCursor(6, 12);
+    display.setCursor(display.getWidth() * 0.4, display.getHeight() * 0.4);
     display.print("You");
-    display.setCursor(110, 12);
+    display.setCursor(display.getWidth() * 0.55, display.getHeight() * 0.4);
     display.print("CPU");
 
-    display.setCursor(6, 28);
+    display.setCursor(display.getWidth() * 0.4, display.getCursorY() + 5);
     display.print("{}", get_move_ascii(player_move));
 
-    display.centerText(28, "VS");
+    display.centerText(display.getCursorY(), "VS");
 
-    display.setCursor(110, 28);
+    display.setCursor(display.getWidth() * 0.55, display.getCursorY());
     display.print("{}", get_move_ascii(computer_move));
 
     display.display();
