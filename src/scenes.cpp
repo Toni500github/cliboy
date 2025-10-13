@@ -28,7 +28,6 @@ static void load_scene_game(int game)
 
     switch (game)
     {
-        case GAME_MULTIP_RPS:
         case GAME_SINGLEP_RPS: display.centerText(10, "Rock Paper Scissors"); break;
     }
 
@@ -65,7 +64,6 @@ void load_scene_main_menu(int choice)
     display.centerText(5, "CliBoy v0.0.1");
 
     static const std::vector<MenuItem> menu_items{ { SCENE_MAIN_MENU_SINGLEP, "Single-Player" },
-                                                   { SCENE_MAIN_MENU_MULTIP, "Multi-Player" },
                                                    { SCENE_MAIN_MENU_SETTINGS, "Settings" } };
     drawMenu(15, 5, choice, menu_items);
 
@@ -77,7 +75,6 @@ void load_scene(int scene, int game)
     switch (scene)
     {
         case SCENE_MAIN_MENU:     load_scene_main_menu(game); break;
-        case SCENE_MULTIP_GAMES:
         case SCENE_SINGLEP_GAMES: load_scene_game(game); break;
         case SCENE_SETTINGS:      load_scene_game_settings(game); break;
     }

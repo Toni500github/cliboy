@@ -112,13 +112,7 @@ void loop()
                         currentScene = SCENE_SINGLEP_GAMES;
                         choice       = GAME_SINGLEP_RPS;
                         min_choice   = GAME_SINGLEP_RPS;
-                        max_choice   = GAME_SINGLEP_SNAKE;
-                        break;
-                    case SCENE_MAIN_MENU_MULTIP:
-                        currentScene = SCENE_MULTIP_GAMES;
-                        choice       = GAME_MULTIP_RPS;
-                        min_choice   = GAME_MULTIP_RPS;
-                        max_choice   = GAME_MULTIP_TTT;
+                        max_choice   = GAME_SINGLEP_RPS;
                         break;
                     case SCENE_MAIN_MENU_SETTINGS:
                         currentScene = SCENE_SETTINGS;
