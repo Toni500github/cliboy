@@ -6,10 +6,10 @@
 struct settings_t
 {
     int ch_up    = 'w';
-    int ch_down  = 's';
     int ch_left  = 'a';
+    int ch_down  = 's';
     int ch_right = 'd';
-    int ch_enter = NCKEY_ENTER;
+    int ch_quit  = 'q';
 };
 
 extern settings_t settings;

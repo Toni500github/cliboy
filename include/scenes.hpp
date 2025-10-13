@@ -39,6 +39,7 @@ enum ScenesSettings
     SCENE_SETTINGS_KEY_DOWN,
     SCENE_SETTINGS_KEY_LEFT,
     SCENE_SETTINGS_KEY_RIGHT,
+    SCENE_SETTINGS_KEY_QUIT
 };
 
 inline int currentScene = SCENE_MAIN_MENU;

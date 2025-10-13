@@ -50,6 +50,7 @@ void load_scene_game_settings(int choice)
         { SCENE_SETTINGS_KEY_DOWN, std::format("Down key: {:c}", settings.ch_down) },
         { SCENE_SETTINGS_KEY_LEFT, std::format("Left key: {:c}", settings.ch_left) },
         { SCENE_SETTINGS_KEY_RIGHT, std::format("Right key: {:c}", settings.ch_right) },
+        { SCENE_SETTINGS_KEY_QUIT, std::format("Quit key: ESC") }
     };
     drawMenu(display.getCursorY() + 4, 2, choice, menu_items);
 
