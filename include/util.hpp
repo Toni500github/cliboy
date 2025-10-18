@@ -3,11 +3,33 @@
 
 #include <chrono>
 #include <cstdint>
+#include <sstream>
 #include <string>
+#include <vector>
 
 #include "settings.hpp"
 
 using namespace std::chrono;
+
+// Get string literal length
+constexpr std::size_t operator""_len(const char*, std::size_t ln) noexcept { return ln; }
+
+/* Spilt a string into a vector using a delimeter
+ * @param text The string to split
+ * @param delim The delimeter used for spliting the text
+ */
+static std::vector<std::string> split(const std::string_view text, const char delim)
+{
+    std::string              line;
+    std::vector<std::string> vec;
+    std::stringstream        ss(text.data());
+    while (std::getline(ss, line, delim))
+    {
+        vec.push_back(line);
+    }
+
+    return vec;
+}
 
 // clang-format off
 static inline std::int64_t

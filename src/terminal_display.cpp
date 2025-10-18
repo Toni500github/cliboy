@@ -4,6 +4,12 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <cstdlib>
+#include <format>
+#include <iostream>
+
+#include "srilakshmikanthanp/libfiglet.hpp"
+using namespace srilakshmikanthanp::libfiglet;
 
 TerminalDisplay::~TerminalDisplay()
 {
@@ -50,15 +56,12 @@ bool TerminalDisplay::begin()
         return false;
     }
 
-    setTextBgColor(0u);
-    setTextColor(255, 255, 255);
-
     return true;
 }
 
 void TerminalDisplay::clearDisplay()
 {
-    // Set both foreground and background channels
+    // set both foreground and background channels
     ncplane_set_channels(m_content_plane, m_fg_channel | m_bg_channel);
     ncplane_erase(m_content_plane);
     m_cursor_x = m_cursor_y = 0;
@@ -71,32 +74,39 @@ void TerminalDisplay::display()
 // clang-format on
 void TerminalDisplay::setTextColor(const std::uint32_t& hex)
 {
-    uint r = (hex >> 16) & 0xff;
-    uint g = (hex >> 8) & 0xff;
-    uint b = (hex) & 0xff;
+    uint8_t r = (hex >> 16) & 0xff;
+    uint8_t g = (hex >> 8) & 0xff;
+    uint8_t b = (hex) & 0xff;
     setTextColor(r, g, b);
 }
 
 void TerminalDisplay::setTextColor(const uint8_t r, const uint8_t g, const uint8_t b)
 {
-    m_fg_channel = NCCHANNELS_INITIALIZER(r, g, b, 0, 0, 0);
+    m_fg_channel = 0;
+    ncchannel_set_rgb8(&m_fg_channel, r, g, b);
+    ncchannel_set_alpha(&m_fg_channel, NCALPHA_OPAQUE);
+
     ncplane_set_fg_rgb8(m_content_plane, r, g, b);
 }
 
 void TerminalDisplay::setTextBgColor(const std::uint32_t& hex)
 {
-    uint r       = (hex >> 16) & 0xff;
-    uint g       = (hex >> 8) & 0xff;
-    uint b       = (hex) & 0xff;
-    m_bg_channel = NCCHANNELS_INITIALIZER(0, 0, 0, r, g, b);
+    uint8_t r = (hex >> 16) & 0xff;
+    uint8_t g = (hex >> 8) & 0xff;
+    uint8_t b = (hex) & 0xff;
+
+    m_bg_channel = 0;
+    ncchannel_set_rgb8(&m_bg_channel, r, g, b);
+    ncchannel_set_alpha(&m_bg_channel, NCALPHA_TRANSPARENT);
+
     ncplane_set_bg_rgb8(m_content_plane, r, g, b);
 }
 
 void TerminalDisplay::setTerminalBgColor(const std::uint32_t& hex)
 {
-    uint r            = (hex >> 16) & 0xff;
-    uint g            = (hex >> 8) & 0xff;
-    uint b            = (hex) & 0xff;
+    uint8_t r         = (hex >> 16) & 0xff;
+    uint8_t g         = (hex >> 8) & 0xff;
+    uint8_t b         = (hex) & 0xff;
     m_term_bg_channel = NCCHANNELS_INITIALIZER(0, 0, 0, r, g, b);
     ncplane_set_bg_rgb8(m_stdplane, r, g, b);
 }
@@ -105,4 +115,25 @@ void TerminalDisplay::setCursor(const int x, const int y)
 {
     m_cursor_x = std::clamp<int>(x, 0, m_width - 1);
     m_cursor_y = std::clamp<int>(y, 0, m_height - 1);
+}
+
+void TerminalDisplay::setFont(bool full_width, const std::string_view font)
+{
+    m_flf_font = flf_font::make_shared(std::format("./assets/fonts/{}.flf", font));
+    if (!m_flf_font)
+    {
+        std::cerr << "Failed to open font '" << font << "' at path ./assets/fonts";
+        std::exit(-1);
+    }
+
+    if (full_width)
+        m_figlet.emplace(figlet(m_flf_font, full_width::make_shared()));
+    else
+        m_figlet.emplace(figlet(m_flf_font, kerning::make_shared()));
+}
+
+void TerminalDisplay::resetFont()
+{
+    m_flf_font = nullptr;
+    m_figlet.reset();
 }

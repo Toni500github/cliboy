@@ -25,14 +25,19 @@ static void load_scene_game(int game)
 
     display.setCursor(0, display.getHeight() / 2);
     display.print("<");
-
-    switch (game)
-    {
-        case GAME_SINGLEP_RPS: display.centerText(display.getHeight() / 2, "Rock Paper Scissors"); break;
-    }
-
     display.setCursor(display.getWidth() - 7, display.getCursorY());
     display.print(">");
+
+    display.setFont(true, "Small");
+    switch (game)
+    {
+        case GAME_SINGLEP_RPS:
+            display.centerText(display.getHeight() / 2.5f, "Rock");
+            display.centerText(display.getCursorY() + 2, "Paper");
+            display.centerText(display.getCursorY() + 2, "Scissors");
+            break;
+    }
+    display.resetFont();
 
     display.display();
 }
@@ -42,7 +47,9 @@ void load_scene_game_settings(int choice)
     display.clearDisplay();
     display.setTextColor(0xFFFFFF);
 
+    display.setFont(false, "Standard");
     display.centerText(10, "Settings");
+    display.resetFont();
 
     const std::vector<MenuItem> menu_items{
         { SCENE_SETTINGS_KEY_UP, std::format("Up key: {:c}", settings.ch_up) },
@@ -61,11 +68,15 @@ void load_scene_main_menu(int choice)
     display.clearDisplay();
     display.setTextColor(0xFFFFFF);
 
-    display.centerText(5, "CliBoy v0.0.1");
+    display.setFont(true, "Big Money-nw");
+    display.centerText(5, "CliBoy");
+    display.resetFont();
 
     static const std::vector<MenuItem> menu_items{ { SCENE_MAIN_MENU_SINGLEP, "Games" },
                                                    { SCENE_MAIN_MENU_SETTINGS, "Settings" } };
-    drawMenu(15, 5, choice, menu_items);
+    display.setFont(true, "Small Slant");
+    drawMenu(display.getCursorY() + 5, 5, choice, menu_items);
+    display.resetFont();
 
     display.display();
 }

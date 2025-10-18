@@ -125,9 +125,7 @@ void loop()
             case SCENE_SINGLEP_GAMES:
                 switch (choice)
                 {
-                    case GAME_SINGLEP_RPS:
-                        currentScene = SCENE_NONE;
-                        play_singlep_rps();
+                    case GAME_SINGLEP_RPS: currentScene = SCENE_NONE; play_singlep_rps();
                 }
                 break;
             case SCENE_SETTINGS: settings_update_key_button(choice); break;

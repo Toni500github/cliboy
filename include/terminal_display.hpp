@@ -5,7 +5,14 @@
 
 #include <cstdint>
 #include <format>
+#include <memory>
+#include <optional>
 #include <string_view>
+#include <vector>
+
+#include "srilakshmikanthanp/libfiglet.hpp"
+#include "util.hpp"
+using namespace srilakshmikanthanp::libfiglet;
 
 // A similiar clone of Adafruit_SSD130 for terminals
 class TerminalDisplay
@@ -21,7 +28,9 @@ public:
           m_cursor_y(0),
           m_fg_channel(0),
           m_bg_channel(0),
-          m_term_bg_channel(0)
+          m_term_bg_channel(0),
+          m_flf_font(nullptr),
+          m_figlet()
     {}
     ~TerminalDisplay();
 
@@ -32,17 +41,32 @@ public:
     void setTextColor(const uint8_t r, const uint8_t g, const uint8_t b);
     void setTextBgColor(const std::uint32_t& hex);
     void setTerminalBgColor(const std::uint32_t& hex);
+    void setFont(bool full_width, const std::string_view font);
+    void resetFont();
     void display();
 
     template <typename... Args>
     void print(const std::string_view fmt, Args&&... args)
     {
-        const std::string& text = std::vformat(fmt, std::make_format_args(args...));
+        const std::string& text = m_figlet ? (*m_figlet)(std::vformat(fmt, std::make_format_args(args...)))
+                                           : std::vformat(fmt, std::make_format_args(args...));
 
-        ncplane_set_channels(m_content_plane, m_fg_channel | m_bg_channel);
-        ncplane_putstr_yx(m_content_plane, m_cursor_y, m_cursor_x, text.c_str());
+        const std::vector<std::string>& text_lines = split(text, '\n');
 
-        m_cursor_x += text.length();
+        ncplane_set_fg_alpha(m_content_plane, NCALPHA_OPAQUE);
+        ncplane_set_bg_alpha(m_content_plane, NCALPHA_TRANSPARENT);
+        ncplane_set_fg_rgb8(m_content_plane, ncchannel_r(m_fg_channel), ncchannel_g(m_fg_channel),
+                            ncchannel_b(m_fg_channel));
+
+        int max_width = 0;
+        for (const auto& line : text_lines)
+        {
+            ncplane_putstr_yx(m_content_plane, m_cursor_y, m_cursor_x, line.c_str());
+            m_cursor_y++;
+            max_width = std::max<int>(max_width, line.size());
+        }
+
+        m_cursor_x += max_width;
 
         if (m_cursor_x >= static_cast<int>(m_width))
         {
@@ -56,20 +80,27 @@ public:
     template <typename... Args>
     void centerText(int y, const std::string_view fmt, Args&&... args)
     {
-        const std::string& text = std::vformat(fmt, std::make_format_args(args...));
+        const std::string& text = m_figlet ? (*m_figlet)(std::vformat(fmt, std::make_format_args(args...)))
+                                           : std::vformat(fmt, std::make_format_args(args...));
 
-        int x = (m_width - text.length()) / 2;
-        x     = std::max(0, x);
+        const std::vector<std::string>& text_lines = split(text, '\n');
+        size_t                          max_width  = 0;
+        for (const auto& line : text_lines)
+            max_width = std::max(max_width, line.size());
 
-        // int saved_x = m_cursor_x;
-        // int saved_y = m_cursor_y;
+        ncplane_set_fg_alpha(m_content_plane, NCALPHA_OPAQUE);
+        ncplane_set_bg_alpha(m_content_plane, NCALPHA_TRANSPARENT);
+        ncplane_set_fg_rgb8(m_content_plane, ncchannel_r(m_fg_channel), ncchannel_g(m_fg_channel),
+                            ncchannel_b(m_fg_channel));
 
-        setCursor(x, y);
-        ncplane_set_channels(m_content_plane, m_fg_channel | m_bg_channel);
-        ncplane_putstr_yx(m_content_plane, m_cursor_y, m_cursor_x, text.c_str());
-
-        // restore cursor
-        // setCursor(saved_x, saved_y);
+        int current_y = y;
+        for (const auto& line : text_lines)
+        {
+            int x = (m_width - static_cast<int>(line.size())) / 2;
+            x     = std::max(0, x);
+            ncplane_putstr_yx(m_content_plane, current_y++, x, line.c_str());
+        }
+        setCursor(m_cursor_x, current_y);
     }
 
     uint       getWidth() const { return m_width; }
@@ -83,7 +114,10 @@ private:
     ncplane *  m_stdplane, *m_content_plane;
     uint       m_width, m_height;
     int        m_cursor_x, m_cursor_y;
-    uint64_t   m_fg_channel, m_bg_channel, m_term_bg_channel;
+    uint32_t   m_fg_channel, m_bg_channel, m_term_bg_channel;
+
+    std::shared_ptr<flf_font> m_flf_font;
+    std::optional<figlet>     m_figlet;
 };
 
 extern TerminalDisplay display;

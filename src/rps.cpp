@@ -85,8 +85,8 @@ static void print_player_move(Moves player_move)
 {
     display.clearDisplay();
     display.centerText((display.getHeight() + 5) / 2, "Your move: {}", get_move_ascii(player_move));
-    display.centerText(display.getHeight() * 0.9, "Rock: {:c} || Paper: {:c} || Scissors: {:c} || Play: ENTER", settings.ch_up,
-                       settings.ch_left, settings.ch_down);
+    display.centerText(display.getHeight() * 0.9, "Rock: {:c} || Paper: {:c} || Scissors: {:c} || Play: ENTER",
+                       settings.ch_up, settings.ch_left, settings.ch_down);
 
     display.display();
 }
