@@ -1,7 +1,7 @@
 CXX       	?= g++
 TAR		?= bsdtar
 PREFIX	  	?= /usr
-VARS  	  	?= -DENABLE_NLS=1
+VARS  	  	?=
 CXXSTD		?= c++20
 
 DEBUG 		?= 1
@@ -43,35 +43,9 @@ SRC	 	 = $(wildcard src/*.cpp)
 OBJ	 	 = $(SRC:.cpp=.o)
 LDFLAGS   	+= -L$(BUILDDIR)
 LDLIBS		+= $(shell pkg-config --libs notcurses)
-CXXFLAGS        += $(LTO_FLAGS) -fvisibility-inlines-hidden -fvisibility=hidden -Iinclude -std=$(CXXSTD) $(VARS) -DVERSION=\"$(VERSION)\"
+CXXFLAGS        += $(LTO_FLAGS) -fvisibility-inlines-hidden -fvisibility=hidden -Iinclude -std=$(CXXSTD) $(shell pkg-config --cflags notcurses) $(VARS) -DVERSION=\"$(VERSION)\"
 
 all: $(TARGET)
-
-fmt:
-ifeq ($(wildcard $(BUILDDIR)/libfmt.a),)
-	mkdir -p $(BUILDDIR)
-	$(MAKE) -C src/libs/fmt BUILDDIR=$(BUILDDIR) CXXSTD=$(CXXSTD)
-endif
-
-toml:
-ifeq ($(wildcard $(BUILDDIR)/toml.o),)
-	$(MAKE) -C src/libs/toml++ BUILDDIR=$(BUILDDIR) CXXSTD=$(CXXSTD)
-endif
-
-tpl:
-ifeq ($(wildcard $(BUILDDIR)/libtiny-process-library.a),)
-	$(MAKE) -C src/libs/tiny-process-library BUILDDIR=$(BUILDDIR) CXXSTD=$(CXXSTD)
-endif
-
-getopt-port:
-ifeq ($(wildcard $(BUILDDIR)/getopt.o),)
-	$(MAKE) -C src/libs/getopt_port BUILDDIR=$(BUILDDIR)
-endif
-
-genver: ./scripts/generateVersion.sh
-ifeq ($(wildcard include/version.h),)
-	./scripts/generateVersion.sh
-endif
 
 $(TARGET): $(OBJ)
 	mkdir -p $(BUILDDIR)
@@ -93,4 +67,4 @@ updatever:
 	sed -i "s#$(OLDVERSION)#$(VERSION)#g" $(wildcard .github/workflows/*.yml) compile_flags.txt
 	sed -i "s#Project-Id-Version: $(NAME) $(OLDVERSION)#Project-Id-Version: $(NAME) $(VERSION)#g" po/*
 
-.PHONY: $(TARGET) updatever distclean fmt toml tpl genver clean all locale
+.PHONY: $(TARGET) updatever distclean clean all

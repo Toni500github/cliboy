@@ -115,8 +115,8 @@ public:
         }
     }
 
-    uint       getWidth() const { return m_width; }
-    uint       getHeight() const { return m_height; }
+    uint32_t   getWidth() const { return m_width; }
+    uint32_t   getHeight() const { return m_height; }
     int        getCursorX() const { return m_cursor_x; }
     int        getCursorY() const { return m_cursor_y; }
     notcurses* getNC() const { return m_nc; }
@@ -124,7 +124,7 @@ public:
 private:
     notcurses* m_nc;
     ncplane *  m_stdplane, *m_content_plane;
-    uint       m_width, m_height;
+    uint32_t   m_width, m_height;
     int        m_cursor_x, m_cursor_y;
     uint32_t   m_fg_channel, m_bg_channel, m_term_bg_channel;
 
