@@ -23,11 +23,6 @@ static void load_scene_game(int game)
     display.clearDisplay();
     display.setTextColor(0xFFFFFF);
 
-    display.setCursor(0, display.getHeight() / 2);
-    display.print("<");
-    display.setCursor(display.getWidth() - 7, display.getCursorY());
-    display.print(">");
-
     display.setFont(FIGLET_KERNING, "Small");
     switch (game)
     {
@@ -35,8 +30,12 @@ static void load_scene_game(int game)
             display.centerText(display.getHeight() / 3, "Rock");
             display.centerText(display.getCursorY() + 2, "Paper");
             display.centerText(display.getCursorY() + 2, "Scissors");
+            display.setCursor(display.getWidth() * 0.95, display.getHeight() / 2);
+            display.print(">");
             break;
         case GAME_TTT:
+            display.setCursor(2, display.getHeight() / 2);
+            display.print("<");
             display.centerText(display.getHeight() / 3, "Tic");
             display.centerText(display.getCursorY() + 2, "Tax");
             display.centerText(display.getCursorY() + 2, "Toe");
@@ -74,7 +73,7 @@ void load_scene_main_menu(int choice)
     display.setTextColor(0xFFFFFF);
 
     display.setFont(FIGLET_FULL_WIDTH, "Big Money-nw");
-    display.centerText(5, "CliBoy");
+    display.centerText(5, "Cli-Boy");
     display.resetFont();
 
     static const std::vector<MenuItem> menu_items{ { SCENE_MAIN_MENU_SINGLEP, "Games" },
