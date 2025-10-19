@@ -50,6 +50,7 @@ TerminalDisplay display;
 settings_t      settings;
 
 void play_singlep_rps();
+void play_multip_ttt();
 
 void reset_to_main_menu()
 {
@@ -109,10 +110,10 @@ void loop()
                 switch (choice)
                 {
                     case SCENE_MAIN_MENU_SINGLEP:
-                        currentScene = SCENE_SINGLEP_GAMES;
-                        choice       = GAME_SINGLEP_RPS;
-                        min_choice   = GAME_SINGLEP_RPS;
-                        max_choice   = GAME_SINGLEP_RPS;
+                        currentScene = SCENE_GAMES;
+                        choice       = GAME_RPS;
+                        min_choice   = GAME_RPS;
+                        max_choice   = GAME_TTT;
                         break;
                     case SCENE_MAIN_MENU_SETTINGS:
                         currentScene = SCENE_SETTINGS;
@@ -122,10 +123,17 @@ void loop()
                         break;
                 }
                 break;
-            case SCENE_SINGLEP_GAMES:
+            case SCENE_GAMES:
                 switch (choice)
                 {
-                    case GAME_SINGLEP_RPS: currentScene = SCENE_NONE; play_singlep_rps();
+                    case GAME_RPS:
+                        currentScene = SCENE_NONE;
+                        play_singlep_rps();
+                        break;
+                    case GAME_TTT:
+                        currentScene = SCENE_NONE;
+                        play_multip_ttt();
+                        break;
                 }
                 break;
             case SCENE_SETTINGS: settings_update_key_button(choice); break;

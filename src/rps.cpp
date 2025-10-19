@@ -57,13 +57,24 @@ static Moves get_cpu_move()
 static void print_winner(Winner winner)
 {
     display.clearDisplay();
+    display.setFont(FIGLET_FULL_WIDTH, "starwars");
     switch (winner)
     {
-        case CPU:    display.centerText(display.getHeight() / 2, "CPU Wins"); break;
-        case DRAW:   display.centerText(display.getHeight() / 2, "Draw!"); break;
-        case PLAYER: display.centerText(display.getHeight() / 2, "Player Wins!"); break;
+        case CPU:
+            display.setTextColor(0xff0000);
+            display.centerText(display.getHeight() / 2, "CPU Wins");
+            break;
+        case DRAW:
+            display.setTextColor(0xffff00);
+            display.centerText(display.getHeight() / 2, "Draw!");
+            break;
+        case PLAYER:
+            display.setTextColor(0x00ff00);
+            display.centerText(display.getHeight() / 2, "Player Wins!");
+            break;
     }
 
+    display.resetFont();
     display.display();
     std::this_thread::sleep_for(1.5s);
 }
@@ -84,9 +95,13 @@ static Winner calculate_winner(Moves cpu_move, Moves player_move)
 static void print_player_move(Moves player_move)
 {
     display.clearDisplay();
-    display.centerText((display.getHeight() + 5) / 2, "Your move: {}", get_move_ascii(player_move));
-    display.centerText(display.getHeight() * 0.9, "Rock: {:c} || Paper: {:c} || Scissors: {:c} || Play: ENTER",
-                       settings.ch_up, settings.ch_left, settings.ch_down);
+    display.centerText((display.getHeight() + 15) / 2, "Your move:");
+    display.setFont(FIGLET_FULL_WIDTH, "Ogre");
+    display.centerText(display.getCursorY() + 2, "{}", get_move_ascii(player_move));
+    display.resetFont();
+    display.centerText(display.getHeight() * 0.9,
+                       "Rock: {:c} || Paper: {:c} || Scissors: {:c} || Play: ENTER || Exit: ESC", settings.ch_up,
+                       settings.ch_left, settings.ch_down);
 
     display.display();
 }
@@ -94,19 +109,22 @@ static void print_player_move(Moves player_move)
 static void print_moves(Moves computer_move, Moves player_move)
 {
     display.clearDisplay();
-    display.setCursor(display.getWidth() * 0.4, display.getHeight() * 0.4);
+    display.setFont(FIGLET_KERNING, "Doom");
+    display.setCursor(display.getWidth() * 0.15, display.getHeight() * 0.4);
     display.print("You");
-    display.setCursor(display.getWidth() * 0.55, display.getHeight() * 0.4);
+    display.setCursor(display.getWidth() * 0.6, display.getHeight() * 0.4);
     display.print("CPU");
 
-    display.setCursor(display.getWidth() * 0.4, display.getCursorY() + 5);
+    display.setCursor(display.getWidth() * 0.1, display.getCursorY() + 2);
     display.print("{}", get_move_ascii(player_move));
 
-    display.centerText(display.getCursorY(), "VS");
+    display.setCursor(display.getWidth() * 0.5, display.getCursorY() - 8);
+    display.print("VS");
 
-    display.setCursor(display.getWidth() * 0.55, display.getCursorY());
+    display.setCursor(display.getWidth() * 0.6, display.getCursorY() - 8);
     display.print("{}", get_move_ascii(computer_move));
 
+    display.resetFont();
     display.display();
     std::this_thread::sleep_for(1.5s);
 }
@@ -115,6 +133,7 @@ void play_singlep_rps()
 {
     while (true)
     {
+        display.setTextColor(0xffffff);
         std::this_thread::sleep_for(33ms);
         Moves player_move = NONE;
 
@@ -145,6 +164,7 @@ void play_singlep_rps()
         }
 
         Moves computer_move = get_cpu_move();
+        display.setFont(FIGLET_FULL_WIDTH, "Stop");
         print_count_down(3);
         print_count_down(2);
         print_count_down(1);

@@ -14,6 +14,13 @@
 #include "util.hpp"
 using namespace srilakshmikanthanp::libfiglet;
 
+enum FigletType
+{
+    FIGLET_FULL_WIDTH,
+    FIGLET_KERNING,
+    FIGLET_SMUSHED
+};
+
 // A similiar clone of Adafruit_SSD130 for terminals
 class TerminalDisplay
 {
@@ -41,8 +48,13 @@ public:
     void setTextColor(const uint8_t r, const uint8_t g, const uint8_t b);
     void setTextBgColor(const std::uint32_t& hex);
     void setTerminalBgColor(const std::uint32_t& hex);
-    void setFont(bool full_width, const std::string_view font);
+    void setFont(FigletType figlet_type, const std::string_view font);
     void resetFont();
+    void drawLine(int x0, int y0, int x1, int y1, char ch = ' ');
+    void drawCircle(int center_x, int center_y, int radius, char ch = ' ');
+    void drawRect(int x, int y, int width, int height, char ch = ' ');
+    void drawFilledRect(int x, int y, int width, int height, char ch = ' ');
+    void drawPixel(int x, int y, char ch);
     void display();
 
     template <typename... Args>

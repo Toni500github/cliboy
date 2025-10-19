@@ -396,7 +396,7 @@ namespace srilakshmikanthanp
       /**
        * @brief Get the Fig string
        */
-      fig_str_type get_fig_str(std::vector<fig_char_type> fig_chrs) const
+      fig_str_type get_fig_str(std::vector<fig_char_type> fig_chrs) const override
       {
         // fig str container type
         fig_str_type fig_str(this->height);

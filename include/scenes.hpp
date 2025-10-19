@@ -5,7 +5,7 @@ enum Scenes
 {
     SCENE_NONE = 0,
     SCENE_MAIN_MENU,
-    SCENE_SINGLEP_GAMES,
+    SCENE_GAMES,
     SCENE_SETTINGS,
 };
 
@@ -16,11 +16,11 @@ enum ScenesMainMenu
     SCENE_MAIN_MENU_SETTINGS,
 };
 
-enum selectedSinglePGame
+enum selectedGame
 {
-    GAME_SINGLEP_NONE = 20,
-    GAME_SINGLEP_RPS,
-    GAME_SINGLEP_SNAKE,
+    GAME_NONE = 20,
+    GAME_RPS,
+    GAME_TTT,
 };
 
 enum ScenesSettings

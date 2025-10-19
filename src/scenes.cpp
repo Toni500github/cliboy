@@ -28,13 +28,18 @@ static void load_scene_game(int game)
     display.setCursor(display.getWidth() - 7, display.getCursorY());
     display.print(">");
 
-    display.setFont(true, "Small");
+    display.setFont(FIGLET_KERNING, "Small");
     switch (game)
     {
-        case GAME_SINGLEP_RPS:
-            display.centerText(display.getHeight() / 2.5f, "Rock");
+        case GAME_RPS:
+            display.centerText(display.getHeight() / 3, "Rock");
             display.centerText(display.getCursorY() + 2, "Paper");
             display.centerText(display.getCursorY() + 2, "Scissors");
+            break;
+        case GAME_TTT:
+            display.centerText(display.getHeight() / 3, "Tic");
+            display.centerText(display.getCursorY() + 2, "Tax");
+            display.centerText(display.getCursorY() + 2, "Toe");
             break;
     }
     display.resetFont();
@@ -47,7 +52,7 @@ void load_scene_game_settings(int choice)
     display.clearDisplay();
     display.setTextColor(0xFFFFFF);
 
-    display.setFont(false, "Standard");
+    display.setFont(FIGLET_FULL_WIDTH, "Standard");
     display.centerText(10, "Settings");
     display.resetFont();
 
@@ -68,13 +73,13 @@ void load_scene_main_menu(int choice)
     display.clearDisplay();
     display.setTextColor(0xFFFFFF);
 
-    display.setFont(true, "Big Money-nw");
+    display.setFont(FIGLET_FULL_WIDTH, "Big Money-nw");
     display.centerText(5, "CliBoy");
     display.resetFont();
 
     static const std::vector<MenuItem> menu_items{ { SCENE_MAIN_MENU_SINGLEP, "Games" },
                                                    { SCENE_MAIN_MENU_SETTINGS, "Settings" } };
-    display.setFont(true, "Small Slant");
+    display.setFont(FIGLET_FULL_WIDTH, "Small Slant");
     drawMenu(display.getCursorY() + 5, 5, choice, menu_items);
     display.resetFont();
 
@@ -85,8 +90,8 @@ void load_scene(int scene, int game)
 {
     switch (scene)
     {
-        case SCENE_MAIN_MENU:     load_scene_main_menu(game); break;
-        case SCENE_SINGLEP_GAMES: load_scene_game(game); break;
-        case SCENE_SETTINGS:      load_scene_game_settings(game); break;
+        case SCENE_MAIN_MENU: load_scene_main_menu(game); break;
+        case SCENE_GAMES:     load_scene_game(game); break;
+        case SCENE_SETTINGS:  load_scene_game_settings(game); break;
     }
 }
