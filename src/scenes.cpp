@@ -83,6 +83,7 @@ void load_scene_main_menu(int choice)
     drawMenu(display.getCursorY() + 5, 5, choice, menu_items);
     display.resetFont();
 
+    display.centerText(display.getHeight() * 0.9, "It's suggested to have a big terminal screen for correct rendering");
     display.display();
 }
 

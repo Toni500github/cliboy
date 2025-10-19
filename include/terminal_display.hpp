@@ -111,8 +111,8 @@ public:
             int x = (m_width - static_cast<int>(line.size())) / 2;
             x     = std::max(0, x);
             ncplane_putstr_yx(m_content_plane, current_y++, x, line.c_str());
+            setCursor(x, current_y);
         }
-        setCursor(m_cursor_x, current_y);
     }
 
     uint       getWidth() const { return m_width; }

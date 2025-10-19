@@ -56,27 +56,26 @@ static Moves get_cpu_move()
 
 static void print_winner(Winner winner)
 {
-    display.clearDisplay();
+    //display.clearDisplay();
     display.setFont(FIGLET_FULL_WIDTH, "starwars");
     switch (winner)
     {
         case CPU:
             display.setTextColor(0xff0000);
-            display.centerText(display.getHeight() / 2, "CPU Wins");
+            display.centerText(display.getHeight() / 10, "CPU Wins");
             break;
         case DRAW:
-            display.setTextColor(0xffff00);
-            display.centerText(display.getHeight() / 2, "Draw!");
+            display.setTextColor(0x9370DB);
+            display.centerText(display.getHeight() / 10, "Draw");
             break;
         case PLAYER:
             display.setTextColor(0x00ff00);
-            display.centerText(display.getHeight() / 2, "Player Wins!");
+            display.centerText(display.getHeight() / 10, "You Won");
             break;
     }
 
     display.resetFont();
     display.display();
-    std::this_thread::sleep_for(1.5s);
 }
 
 static Winner calculate_winner(Moves cpu_move, Moves player_move)
@@ -95,7 +94,7 @@ static Winner calculate_winner(Moves cpu_move, Moves player_move)
 static void print_player_move(Moves player_move)
 {
     display.clearDisplay();
-    display.centerText((display.getHeight() + 15) / 2, "Your move:");
+    display.centerText(display.getHeight() / 2.5, "Your move:");
     display.setFont(FIGLET_FULL_WIDTH, "Ogre");
     display.centerText(display.getCursorY() + 2, "{}", get_move_ascii(player_move));
     display.resetFont();
@@ -109,24 +108,31 @@ static void print_player_move(Moves player_move)
 static void print_moves(Moves computer_move, Moves player_move)
 {
     display.clearDisplay();
-    display.setFont(FIGLET_KERNING, "Doom");
-    display.setCursor(display.getWidth() * 0.15, display.getHeight() * 0.4);
+    display.setFont(FIGLET_SMUSHED, "Doom");
+
+    const int& term_width = display.getWidth();
+    const int& term_height = display.getHeight();
+
+    int left_col = term_width * 0.05;      // 5% from left
+    int right_col = term_width * 0.8;     // 80% from left
+    int header_y = term_height * 0.4;     // 40% from top
+    int moves_y = term_height * 0.6;      // 60% from top
+
+    display.setCursor(left_col + 3, header_y);
     display.print("You");
-    display.setCursor(display.getWidth() * 0.6, display.getHeight() * 0.4);
+
+    display.setCursor(right_col - 3, header_y);
     display.print("CPU");
 
-    display.setCursor(display.getWidth() * 0.1, display.getCursorY() + 2);
+    display.setCursor(left_col, moves_y);
     display.print("{}", get_move_ascii(player_move));
 
-    display.setCursor(display.getWidth() * 0.5, display.getCursorY() - 8);
-    display.print("VS");
+    display.centerText(moves_y - 8, "VS");
 
-    display.setCursor(display.getWidth() * 0.6, display.getCursorY() - 8);
+    display.setCursor(right_col - 8, moves_y);
     display.print("{}", get_move_ascii(computer_move));
 
-    display.resetFont();
     display.display();
-    std::this_thread::sleep_for(1.5s);
 }
 
 void play_singlep_rps()
@@ -171,5 +177,6 @@ void play_singlep_rps()
         Winner winner = calculate_winner(computer_move, player_move);
         print_moves(computer_move, player_move);
         print_winner(winner);
+        std::this_thread::sleep_for(2s);
     }
 }
