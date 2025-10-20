@@ -1,11 +1,9 @@
 name: Release Cli-Boy (cross-platform)
 
 on:
+  workflow_dispatch:
   push:
     tags: "*"
-    #paths:
-      # trigger release workflow only if this file changed
-      #- .github/workflows/release.yml
 
 jobs:
   get-version:
@@ -45,7 +43,7 @@ jobs:
       - name: Make Release
         run: |
           mv ./build/release/cliboy .
-          tar -zcf cli-boy.tar.gz ./cliboy ./assets/
+          tar -zcf cli-boy.tar.gz cliboy assets/
 
       - name: Upload to github artifacts
         uses: actions/upload-artifact@v4
@@ -71,6 +69,9 @@ jobs:
           brew update
           brew install pkg-config make notcurses
 
+      #- name: Setup SSH session
+      #  uses: mxschmitt/action-tmate@v3
+
       - name: Build project
         run: |
           brew ls --verbose notcurses
@@ -79,7 +80,7 @@ jobs:
       - name: Make Release
         run: |
           mv ./build/release/cliboy .
-          tar -zcf cli-boy.tar.gz ./cliboy ./assets/
+          tar -zcf cli-boy.tar.gz cliboy assets/
 
       - name: Upload to github artifacts
         uses: actions/upload-artifact@v4

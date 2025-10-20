@@ -6,24 +6,14 @@ CXXSTD		?= c++20
 
 DEBUG 		?= 1
 
-COMPILER := $(shell $(CXX) --version | head -n1)
-
-ifeq ($(findstring GCC,$(COMPILER)),GCC)
-	export LTO_FLAGS = -flto=auto -ffat-lto-objects
-else ifeq ($(findstring clang,$(COMPILER)),clang)
-	export LTO_FLAGS = -flto=thin
-else
-    $(warning Unknown compiler: $(COMPILER). No LTO flags applied.)
-endif
-
 # https://stackoverflow.com/a/1079861
 # WAY easier way to build debug and release builds
 ifeq ($(DEBUG), 1)
         BUILDDIR  := build/debug
 	LTO_FLAGS  = -fno-lto
-        CXXFLAGS  := -ggdb3 -Wall -Wextra -pedantic -Wno-unused-parameter -fsanitize=address \
+        CXXFLAGS  := -ggdb3 -Wall -Wextra -pedantic -Wno-unused-parameter -fsanitize=address -fsanitize=undefined \
 			-DDEBUG=1 -fno-omit-frame-pointer $(DEBUG_CXXFLAGS) $(CXXFLAGS)
-        LDFLAGS	  += -fsanitize=address -fno-lto -Wl,-rpath,$(BUILDDIR)
+        LDFLAGS	  += -fsanitize=address -fsanitize=undefined -fno-lto -Wl,-rpath,$(BUILDDIR)
 else
 	# Check if an optimization flag is not already set
 	ifneq ($(filter -O%,$(CXXFLAGS)),)

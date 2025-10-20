@@ -39,14 +39,12 @@ void settings_update_key_button(int choice)
 
 void update_button()
 {
+    uint32_t id;
     prev_button_state = button_state;
     button_state      = 0;
 
-    struct ncinput ni;
-    uint32_t       id;
-
     // non-blocking poll (returns 0 if no input available immediately)
-    while ((id = notcurses_get_nblock(display.getNC(), &ni)) != 0)
+    while ((id = notcurses_get_nblock(display.getNC(), nullptr)) != 0)
     {
         if (id == (uint32_t)-1)
             break;  // error

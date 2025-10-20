@@ -56,7 +56,7 @@ static Moves get_cpu_move()
 
 static void print_winner(Winner winner)
 {
-    //display.clearDisplay();
+    // display.clearDisplay();
     display.setFont(FIGLET_FULL_WIDTH, "starwars");
     switch (winner)
     {
@@ -110,13 +110,13 @@ static void print_moves(Moves computer_move, Moves player_move)
     display.clearDisplay();
     display.setFont(FIGLET_SMUSHED, "Doom");
 
-    const int& term_width = display.getWidth();
+    const int& term_width  = display.getWidth();
     const int& term_height = display.getHeight();
 
-    int left_col = term_width * 0.05;      // 5% from left
-    int right_col = term_width * 0.8;     // 80% from left
-    int header_y = term_height * 0.4;     // 40% from top
-    int moves_y = term_height * 0.6;      // 60% from top
+    int left_col  = term_width * 0.05;  // 5% from left
+    int right_col = term_width * 0.8;   // 80% from left
+    int header_y  = term_height * 0.4;  // 40% from top
+    int moves_y   = term_height * 0.6;  // 60% from top
 
     display.setCursor(left_col + 3, header_y);
     display.print("You");
