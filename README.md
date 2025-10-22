@@ -1,7 +1,7 @@
 # cliboy
 
 ## Dependencies
-install `notcurses` (libnotcurses-dev) in order to compile-run cli-boy
+install `notcurses` (libnotcurses-dev) in order to compile/run cliboy
 
 ## Building
 just run
