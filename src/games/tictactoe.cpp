@@ -222,7 +222,6 @@ void TTTScene::render()
 
     if (is_board_full())
     {
-        std::this_thread::sleep_for(200ms);
         display.clearDisplay();
         display.setFont(FIGLET_KERNING, "starwars");
         display.centerText(display.getHeight() / 2, "Board Full");
@@ -262,7 +261,10 @@ SceneResult TTTScene::handle_input(uint32_t key)
                 --currentPosX;
             break;
 
-        case NCKEY_ENTER: choose_pos = true; break;
+        case NCKEY_ENTER:
+        case '\n':
+        case '\r':
+            choose_pos = true; break;
     }
 
     return ScenesGame::TicTacToe;

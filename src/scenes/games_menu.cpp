@@ -46,6 +46,8 @@ SceneResult GamesMenuScene::handle_input(uint32_t key)
         case NCKEY_DOWN: m_selected_game = (m_selected_game + 1) % GAME_COUNT; break;
 
         case NCKEY_ENTER:
+        case '\n':
+        case '\r':
             switch (m_selected_game)
             {
                 case 0: return ScenesGame::RockPaperScissors;

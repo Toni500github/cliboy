@@ -25,13 +25,17 @@
 
 #include <notcurses/notcurses.h>
 
-#include "games/tictactoe.hpp"
+#include <chrono>
+#include <thread>
+
 #include "games/rockpaperscissors.hpp"
+#include "games/tictactoe.hpp"
 #include "scenes.hpp"
 #include "terminal_display.hpp"
-#include "util.hpp"
 
 TerminalDisplay display;
+
+using namespace std::chrono_literals;
 
 template <class... Ts>
 struct overloaded : Ts...
@@ -41,29 +45,9 @@ struct overloaded : Ts...
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
-static timespec add_ms(timespec t, long ms)
-{
-    t.tv_nsec += ms * 1000000L;
-    t.tv_sec += t.tv_nsec / 1000000000L;
-    t.tv_nsec %= 1000000000L;
-    return t;
-}
-
 bool is_scene_none(const SceneResult& r)
 {
     return std::visit([](auto v) { return v == std::decay_t<decltype(v)>::kNone; }, r);
-}
-
-Result<notcurses*> init_notcurses()
-{
-    notcurses_options opts = {};
-    opts.flags             = NCOPTION_SUPPRESS_BANNERS | NCOPTION_NO_ALTERNATE_SCREEN;
-
-    notcurses* nc = notcurses_init(&opts, nullptr);
-    if (!nc)
-        return Err("Failed to initialize notcurses");
-
-    return Ok(nc);
 }
 
 void game_loop()
@@ -82,10 +66,10 @@ void game_loop()
         Scene* active_scene = nullptr;
 
         // clang-format off
-        std::visit(overloaded{ 
-            [&](Scenes s) {                      
-                switch (s)                      
-                {                      
+        std::visit(overloaded{
+            [&](Scenes s) {
+                switch (s)
+                {
                     case Scenes::MainMenu: active_scene = &main_menu; break;
                     case Scenes::Games:    active_scene = &games_menu; break;
                     case Scenes::Credits:  active_scene = &credits; break;
@@ -111,24 +95,80 @@ void game_loop()
         active_scene->render();
 
         ncinput  input{};
-        timespec now{};
-        clock_gettime(CLOCK_MONOTONIC, &now);
-        timespec deadline = add_ms(now, 16);  // ~60Hz tick
+        timespec timeout{};
+        timeout.tv_sec  = 0;
+        timeout.tv_nsec = 0;
 
-        uint32_t key = notcurses_get(display.getNC(), &deadline, &input);
+        char32_t ch = notcurses_get(display.getNC(), &timeout, &input);
+        if (ch != 0)  // 0 = timeout
+        {
+            // Prefer synthesized/special key id when present; otherwise use the Unicode character.
+            uint32_t key = input.id ? input.id : (uint32_t)ch;
 
-        // on timeout, key == 0 => loop continues, render will run again
-        if (key == 0)
-            continue;
+            const SceneResult& result = active_scene->handle_input(key);
+            if (!is_scene_none(result))
+                current_scene = result;
+        }
 
-        const SceneResult& result = active_scene->handle_input(key);
-        if (!is_scene_none(result))
-            current_scene = result;
+        std::this_thread::sleep_for(16ms);
     }
 }
 
+#ifdef _WIN32
+#  ifndef NOMINMAX
+#    define NOMINMAX 1
+#  endif
+#  include <fcntl.h>
+#  include <io.h>
+#  include <windows.h>
+
+static void win_enable_vt_and_raw_input()
+{
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+
+    // Enable VT processing on output
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut != INVALID_HANDLE_VALUE && hOut != nullptr)
+    {
+        DWORD mode = 0;
+        if (GetConsoleMode(hOut, &mode))
+        {
+            mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+            mode |= DISABLE_NEWLINE_AUTO_RETURN;
+            SetConsoleMode(hOut, mode);
+        }
+    }
+
+    // Disable echo/line input so terminal replies don't get printed as text
+    // and so key input becomes immediate (no line buffering).
+    HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
+    if (hIn != INVALID_HANDLE_VALUE && hIn != nullptr)
+    {
+        DWORD mode = 0;
+        if (GetConsoleMode(hIn, &mode))
+        {
+            // Keep extended flags, disable cooked input behaviors
+            mode |= ENABLE_EXTENDED_FLAGS;
+
+            mode &= ~ENABLE_ECHO_INPUT;
+            mode &= ~ENABLE_LINE_INPUT;
+            mode &= ~ENABLE_PROCESSED_INPUT;
+
+            mode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
+
+            SetConsoleMode(hIn, mode);
+        }
+    }
+}
+#endif
+
 int main()
 {
+#ifdef _WIN32
+    win_enable_vt_and_raw_input();
+#endif
+
     if (!display.begin())
         return 1;
 

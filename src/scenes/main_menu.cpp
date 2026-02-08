@@ -50,6 +50,8 @@ SceneResult MainMenuScene::handle_input(uint32_t key)
         case NCKEY_DOWN: m_selected_item = (m_selected_item + 1) % MENU_ITEM_COUNT; break;
 
         case NCKEY_ENTER:
+        case '\n':
+        case '\r':
             if (m_selected_item == 0)
                 return Scenes::Games;
             else if (m_selected_item == 1)

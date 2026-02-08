@@ -22,7 +22,6 @@ enum class ScenesGame
 
 using SceneResult = std::variant<Scenes, ScenesGame>;
 
-
 class Scene
 {
 public:

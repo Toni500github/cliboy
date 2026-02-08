@@ -176,7 +176,10 @@ SceneResult RpsScene::handle_input(uint32_t key)
         case 'r':       player_move = ROCK; break;
         case 'p':       player_move = PAPER; break;
         case 's':       player_move = SCISSORS; break;
+
         case NCKEY_ENTER:
+        case '\n':
+        case '\r':
             if (player_move != NONE)
                 selected = true;
             break;
