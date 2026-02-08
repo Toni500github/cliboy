@@ -55,60 +55,49 @@ bool TerminalDisplay::begin()
         notcurses_stop(m_nc);
         return false;
     }
+    // m_content_plane = m_stdplane;
 
     return true;
 }
 
 void TerminalDisplay::clearDisplay()
 {
-    // set both foreground and background channels
-    ncplane_set_channels(m_content_plane, m_fg_channel | m_bg_channel);
+    ncplane_set_fg_default(m_content_plane);
+    ncplane_set_bg_default(m_content_plane);
     ncplane_erase(m_content_plane);
     m_cursor_x = m_cursor_y = 0;
 }
 
-// clang-format off
 void TerminalDisplay::display()
-{ notcurses_render(m_nc); }
-
-// clang-format on
-void TerminalDisplay::setTextColor(const std::uint32_t& hex)
 {
-    uint8_t r = (hex >> 16) & 0xff;
-    uint8_t g = (hex >> 8) & 0xff;
-    uint8_t b = (hex) & 0xff;
-    setTextColor(r, g, b);
+    notcurses_render(m_nc);
 }
 
-void TerminalDisplay::setTextColor(const uint8_t r, const uint8_t g, const uint8_t b)
+void TerminalDisplay::resetColors()
 {
-    m_fg_channel = 0;
-    ncchannel_set_rgb8(&m_fg_channel, r, g, b);
-    ncchannel_set_alpha(&m_fg_channel, NCALPHA_OPAQUE);
-
-    ncplane_set_fg_rgb8(m_content_plane, r, g, b);
+    ncchannels_set_fg_default(&m_channels);
+    ncchannels_set_bg_default(&m_channels);
+    ncplane_set_channels(m_content_plane, m_channels);
 }
 
-void TerminalDisplay::setTextBgColor(const std::uint32_t& hex)
+void TerminalDisplay::setTextColor(const uint32_t hex)
 {
     uint8_t r = (hex >> 16) & 0xff;
     uint8_t g = (hex >> 8) & 0xff;
     uint8_t b = (hex) & 0xff;
 
-    m_bg_channel = 0;
-    ncchannel_set_rgb8(&m_bg_channel, r, g, b);
-    ncchannel_set_alpha(&m_bg_channel, NCALPHA_TRANSPARENT);
-
-    ncplane_set_bg_rgb8(m_content_plane, r, g, b);
+    ncchannels_set_fg_rgb8(&m_channels, r, g, b);
+    ncplane_set_channels(m_content_plane, m_channels);
 }
 
-void TerminalDisplay::setTerminalBgColor(const std::uint32_t& hex)
+void TerminalDisplay::setTextBgColor(const uint32_t hex)
 {
-    uint8_t r         = (hex >> 16) & 0xff;
-    uint8_t g         = (hex >> 8) & 0xff;
-    uint8_t b         = (hex) & 0xff;
-    m_term_bg_channel = NCCHANNELS_INITIALIZER(0, 0, 0, r, g, b);
-    ncplane_set_bg_rgb8(m_stdplane, r, g, b);
+    uint8_t r = (hex >> 16) & 0xff;
+    uint8_t g = (hex >> 8) & 0xff;
+    uint8_t b = (hex) & 0xff;
+
+    ncchannels_set_bg_rgb8(&m_channels, r, g, b);
+    ncplane_set_channels(m_content_plane, m_channels);
 }
 
 void TerminalDisplay::setCursor(const int x, const int y)
@@ -148,7 +137,6 @@ void TerminalDisplay::drawPixel(int x, int y, char ch)
         int saved_y = m_cursor_y;
 
         setCursor(x, y);
-        ncplane_set_channels(m_content_plane, m_fg_channel | m_bg_channel);
         ncplane_putchar_yx(m_content_plane, y, x, ch);
 
         setCursor(saved_x, saved_y);

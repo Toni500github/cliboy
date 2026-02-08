@@ -1,9 +1,15 @@
+#include <notcurses/nckeys.h>
+
+#include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <thread>
 
+#include "games/rockpaperscissors.hpp"
+#include "scenes.hpp"
 #include "terminal_display.hpp"
-#include "util.hpp"
+
+using namespace std::chrono_literals;
 
 enum Winner
 {
@@ -20,6 +26,10 @@ enum Moves
     SCISSORS,
     DONE
 };
+
+Moves player_move = NONE;
+bool  selected    = false;
+bool  restart     = false;
 
 static void print_count_down(uint8_t n)
 {
@@ -83,8 +93,7 @@ static Winner calculate_winner(Moves cpu_move, Moves player_move)
     if (player_move == cpu_move)
         return DRAW;
 
-    if ((cpu_move == ROCK && player_move == SCISSORS) ||
-        (cpu_move == SCISSORS && player_move == PAPER) ||
+    if ((cpu_move == ROCK && player_move == SCISSORS) || (cpu_move == SCISSORS && player_move == PAPER) ||
         (cpu_move == PAPER && player_move == ROCK))
         return CPU;
 
@@ -98,9 +107,7 @@ static void print_player_move(Moves player_move)
     display.setFont(FIGLET_FULL_WIDTH, "Ogre");
     display.centerText(display.getCursorY() + 2, "{}", get_move_ascii(player_move));
     display.resetFont();
-    display.centerText(display.getHeight() * 0.9,
-                       "Rock: {:c} || Paper: {:c} || Scissors: {:c} || Play: ENTER || Exit: ESC", settings.ch_up,
-                       settings.ch_left, settings.ch_down);
+    display.centerText(display.getHeight() * 0.9, "Rock: r | Paper: p | Scissors: s | Play: ENTER | Exit: ESC");
 
     display.display();
 }
@@ -110,8 +117,8 @@ static void print_moves(Moves computer_move, Moves player_move)
     display.clearDisplay();
     display.setFont(FIGLET_SMUSHED, "Doom");
 
-    const int& term_width  = display.getWidth();
-    const int& term_height = display.getHeight();
+    const int term_width  = display.getWidth();
+    const int term_height = display.getHeight();
 
     int left_col  = term_width * 0.05;  // 5% from left
     int right_col = term_width * 0.8;   // 80% from left
@@ -135,48 +142,44 @@ static void print_moves(Moves computer_move, Moves player_move)
     display.display();
 }
 
-void play_singlep_rps()
+void RpsScene::render()
 {
-    while (true)
+    display.clearDisplay();
+
+    print_player_move(player_move);
+    if (player_move == NONE || !selected)
+        return;
+
+    Moves computer_move = get_cpu_move();
+    display.setFont(FIGLET_FULL_WIDTH, "Stop");
+    print_count_down(3);
+    print_count_down(2);
+    print_count_down(1);
+    Winner winner = calculate_winner(computer_move, player_move);
+    print_moves(computer_move, player_move);
+    print_winner(winner);
+
+    display.display();
+
+    std::this_thread::sleep_for(2s);
+
+    display.clearDisplay();
+    print_player_move(NONE);
+    selected = false;
+}
+
+SceneResult RpsScene::handle_input(uint32_t key)
+{
+    switch (key)
     {
-        display.setTextColor(0xffffff);
-        std::this_thread::sleep_for(33ms);
-        Moves player_move = NONE;
-
-        while (true)
-        {
-            update_button();
-            if (button_state & KEY_QUIT)
-            {
-                reset_to_main_menu();
-                return;
-            }
-
-            if (!(button_state & KEY_SELECTED))
-            {
-                if (button_state & KEY_UP_BIT)
-                    player_move = ROCK;
-                else if (button_state & KEY_LEFT_BIT)
-                    player_move = PAPER;
-                else if (button_state & KEY_DOWN_BIT)
-                    player_move = SCISSORS;
-            }
-            else if (button_state & KEY_SELECTED && player_move != NONE)
-            {
-                break;
-            }
-            print_player_move(player_move);
-            std::this_thread::sleep_for(33ms);
-        }
-
-        Moves computer_move = get_cpu_move();
-        display.setFont(FIGLET_FULL_WIDTH, "Stop");
-        print_count_down(3);
-        print_count_down(2);
-        print_count_down(1);
-        Winner winner = calculate_winner(computer_move, player_move);
-        print_moves(computer_move, player_move);
-        print_winner(winner);
-        std::this_thread::sleep_for(2s);
+        case NCKEY_ESC: return Scenes::Games;
+        case 'r':       player_move = ROCK; break;
+        case 'p':       player_move = PAPER; break;
+        case 's':       player_move = SCISSORS; break;
+        case NCKEY_ENTER:
+            if (player_move != NONE)
+                selected = true;
+            break;
     }
+    return ScenesGame::RockPaperScissors;
 }

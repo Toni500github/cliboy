@@ -1,41 +1,61 @@
-#ifndef SCENES_HPP
-#define SCENES_HPP
+#pragma once
 
-enum Scenes
+#include <notcurses/notcurses.h>
+
+#include <variant>
+
+enum class Scenes
 {
-    SCENE_NONE = 0,
-    SCENE_MAIN_MENU,
-    SCENE_GAMES,
-    SCENE_SETTINGS,
+    kNone,
+    MainMenu,
+    Games,
+    Credits,
+    Exit,
 };
 
-enum ScenesMainMenu
+enum class ScenesGame
 {
-    SCENE_MAIN_MENU_NONE = 10,
-    SCENE_MAIN_MENU_SINGLEP,
-    SCENE_MAIN_MENU_SETTINGS,
+    kNone,
+    RockPaperScissors,
+    TicTacToe,
 };
 
-enum selectedGame
+using SceneResult = std::variant<Scenes, ScenesGame>;
+
+
+class Scene
 {
-    GAME_NONE = 20,
-    GAME_RPS,
-    GAME_TTT,
+public:
+    virtual ~Scene()                               = default;
+    virtual void        render()                   = 0;
+    virtual SceneResult handle_input(uint32_t key) = 0;
 };
 
-enum ScenesSettings
+class CreditsScene : public Scene
 {
-    SCENE_SETTINGS_KEY_UP = 60,
-    SCENE_SETTINGS_KEY_DOWN,
-    SCENE_SETTINGS_KEY_LEFT,
-    SCENE_SETTINGS_KEY_RIGHT,
-    SCENE_SETTINGS_KEY_QUIT
+public:
+    void        render() override;
+    SceneResult handle_input(uint32_t key) override;
 };
 
-inline int currentScene = SCENE_MAIN_MENU;
+class MainMenuScene : public Scene
+{
+public:
+    void        render() override;
+    SceneResult handle_input(uint32_t key) override;
 
-void load_scene(int scene, int game);
-void load_scene_main_menu(int choice);
-void load_scene_game_credits();
+private:
+    int                  m_selected_item = 0;
+    static constexpr int MENU_ITEM_COUNT = 2;
+};
 
-#endif
+class GamesMenuScene : public Scene
+{
+public:
+    void        render() override;
+    SceneResult handle_input(uint32_t key) override;
+
+private:
+    int                  m_selected_game = 0;
+    static constexpr int GAME_COUNT      = 2;
+};

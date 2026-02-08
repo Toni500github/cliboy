@@ -11,9 +11,9 @@ DEBUG 		?= 1
 ifeq ($(DEBUG), 1)
         BUILDDIR  := build/debug
 	LTO_FLAGS  = -fno-lto
-        CXXFLAGS  := -ggdb3 -Wall -Wextra -pedantic -Wno-unused-parameter -fsanitize=address -fsanitize=undefined \
+        CXXFLAGS  := -ggdb3 -Wall -Wextra -pedantic -Wno-unused-parameter \
 			-DDEBUG=1 -fno-omit-frame-pointer $(DEBUG_CXXFLAGS) $(CXXFLAGS)
-        LDFLAGS	  += -fsanitize=address -fsanitize=undefined -fno-lto -Wl,-rpath,$(BUILDDIR)
+        LDFLAGS	  += -fno-lto -Wl,-rpath,$(BUILDDIR)
 else
 	# Check if an optimization flag is not already set
 	ifneq ($(filter -O%,$(CXXFLAGS)),)
@@ -29,7 +29,7 @@ NAME		 = cliboy
 TARGET		?= $(NAME)
 OLDVERSION	 = 0.0.0
 VERSION    	 = 0.0.1
-SRC	 	 = $(wildcard src/*.cpp)
+SRC	 	 = $(wildcard src/*.cpp src/*/*.cpp)
 OBJ	 	 = $(SRC:.cpp=.o)
 LDFLAGS   	+= -L$(BUILDDIR)
 LDLIBS		+= $(shell pkg-config --libs notcurses)

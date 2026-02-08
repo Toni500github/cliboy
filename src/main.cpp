@@ -24,141 +24,115 @@
  */
 
 #include <notcurses/notcurses.h>
-#include <unistd.h>
 
-#include <chrono>
-#include <clocale>
-#include <cstdint>
-#include <cstdlib>
-#include <ctime>
-#include <iostream>
-#include <thread>
-
+#include "games/tictactoe.hpp"
+#include "games/rockpaperscissors.hpp"
 #include "scenes.hpp"
-#include "settings.hpp"
 #include "terminal_display.hpp"
 #include "util.hpp"
 
-using namespace std::chrono;
-using namespace std::chrono_literals;
-
-static int choice     = SCENE_MAIN_MENU_SINGLEP;
-static int min_choice = SCENE_MAIN_MENU_SINGLEP;
-static int max_choice = SCENE_MAIN_MENU_SETTINGS;
-
 TerminalDisplay display;
-settings_t      settings;
 
-void play_singlep_rps();
-void play_multip_ttt();
-
-void reset_to_main_menu()
+template <class... Ts>
+struct overloaded : Ts...
 {
-    currentScene = SCENE_MAIN_MENU;
-    choice       = SCENE_MAIN_MENU_SINGLEP;
-    min_choice   = SCENE_MAIN_MENU_SINGLEP;
-    max_choice   = SCENE_MAIN_MENU_SETTINGS;
+    using Ts::operator()...;
+};
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
+
+static timespec add_ms(timespec t, long ms)
+{
+    t.tv_nsec += ms * 1000000L;
+    t.tv_sec += t.tv_nsec / 1000000000L;
+    t.tv_nsec %= 1000000000L;
+    return t;
 }
 
-void setup()
+bool is_scene_none(const SceneResult& r)
 {
-    srand(time(NULL));
-    setlocale(LC_ALL, "");
-
-    if (!display.begin())
-    {
-        std::cerr << "Couldn't init display\n";
-        std::exit(1);
-    }
+    return std::visit([](auto v) { return v == std::decay_t<decltype(v)>::kNone; }, r);
 }
 
-bool flag = true;
-
-void loop()
+Result<notcurses*> init_notcurses()
 {
-    static auto last_frame = steady_clock::now();
+    notcurses_options opts = {};
+    opts.flags             = NCOPTION_SUPPRESS_BANNERS | NCOPTION_NO_ALTERNATE_SCREEN;
 
-    display.clearDisplay();
+    notcurses* nc = notcurses_init(&opts, nullptr);
+    if (!nc)
+        return Err("Failed to initialize notcurses");
 
-    update_button();
+    return Ok(nc);
+}
 
-    if (button_pressed & (KEY_UP_BIT | KEY_LEFT_BIT))
+void game_loop()
+{
+    MainMenuScene  main_menu;
+    GamesMenuScene games_menu;
+    CreditsScene   credits;
+    TTTScene       game_ttt_scene;
+    RpsScene       game_rps_scene;
+
+    SceneResult current_scene = Scenes::MainMenu;
+    bool        running       = true;
+
+    while (running)
     {
-        if (choice > min_choice)
-            --choice;
-    }
-    else if (button_pressed & (KEY_DOWN_BIT | KEY_RIGHT_BIT))
-    {
-        if (choice < max_choice)
-            ++choice;
-    }
+        Scene* active_scene = nullptr;
 
-    load_scene(currentScene, choice);
+        // clang-format off
+        std::visit(overloaded{ 
+            [&](Scenes s) {                      
+                switch (s)                      
+                {                      
+                    case Scenes::MainMenu: active_scene = &main_menu; break;
+                    case Scenes::Games:    active_scene = &games_menu; break;
+                    case Scenes::Credits:  active_scene = &credits; break;
 
-    if (button_pressed & KEY_QUIT)
-    {
-        if (currentScene == SCENE_MAIN_MENU)
-            flag = false;
-        reset_to_main_menu();
-        return;
-    }
-    if (button_pressed & KEY_SELECTED)
-    {
-        switch (currentScene)
-        {
-            case SCENE_MAIN_MENU:
-                switch (choice)
-                {
-                    case SCENE_MAIN_MENU_SINGLEP:
-                        currentScene = SCENE_GAMES;
-                        choice       = GAME_RPS;
-                        min_choice   = GAME_RPS;
-                        max_choice   = GAME_TTT;
-                        break;
-                    case SCENE_MAIN_MENU_SETTINGS:
-                        currentScene = SCENE_SETTINGS;
-                        choice       = SCENE_SETTINGS_KEY_UP;
-                        min_choice   = SCENE_SETTINGS_KEY_UP;
-                        max_choice   = SCENE_SETTINGS_KEY_RIGHT;
-                        break;
+                    case Scenes::Exit:
+                    default:           running = false; break;
                 }
-                break;
-            case SCENE_GAMES:
-                switch (choice)
+            },
+            [&](ScenesGame s) {
+                switch (s)
                 {
-                    case GAME_RPS:
-                        currentScene = SCENE_NONE;
-                        play_singlep_rps();
-                        break;
-                    case GAME_TTT:
-                        currentScene = SCENE_NONE;
-                        play_multip_ttt();
-                        break;
+                    case ScenesGame::RockPaperScissors: active_scene = &game_rps_scene; break;
+                    case ScenesGame::TicTacToe: active_scene = &game_ttt_scene; break;
+                    default:               running = false; break;
                 }
-                break;
-            case SCENE_SETTINGS: settings_update_key_button(choice); break;
-        }
+            }
+        }, current_scene);
+        // clang-format on
+
+        if (!running || !active_scene)
+            break;
+
+        active_scene->render();
+
+        ncinput  input{};
+        timespec now{};
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        timespec deadline = add_ms(now, 16);  // ~60Hz tick
+
+        uint32_t key = notcurses_get(display.getNC(), &deadline, &input);
+
+        // on timeout, key == 0 => loop continues, render will run again
+        if (key == 0)
+            continue;
+
+        const SceneResult& result = active_scene->handle_input(key);
+        if (!is_scene_none(result))
+            current_scene = result;
     }
-
-    display.display();
-
-    auto now               = steady_clock::now();
-    auto frame_time        = duration_cast<milliseconds>(now - last_frame);
-    auto target_frame_time = 160ms;
-
-    if (frame_time < target_frame_time)
-        std::this_thread::sleep_for(target_frame_time - frame_time);
-
-    last_frame = now;
 }
 
 int main()
 {
-    setup();
-    while (flag)
-    {
-        loop();
-    }
+    if (!display.begin())
+        return 1;
+
+    game_loop();
 
     return 0;
 }

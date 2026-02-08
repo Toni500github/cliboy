@@ -1,7 +1,11 @@
+#include "games/tictactoe.hpp"
+#include <notcurses/nckeys.h>
+
 #include <thread>
 
 #include "terminal_display.hpp"
-#include "util.hpp"
+
+using namespace std::chrono_literals;
 
 // I'm not singing for your XO... I'm singing cuz it's oveeeerrrrr
 enum Player
@@ -19,7 +23,7 @@ static int  currentPosY, oldPosY, cursorY = 0;
 static int  moves = 0;
 
 // Tic-Tac-Toe board lines
-// These will be calculated dynamically in play_multip_ttt()
+// These will be calculated dynamically in TTTScene constructor
 static int BOARD_SIZE     = 0;
 static int CELL_SIZE      = 0;
 static int BOARD_OFFSET_X = 0;
@@ -27,9 +31,9 @@ static int BOARD_OFFSET_Y = 0;
 
 static bool is_board_full()
 {
-    for (uint8_t row = 0; row < 3; ++row)
-        for (uint8_t col = 0; col < 3; ++col)
-            if (board[row][col] == ' ' || board[row][col] == '*')
+    for (int r = 0; r < 3; ++r)
+        for (int c = 0; c < 3; ++c)
+            if (board[r][c] == ' ')
                 return false;
     return true;
 }
@@ -45,47 +49,52 @@ void draw_piece(int row, int col, char piece)
     display.setCursor(cx, cy);
     display.print("*");
 
+    display.setTextBgColor(0xffffff);
     switch (piece)
     {
         case 'X':
-            display.drawLine(x, y, x + CELL_SIZE / 2, y + CELL_SIZE / 2);
-            display.drawLine(x + CELL_SIZE / 2, y, x, y + CELL_SIZE / 2);
+            display.drawLine(x, y, x + CELL_SIZE / 2, y + CELL_SIZE / 2, ' ');
+            display.drawLine(x + CELL_SIZE / 2, y, x, y + CELL_SIZE / 2, ' ');
             break;
-        case 'O': display.drawCircle(x + CELL_SIZE / 4, y + CELL_SIZE / 4, CELL_SIZE / 4); break;
+        case 'O': display.drawCircle(x + CELL_SIZE / 4, y + CELL_SIZE / 4, CELL_SIZE / 4, ' '); break;
     }
+    display.resetColors();
 }
 
 void draw_game_screen()
 {
-    display.clearDisplay();
+    display.setTextBgColor(0xffffff);
 
     // Vertical lines
     display.drawLine(BOARD_OFFSET_X + CELL_SIZE, BOARD_OFFSET_Y, BOARD_OFFSET_X + CELL_SIZE,
-                     BOARD_OFFSET_Y + BOARD_SIZE);
+                     BOARD_OFFSET_Y + BOARD_SIZE, ' ');
     display.drawLine(BOARD_OFFSET_X + 2 * CELL_SIZE, BOARD_OFFSET_Y, BOARD_OFFSET_X + 2 * CELL_SIZE,
-                     BOARD_OFFSET_Y + BOARD_SIZE);
+                     BOARD_OFFSET_Y + BOARD_SIZE, ' ');
 
     // Horizontal lines
     display.drawLine(BOARD_OFFSET_X, BOARD_OFFSET_Y + CELL_SIZE, BOARD_OFFSET_X + BOARD_SIZE,
-                     BOARD_OFFSET_Y + CELL_SIZE);
+                     BOARD_OFFSET_Y + CELL_SIZE, ' ');
     display.drawLine(BOARD_OFFSET_X, BOARD_OFFSET_Y + 2 * CELL_SIZE, BOARD_OFFSET_X + BOARD_SIZE,
-                     BOARD_OFFSET_Y + 2 * CELL_SIZE);
+                     BOARD_OFFSET_Y + 2 * CELL_SIZE, ' ');
 
-    for (uint8_t row = 0; row < 3; ++row)
-        for (uint8_t col = 0; col < 3; ++col)
-            if (board[row][col] != ' ')
-                draw_piece(row, col, board[row][col]);
+    display.resetColors();
+
+    for (int r = 0; r < 3; ++r)
+        for (int c = 0; c < 3; ++c)
+            if (board[r][c] != ' ')
+                draw_piece(r, c, board[r][c]);
+
+    int cx = BOARD_OFFSET_X + cursorX * CELL_SIZE + CELL_SIZE / 2;
+    int cy = BOARD_OFFSET_Y + cursorY * CELL_SIZE + CELL_SIZE / 2;
+    display.setCursor(cx, cy);
+    display.print("*");
 
     display.setCursor(15, 10);
     display.setFont(FIGLET_FULL_WIDTH, "Soft");
     display.print("{}", currentPlayer);
     display.resetFont();
 
-    display.centerText(display.getHeight() * 0.9,
-                       "Up: {:c} || Left: {:c} || Down: {:c} || Right: {:c} || Place: ENTER || Exit: ESC",
-                       settings.ch_up, settings.ch_left, settings.ch_down, settings.ch_right);
-
-    display.display();
+    display.centerText(display.getHeight() * 0.9, "Arrow: Navigation | Place: ENTER | Exit: ESC");
 }
 
 void animate_line(int x0, int y0, int x1, int y1)
@@ -96,10 +105,12 @@ void animate_line(int x0, int y0, int x1, int y1)
         int xi = x0 + (x1 - x0) * i / steps;
         int yi = y0 + (y1 - y0) * i / steps;
         draw_game_screen();  // redraw board and pieces
-        display.drawLine(x0, y0, xi, yi);
+        display.setTextBgColor(0xffffff);
+        display.drawLine(x0, y0, xi, yi, ' ');
         display.display();
         std::this_thread::sleep_for(50ms);
     }
+    display.resetColors();
 }
 
 Player check_winner()
@@ -153,6 +164,7 @@ void draw_winner(Player winner)
 void reset_game()
 {
     display.clearDisplay();
+    display.resetColors();
     display.resetFont();
 
     for (uint8_t row = 0; row < 3; ++row)
@@ -163,12 +175,10 @@ void reset_game()
     currentPlayer                                                      = X_PLAYER;
 }
 
-void play_multip_ttt()
+TTTScene::TTTScene()
 {
-    reset_game();
-
     // board size should be about 2/3 of the smaller dimension
-    BOARD_SIZE = std::min(display.getWidth(), display.getHeight()) * 2 / 3;
+    BOARD_SIZE = (std::min(display.getWidth(), display.getHeight()) * 2) / 3;
 
     // ensure BOARD_SIZE is divisible by 3 for clean cell boundaries
     BOARD_SIZE = (BOARD_SIZE / 3) * 3;
@@ -178,90 +188,82 @@ void play_multip_ttt()
     // center the board
     BOARD_OFFSET_X = (display.getWidth() - BOARD_SIZE) / 2;
     BOARD_OFFSET_Y = (display.getHeight() - BOARD_SIZE) / 3;  // slightly higher than center
+}
 
-    std::this_thread::sleep_for(200ms);
+void TTTScene::render()
+{
+    currentPlayer = (moves % 2 == 0) ? X_PLAYER : O_PLAYER;
 
-    while (true)
+    cursorX = currentPosX;
+    cursorY = currentPosY;
+
+    if (choose_pos)
     {
-        if (is_board_full())
-        {
-            std::this_thread::sleep_for(100ms);
-            display.clearDisplay();
-            display.setFont(FIGLET_KERNING, "starwars");
-            display.centerText(display.getHeight() / 2, "Board Full");
-            display.resetFont();
-            display.display();
-            std::this_thread::sleep_for(2s);
-            reset_game();
-            continue;
-        }
-
-        choose_pos    = false;
-        oldPosX       = currentPosX;
-        oldPosY       = currentPosY;
-        currentPlayer = (moves % 2 == 0) ? X_PLAYER : O_PLAYER;
-
-        update_button();
-        if (button_state & KEY_QUIT)
-        {
-            reset_to_main_menu();
-            return;
-        }
-
-        if (button_state & KEY_DOWN_BIT)
-        {
-            if (currentPosY < 2)
-                currentPosY++;
-        }
-        if (button_state & KEY_UP_BIT)
-        {
-            if (currentPosY > 0)
-                currentPosY--;
-        }
-        if (button_state & KEY_RIGHT_BIT)
-        {
-            if (currentPosX < 2)
-                ++currentPosX;
-        }
-        if (button_state & KEY_LEFT_BIT)
-        {
-            if (currentPosX > 0)
-                --currentPosX;
-        }
-
-        if (button_state & KEY_SELECTED)
-        {
-            choose_pos = true;
-        }
-
-        std::this_thread::sleep_for(50ms);
-        cursorX = currentPosX;
-        cursorY = currentPosY;
-
         if (board[currentPosY][currentPosX] == ' ')
-            board[currentPosY][currentPosX] = '*';
-
-        draw_game_screen();
-
-        if (choose_pos && board[currentPosY][currentPosX] == '*')
         {
             board[currentPosY][currentPosX] = currentPlayer;
-            // currentPosX = currentPosY = 0;
             ++moves;
         }
-        else
-        {
-            if (board[oldPosX][oldPosY] == '*')
-                board[oldPosX][oldPosY] = ' ';
-            continue;
-        }
-
-        Player winner = check_winner();
-        if (winner != NO_PLAYER)
-        {
-            draw_winner(winner);
-            std::this_thread::sleep_for(3s);
-            reset_game();
-        }
+        choose_pos = false;
     }
+
+    display.clearDisplay();
+    draw_game_screen();
+
+    Player winner = check_winner();
+    if (winner != NO_PLAYER)
+    {
+        draw_winner(winner);
+        display.display();
+        std::this_thread::sleep_for(2s);
+        reset_game();
+        return;
+    }
+
+    if (is_board_full())
+    {
+        std::this_thread::sleep_for(200ms);
+        display.clearDisplay();
+        display.setFont(FIGLET_KERNING, "starwars");
+        display.centerText(display.getHeight() / 2, "Board Full");
+        display.resetFont();
+        display.display();
+        std::this_thread::sleep_for(2s);
+        reset_game();
+        return;
+    }
+
+    display.display();
+}
+
+SceneResult TTTScene::handle_input(uint32_t key)
+{
+    switch (key)
+    {
+        case NCKEY_ESC: return Scenes::Games;
+
+        case NCKEY_DOWN:
+            if (currentPosY < 2)
+                currentPosY++;
+            break;
+
+        case NCKEY_UP:
+            if (currentPosY > 0)
+                currentPosY--;
+            break;
+
+        case NCKEY_RIGHT:
+            if (currentPosX < 2)
+                ++currentPosX;
+            break;
+
+        case NCKEY_LEFT:
+            if (currentPosX > 0)
+                --currentPosX;
+            break;
+
+        case NCKEY_ENTER: choose_pos = true; break;
+    }
+
+    return ScenesGame::TicTacToe;
 }
