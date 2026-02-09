@@ -27,8 +27,8 @@ endif
 
 NAME		 = cliboy
 TARGET		?= $(NAME)
-OLDVERSION	 = 0.0.0
-VERSION    	 = 0.0.1
+OLDVERSION	 = 0.0.1
+VERSION    	 = 0.0.2-beta
 SRC	 	 = $(wildcard src/*.cpp src/*/*.cpp)
 OBJ	 	 = $(SRC:.cpp=.o)
 LDFLAGS   	+= -L$(BUILDDIR)
