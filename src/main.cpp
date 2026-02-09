@@ -97,7 +97,7 @@ void game_loop()
         ncinput  input{};
         timespec timeout{};
         timeout.tv_sec  = 0;
-        timeout.tv_nsec = 16'000'000;  // 16ms timeout for responsive rendering
+        timeout.tv_nsec = 0;  // Use non-blocking read
 
         char32_t ch = notcurses_get(display.getNC(), &timeout, &input);
         if (ch != 0 && ch != (char32_t)-1)  // 0 = timeout, -1 = error
@@ -109,6 +109,8 @@ void game_loop()
             if (!is_scene_none(result))
                 current_scene = result;
         }
+
+        std::this_thread::sleep_for(16ms);
     }
 }
 
@@ -146,16 +148,16 @@ static void win_enable_vt_and_raw_input()
         DWORD mode = 0;
         if (GetConsoleMode(hIn, &mode))
         {
-            // Keep extended flags, disable cooked input behaviors
-            mode |= ENABLE_EXTENDED_FLAGS;
-
+            // Disable all processed input modes for raw key handling
             mode &= ~ENABLE_ECHO_INPUT;
             mode &= ~ENABLE_LINE_INPUT;
-            // Keep ENABLE_PROCESSED_INPUT enabled for proper key handling on Windows
-            // mode &= ~ENABLE_PROCESSED_INPUT;
+            mode &= ~ENABLE_PROCESSED_INPUT;
+            mode &= ~ENABLE_MOUSE_INPUT;
+            mode &= ~ENABLE_WINDOW_INPUT;
+            mode &= ~ENABLE_QUICK_EDIT_MODE;
 
+            // Enable virtual terminal input for proper key code handling
             mode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
-            mode |= ENABLE_WINDOW_INPUT;
 
             SetConsoleMode(hIn, mode);
         }
