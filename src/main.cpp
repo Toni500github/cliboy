@@ -97,10 +97,10 @@ void game_loop()
         ncinput  input{};
         timespec timeout{};
         timeout.tv_sec  = 0;
-        timeout.tv_nsec = 0;
+        timeout.tv_nsec = 16'000'000;  // 16ms timeout for responsive rendering
 
         char32_t ch = notcurses_get(display.getNC(), &timeout, &input);
-        if (ch != 0)  // 0 = timeout
+        if (ch != 0 && ch != (char32_t)-1)  // 0 = timeout, -1 = error
         {
             // Prefer synthesized/special key id when present; otherwise use the Unicode character.
             uint32_t key = input.id ? input.id : (uint32_t)ch;
@@ -109,8 +109,6 @@ void game_loop()
             if (!is_scene_none(result))
                 current_scene = result;
         }
-
-        std::this_thread::sleep_for(16ms);
     }
 }
 
