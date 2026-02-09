@@ -168,7 +168,7 @@ static void win_enable_vt_and_raw_input()
 
             mode &= ~ENABLE_ECHO_INPUT;
             mode &= ~ENABLE_LINE_INPUT;
-            mode &= ~ENABLE_PROCESSED_INPUT;
+            // mode &= ~ENABLE_PROCESSED_INPUT;
 
             mode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
 
