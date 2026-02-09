@@ -38,16 +38,16 @@ bool TerminalDisplay::begin()
     m_width    = ncplane_dim_x(m_stdplane);
     m_height   = ncplane_dim_y(m_stdplane);
 
-    struct ncplane_options ncopts = {
-        .y        = 0,
-        .x        = 0,
-        .rows     = m_height,
-        .cols     = m_width,
-        .userptr  = nullptr,
-        .name     = "Content plane (debug ig)",
-        .resizecb = nullptr,
-        .flags    = 0,
-    };
+    struct ncplane_options ncopts = { .y        = 0,
+                                      .x        = 0,
+                                      .rows     = m_height,
+                                      .cols     = m_width,
+                                      .userptr  = nullptr,
+                                      .name     = "Content plane (debug ig)",
+                                      .resizecb = ncplane_resize_realign,
+                                      .flags    = 0,
+                                      .margin_b = 0,
+                                      .margin_r = 0 };
 
     m_content_plane = ncplane_create(m_stdplane, &ncopts);
     if (!m_content_plane)
@@ -55,7 +55,6 @@ bool TerminalDisplay::begin()
         notcurses_stop(m_nc);
         return false;
     }
-    // m_content_plane = m_stdplane;
 
     return true;
 }

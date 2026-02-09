@@ -25,7 +25,6 @@
 
 #include <notcurses/notcurses.h>
 
-#include <chrono>
 #include <thread>
 
 #include "games/rockpaperscissors.hpp"
@@ -61,7 +60,9 @@ void game_loop()
     SceneResult current_scene = Scenes::MainMenu;
     bool        running       = true;
 
-    while (running)
+    char32_t ch = 0;
+
+    while (running && ch != (char32_t)-1)
     {
         Scene* active_scene = nullptr;
 
@@ -94,23 +95,17 @@ void game_loop()
 
         active_scene->render();
 
-        ncinput  input{};
-        timespec timeout{};
-        timeout.tv_sec  = 0;
-        timeout.tv_nsec = 0;
+        ncinput input{};
+        ch = notcurses_get_blocking(display.getNC(), &input);
 
-        char32_t ch = notcurses_get(display.getNC(), &timeout, &input);
-        if (ch != 0)  // 0 = timeout
-        {
-            // Prefer synthesized/special key id when present; otherwise use the Unicode character.
-            uint32_t key = input.id ? input.id : (uint32_t)ch;
+        if (ch == 0)
+            continue;
 
-            const SceneResult& result = active_scene->handle_input(key);
-            if (!is_scene_none(result))
-                current_scene = result;
-        }
-
-        std::this_thread::sleep_for(16ms);
+        // Prefer synthesized/special key id when present; otherwise use the Unicode character.
+        uint32_t           key    = input.id ? input.id : (uint32_t)ch;
+        const SceneResult& result = active_scene->handle_input(key);
+        if (!is_scene_none(result))
+            current_scene = result;
     }
 }
 
