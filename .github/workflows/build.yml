@@ -1,0 +1,138 @@
+name: Build debug Cli-Boy (cross-platform)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, input-issue-fix]
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - id: version
+        run: |
+          echo "Tag name from GITHUB_REF_NAME: $GITHUB_REF_NAME"
+          echo "Tag name from github.ref_name: ${{ github.ref_name }}"
+          echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+
+  build-linux:
+    name: Build on Linux
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get purge firefox -y
+          sudo apt-get install -y build-essential pkg-config make libnotcurses++-dev
+
+      - name: Build project
+        run: |
+          make all DEBUG=0
+
+      - name: Make Release
+        run: |
+          mv ./build/release/cliboy .
+          tar -zcf cli-boy.tar.gz cliboy assets/
+
+      - name: Upload to github artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-boy-linux
+          if-no-files-found: error
+          path: ./cli-boy.tar.gz
+
+  build-macos:
+    name: Build on MacOS
+    runs-on: macos-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install pkg-config make notcurses
+
+      #- name: Setup SSH session
+      #  uses: mxschmitt/action-tmate@v3
+
+      - name: Build project
+        run: |
+          brew ls --verbose notcurses
+          make all DEBUG=0
+
+      - name: Make Release
+        run: |
+          mv ./build/release/cliboy .
+          tar -zcf cli-boy.tar.gz cliboy assets/
+
+      - name: Upload to github artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-boy-macos
+          if-no-files-found: error
+          path: ./cli-boy.tar.gz
+
+  build-windows:
+    name: Build on Windows
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
+
+      - name: Install dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            git
+            zip
+            patch
+            base-devel
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-notcurses
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-make
+
+      - name: Build project
+        shell: msys2 {0}
+        run: |
+          make all DEBUG=0
+
+      - name: Make Release
+        shell: msys2 {0}
+        run: |
+          mkdir -p build-zip/
+          mv ./build/release/cliboy.exe assets/ ./build-zip/
+          cd ./build-zip/
+          ldd ./cliboy.exe | awk '{print $3}' | xargs -i cp {} ./
+          zip -r cli-boy.zip *
+          ls -al
+
+      - name: Upload to github artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-boy-windows
+          if-no-files-found: error
+          path: ./build-zip/cli-boy.zip
