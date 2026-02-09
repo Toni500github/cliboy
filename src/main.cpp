@@ -102,12 +102,29 @@ void game_loop()
         char32_t ch = notcurses_get(display.getNC(), &timeout, &input);
         if (ch != 0 && ch != (char32_t)-1)  // 0 = timeout, -1 = error
         {
+            // On Windows, check if this is a key release event and skip it
+#ifdef _WIN32
+            if (input.evtype == NCTYPE_RELEASE)
+                continue;
+#endif
             // Prefer synthesized/special key id when present; otherwise use the Unicode character.
             uint32_t key = input.id ? input.id : (uint32_t)ch;
 
             const SceneResult& result = active_scene->handle_input(key);
             if (!is_scene_none(result))
+            {
                 current_scene = result;
+                
+                // Flush any remaining input events after scene change to prevent stale keys
+#ifdef _WIN32
+                timespec flush_timeout{0, 0};
+                ncinput  flush_input{};
+                while (notcurses_get(display.getNC(), &flush_timeout, &flush_input) != 0)
+                {
+                    // Discard all pending input
+                }
+#endif
+            }
         }
     }
 }
