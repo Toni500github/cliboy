@@ -1,5 +1,3 @@
-#include <notcurses/notcurses.h>
-
 #include "scenes.hpp"
 #include "terminal_display.hpp"
 
@@ -20,8 +18,8 @@ void GamesMenuScene::render()
 
         if (i == m_selected_game)
         {
-            display.setTextColor(0xffffff);
-            // display.setTextBgColor(0x00FFFF);
+            display.setTextColor(TB_WHITE | TB_BOLD);
+            //display.setTextBgColor(TB_BLACK);
             display.centerText(y, "> {} <", game_items[i]);
             display.resetColors();
         }
@@ -40,14 +38,13 @@ SceneResult GamesMenuScene::handle_input(uint32_t key)
 {
     switch (key)
     {
-        case NCKEY_ESC:   return Scenes::MainMenu;
+        case 27:   return Scenes::MainMenu;
 
-        case NCKEY_UP:   m_selected_game = (m_selected_game - 1 + GAME_COUNT) % GAME_COUNT; break;
-        case NCKEY_DOWN: m_selected_game = (m_selected_game + 1) % GAME_COUNT; break;
+        case TB_KEY_ARROW_UP:   m_selected_game = (m_selected_game - 1 + GAME_COUNT) % GAME_COUNT; break;
+        case TB_KEY_ARROW_DOWN: m_selected_game = (m_selected_game + 1) % GAME_COUNT; break;
 
-        case NCKEY_ENTER:
+        case TB_KEY_ENTER:
         case '\n':
-        case '\r':
             switch (m_selected_game)
             {
                 case 0: return ScenesGame::RockPaperScissors;

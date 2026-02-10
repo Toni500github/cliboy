@@ -1,5 +1,3 @@
-#include <notcurses/notcurses.h>
-
 #include "scenes.hpp"
 #include "terminal_display.hpp"
 
@@ -14,7 +12,6 @@ void CreditsScene::render()
     const char* credits[] = {
         "CliBoy - Terminal Games Collection",
         "",
-        "Built with Notcurses",
         "A simple demonstration of terminal-based games",
         "",
         "Thank you for playing!",
@@ -31,7 +28,7 @@ void CreditsScene::render()
 
 SceneResult CreditsScene::handle_input(uint32_t key)
 {
-    if (key == NCKEY_ESC)
+    if (key == 27)
         return Scenes::MainMenu;
     return Scenes::Credits;
 }

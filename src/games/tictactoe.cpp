@@ -1,5 +1,4 @@
 #include "games/tictactoe.hpp"
-#include <notcurses/nckeys.h>
 
 #include <thread>
 
@@ -90,7 +89,7 @@ void draw_game_screen()
     display.print("*");
 
     display.setCursor(15, 10);
-    display.setFont(FIGLET_FULL_WIDTH, "Soft");
+    display.setFont(FigletType::FullWidth, "Soft");
     display.print("{}", currentPlayer);
     display.resetFont();
 
@@ -152,7 +151,7 @@ Player check_winner()
 void draw_winner(Player winner)
 {
     display.clearDisplay();
-    display.setFont(FIGLET_FULL_WIDTH, "starwars");
+    display.setFont(FigletType::FullWidth, "starwars");
     display.centerText(5, "Player");
     display.centerText(display.getCursorY() + 4, winner == X_PLAYER ? "X" : "O");
     display.centerText(display.getCursorY() + 3, "Wins");
@@ -223,7 +222,7 @@ void TTTScene::render()
     if (is_board_full())
     {
         display.clearDisplay();
-        display.setFont(FIGLET_KERNING, "starwars");
+        display.setFont(FigletType::Kerning, "starwars");
         display.centerText(display.getHeight() / 2, "Board Full");
         display.resetFont();
         display.display();
@@ -239,31 +238,30 @@ SceneResult TTTScene::handle_input(uint32_t key)
 {
     switch (key)
     {
-        case NCKEY_ESC: return Scenes::Games;
+        case 27: return Scenes::Games;
 
-        case NCKEY_DOWN:
+        case TB_KEY_ARROW_DOWN:
             if (currentPosY < 2)
                 currentPosY++;
             break;
 
-        case NCKEY_UP:
+        case TB_KEY_ARROW_UP:
             if (currentPosY > 0)
                 currentPosY--;
             break;
 
-        case NCKEY_RIGHT:
+        case TB_KEY_ARROW_RIGHT:
             if (currentPosX < 2)
                 ++currentPosX;
             break;
 
-        case NCKEY_LEFT:
+        case TB_KEY_ARROW_LEFT:
             if (currentPosX > 0)
                 --currentPosX;
             break;
 
-        case NCKEY_ENTER:
+        case TB_KEY_ENTER:
         case '\n':
-        case '\r':
             choose_pos = true; break;
     }
 

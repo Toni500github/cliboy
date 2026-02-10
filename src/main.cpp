@@ -23,9 +23,7 @@
  *
  */
 
-#include <notcurses/notcurses.h>
-
-#include <thread>
+#include <memory>
 
 #include "games/rockpaperscissors.hpp"
 #include "games/tictactoe.hpp"
@@ -33,8 +31,6 @@
 #include "terminal_display.hpp"
 
 TerminalDisplay display;
-
-using namespace std::chrono_literals;
 
 template <class... Ts>
 struct overloaded : Ts...
@@ -60,9 +56,7 @@ void game_loop()
     SceneResult current_scene = Scenes::MainMenu;
     bool        running       = true;
 
-    char32_t ch = 0;
-
-    while (running && ch != (char32_t)-1)
+    while (running)
     {
         Scene* active_scene = nullptr;
 
@@ -76,15 +70,15 @@ void game_loop()
                     case Scenes::Credits:  active_scene = &credits; break;
 
                     case Scenes::Exit:
-                    default:           running = false; break;
+                    default:               running = false; break;
                 }
             },
             [&](ScenesGame s) {
                 switch (s)
                 {
                     case ScenesGame::RockPaperScissors: active_scene = &game_rps_scene; break;
-                    case ScenesGame::TicTacToe: active_scene = &game_ttt_scene; break;
-                    default:               running = false; break;
+                    case ScenesGame::TicTacToe:         active_scene = &game_ttt_scene; break;
+                    default:                            running = false; break;
                 }
             }
         }, current_scene);
@@ -95,75 +89,21 @@ void game_loop()
 
         active_scene->render();
 
-        ncinput input{};
-        ch = notcurses_get_blocking(display.getNC(), &input);
+        tb_event ev;
+        tb_poll_event(&ev);
 
-        if (ch == 0)
-            continue;
+        uint32_t key = 0;
+        if (ev.type == TB_EVENT_KEY)
+            key = ev.key ? ev.key : ev.ch;
 
-        // Prefer synthesized/special key id when present; otherwise use the Unicode character.
-        uint32_t           key    = input.id ? input.id : (uint32_t)ch;
         const SceneResult& result = active_scene->handle_input(key);
         if (!is_scene_none(result))
             current_scene = result;
     }
 }
 
-#ifdef _WIN32
-#  ifndef NOMINMAX
-#    define NOMINMAX 1
-#  endif
-#  include <fcntl.h>
-#  include <io.h>
-#  include <windows.h>
-
-static void win_enable_vt_and_raw_input()
-{
-    SetConsoleOutputCP(CP_UTF8);
-    SetConsoleCP(CP_UTF8);
-
-    // Enable VT processing on output
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut != INVALID_HANDLE_VALUE && hOut != nullptr)
-    {
-        DWORD mode = 0;
-        if (GetConsoleMode(hOut, &mode))
-        {
-            mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-            mode |= DISABLE_NEWLINE_AUTO_RETURN;
-            SetConsoleMode(hOut, mode);
-        }
-    }
-
-    // Disable echo/line input so terminal replies don't get printed as text
-    // and so key input becomes immediate (no line buffering).
-    HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
-    if (hIn != INVALID_HANDLE_VALUE && hIn != nullptr)
-    {
-        DWORD mode = 0;
-        if (GetConsoleMode(hIn, &mode))
-        {
-            // Keep extended flags, disable cooked input behaviors
-            mode |= ENABLE_EXTENDED_FLAGS;
-
-            mode &= ~ENABLE_ECHO_INPUT;
-            mode &= ~ENABLE_LINE_INPUT;
-            mode &= ~ENABLE_PROCESSED_INPUT;
-
-            mode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
-
-            SetConsoleMode(hIn, mode);
-        }
-    }
-}
-#endif
-
 int main()
 {
-#ifdef _WIN32
-    win_enable_vt_and_raw_input();
-#endif
-
     if (!display.begin())
         return 1;
 

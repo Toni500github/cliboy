@@ -1,5 +1,3 @@
-#include <notcurses/notcurses.h>
-
 #include "scenes.hpp"
 #include "terminal_display.hpp"
 
@@ -9,22 +7,22 @@ void MainMenuScene::render()
 
     int rows = display.getHeight();
 
-    display.setFont(FIGLET_FULL_WIDTH, "Big Money-nw");
+    display.setFont(FigletType::FullWidth, "Big Money-nw");
     display.centerText(5, "CliBoy");
     display.resetFont();
 
     const char* menu_items[] = { "Games", "Credits" };
     int         start_y      = rows / 2 - 2;
 
-    display.setFont(FIGLET_FULL_WIDTH, "Small Slant");
+    display.setFont(FigletType::FullWidth, "Small Slant");
     for (int i = 0; i < MENU_ITEM_COUNT; i++)
     {
         int y = start_y + i * 5;
 
         if (i == m_selected_item)
         {
-            display.setTextColor(0xffffff);
-            // display.setTextBgColor(0x00FFFF);
+            display.setTextColor(TB_WHITE | TB_BOLD);
+            //display.setTextBgColor(TB_BLACK);
             display.centerText(y, "> {} <", menu_items[i]);
             display.resetColors();
         }
@@ -44,14 +42,13 @@ SceneResult MainMenuScene::handle_input(uint32_t key)
 {
     switch (key)
     {
-        case NCKEY_ESC: return Scenes::Exit;
+        case 27: return Scenes::Exit;
 
-        case NCKEY_UP:   m_selected_item = (m_selected_item - 1 + MENU_ITEM_COUNT) % MENU_ITEM_COUNT; break;
-        case NCKEY_DOWN: m_selected_item = (m_selected_item + 1) % MENU_ITEM_COUNT; break;
+        case TB_KEY_ARROW_UP:   m_selected_item = (m_selected_item - 1 + MENU_ITEM_COUNT) % MENU_ITEM_COUNT; break;
+        case TB_KEY_ARROW_DOWN: m_selected_item = (m_selected_item + 1) % MENU_ITEM_COUNT; break;
 
-        case NCKEY_ENTER:
+        case TB_KEY_ENTER:
         case '\n':
-        case '\r':
             if (m_selected_item == 0)
                 return Scenes::Games;
             else if (m_selected_item == 1)

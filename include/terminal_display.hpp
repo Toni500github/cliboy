@@ -1,8 +1,6 @@
 #ifndef _TERMINAL_DISPLAY_HPP_
 #define _TERMINAL_DISPLAY_HPP_
 
-#include <notcurses/notcurses.h>
-
 #include <cstdint>
 #include <format>
 #include <memory>
@@ -11,14 +9,16 @@
 #include <vector>
 
 #include "srilakshmikanthanp/libfiglet.hpp"
+#include "termbox2.h"
 #include "util.hpp"
+
 using namespace srilakshmikanthanp::libfiglet;
 
-enum FigletType
+enum class FigletType
 {
-    FIGLET_FULL_WIDTH,
-    FIGLET_KERNING,
-    FIGLET_SMUSHED
+    FullWidth,
+    Kerning,
+    Smushed
 };
 
 // A similiar clone of Adafruit_SSD130 for terminals
@@ -26,14 +26,12 @@ class TerminalDisplay
 {
 public:
     TerminalDisplay()
-        : m_nc(nullptr),
-          m_stdplane(nullptr),
-          m_content_plane(nullptr),
-          m_width(0),
+        : m_width(0),
           m_height(0),
           m_cursor_x(0),
           m_cursor_y(0),
-          m_channels(0),
+          m_fg_col(0),
+          m_bg_col(0),
           m_flf_font(nullptr),
           m_figlet()
     {}
@@ -47,11 +45,12 @@ public:
     void resetColors();
     void setFont(FigletType figlet_type, const std::string_view font);
     void resetFont();
-    void drawLine(int x0, int y0, int x1, int y1, char ch);
-    void drawCircle(int center_x, int center_y, int radius, char ch);
-    void drawRect(int x, int y, int width, int height, char ch);
-    void drawFilledRect(int x, int y, int width, int height, char ch);
-    void drawPixel(int x, int y, char ch);
+    void updateDims();
+    void drawLine(int x0, int y0, int x1, int y1, unsigned char ch);
+    void drawCircle(int center_x, int center_y, int radius, unsigned char ch);
+    void drawRect(int x, int y, int width, int height, unsigned char ch);
+    void drawFilledRect(int x, int y, int width, int height, unsigned char ch);
+    void drawPixel(int x, int y, unsigned char ch);
     void display();
 
     template <typename... Args>
@@ -65,7 +64,7 @@ public:
         int max_width = 0;
         for (const auto& line : text_lines)
         {
-            ncplane_putstr_yx(m_content_plane, m_cursor_y, m_cursor_x, line.c_str());
+            tb_print(m_cursor_x, m_cursor_y, m_fg_col, m_bg_col, line.c_str());
             m_cursor_y++;
             max_width = std::max<int>(max_width, line.size());
         }
@@ -98,24 +97,20 @@ public:
             int x = (m_width - static_cast<int>(line.size())) / 2;
             x     = std::max(0, x);
 
-            ncplane_putstr_yx(m_content_plane, current_y++, x, line.c_str());
+            tb_print(x, current_y++, m_fg_col, m_bg_col, line.c_str());
             setCursor(x, current_y);
         }
     }
 
-    uint32_t   getWidth() const { return m_width; }
-    uint32_t   getHeight() const { return m_height; }
-    int        getCursorX() const { return m_cursor_x; }
-    int        getCursorY() const { return m_cursor_y; }
-    notcurses* getNC() const { return m_nc; }
+    int getWidth() const { return m_width; }
+    int getHeight() const { return m_height; }
+    int getCursorX() const { return m_cursor_x; }
+    int getCursorY() const { return m_cursor_y; }
 
 private:
-    notcurses* m_nc;
-    ncplane*   m_stdplane;
-    ncplane*   m_content_plane;
-    uint32_t   m_width, m_height;
+    int        m_width, m_height;
     int        m_cursor_x, m_cursor_y;
-    uint64_t   m_channels;
+    uintattr_t m_fg_col, m_bg_col;
 
     std::shared_ptr<flf_font> m_flf_font;
     std::optional<figlet>     m_figlet;

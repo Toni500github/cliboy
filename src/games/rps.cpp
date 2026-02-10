@@ -1,6 +1,3 @@
-#include <notcurses/nckeys.h>
-
-#include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <thread>
@@ -67,7 +64,7 @@ static Moves get_cpu_move()
 static void print_winner(Winner winner)
 {
     // display.clearDisplay();
-    display.setFont(FIGLET_FULL_WIDTH, "starwars");
+    display.setFont(FigletType::FullWidth, "starwars");
     switch (winner)
     {
         case CPU:
@@ -104,7 +101,7 @@ static void print_player_move(Moves player_move)
 {
     display.clearDisplay();
     display.centerText(display.getHeight() / 2.5, "Your move:");
-    display.setFont(FIGLET_FULL_WIDTH, "Ogre");
+    display.setFont(FigletType::FullWidth, "Ogre");
     display.centerText(display.getCursorY() + 2, "{}", get_move_ascii(player_move));
     display.resetFont();
     display.centerText(display.getHeight() * 0.9, "Rock: r | Paper: p | Scissors: s | Play: ENTER | Exit: ESC");
@@ -115,7 +112,7 @@ static void print_player_move(Moves player_move)
 static void print_moves(Moves computer_move, Moves player_move)
 {
     display.clearDisplay();
-    display.setFont(FIGLET_SMUSHED, "Doom");
+    display.setFont(FigletType::Smushed, "Doom");
 
     const int term_width  = display.getWidth();
     const int term_height = display.getHeight();
@@ -151,7 +148,7 @@ void RpsScene::render()
         return;
 
     Moves computer_move = get_cpu_move();
-    display.setFont(FIGLET_FULL_WIDTH, "Stop");
+    display.setFont(FigletType::FullWidth, "Stop");
     print_count_down(3);
     print_count_down(2);
     print_count_down(1);
@@ -172,14 +169,14 @@ SceneResult RpsScene::handle_input(uint32_t key)
 {
     switch (key)
     {
-        case NCKEY_ESC: return Scenes::Games;
-        case 'r':       player_move = ROCK; break;
-        case 'p':       player_move = PAPER; break;
-        case 's':       player_move = SCISSORS; break;
+        case 27: return Scenes::Games;
 
-        case NCKEY_ENTER:
+        case 'r': player_move = ROCK; break;
+        case 'p': player_move = PAPER; break;
+        case 's': player_move = SCISSORS; break;
+
+        case TB_KEY_ENTER:
         case '\n':
-        case '\r':
             if (player_move != NONE)
                 selected = true;
             break;

@@ -1,6 +1,6 @@
+#define TB_IMPL       1
+#define TB_OPT_ATTR_W 32
 #include "terminal_display.hpp"
-
-#include <notcurses/notcurses.h>
 
 #include <algorithm>
 #include <cstdint>
@@ -14,89 +14,58 @@ using namespace srilakshmikanthanp::libfiglet;
 TerminalDisplay::~TerminalDisplay()
 {
     clearDisplay();
-
-    if (m_content_plane)
-    {
-        ncplane_destroy(m_content_plane);
-        m_content_plane = nullptr;
-    }
-
-    if (m_nc)
-    {
-        notcurses_stop(m_nc);
-        m_nc = nullptr;
-    }
+    tb_shutdown();
 }
 
 bool TerminalDisplay::begin()
 {
-    m_nc = notcurses_init(nullptr, nullptr);
-    if (!m_nc)
+    if (tb_init() < 0)
         return false;
 
-    m_stdplane = notcurses_stdplane(m_nc);
-    m_width    = ncplane_dim_x(m_stdplane);
-    m_height   = ncplane_dim_y(m_stdplane);
-
-    struct ncplane_options ncopts = { .y        = 0,
-                                      .x        = 0,
-                                      .rows     = m_height,
-                                      .cols     = m_width,
-                                      .userptr  = nullptr,
-                                      .name     = "Content plane (debug ig)",
-                                      .resizecb = ncplane_resize_realign,
-                                      .flags    = 0,
-                                      .margin_b = 0,
-                                      .margin_r = 0 };
-
-    m_content_plane = ncplane_create(m_stdplane, &ncopts);
-    if (!m_content_plane)
-    {
-        notcurses_stop(m_nc);
-        return false;
-    }
+    updateDims();
 
     return true;
 }
 
+void TerminalDisplay::updateDims()
+{
+    m_width  = tb_width();
+    m_height = tb_height();
+
+    m_cursor_x = std::clamp(m_cursor_x, 0, std::max(0, m_width - 1));
+    m_cursor_y = std::clamp(m_cursor_y, 0, std::max(0, m_height - 1));
+}
+
 void TerminalDisplay::clearDisplay()
 {
-    ncplane_set_fg_default(m_content_plane);
-    ncplane_set_bg_default(m_content_plane);
-    ncplane_erase(m_content_plane);
-    m_cursor_x = m_cursor_y = 0;
+    updateDims();
+    resetColors();
+    tb_clear();
+    tb_set_output_mode(TB_OUTPUT_TRUECOLOR);
+    m_cursor_x = 0;
+    m_cursor_y = 0;
 }
 
 void TerminalDisplay::display()
 {
-    notcurses_render(m_nc);
+    updateDims();
+    tb_present();
 }
 
 void TerminalDisplay::resetColors()
 {
-    ncchannels_set_fg_default(&m_channels);
-    ncchannels_set_bg_default(&m_channels);
-    ncplane_set_channels(m_content_plane, m_channels);
+    m_fg_col = TB_DEFAULT;
+    m_bg_col = TB_DEFAULT;
 }
 
 void TerminalDisplay::setTextColor(const uint32_t hex)
 {
-    uint8_t r = (hex >> 16) & 0xff;
-    uint8_t g = (hex >> 8) & 0xff;
-    uint8_t b = (hex) & 0xff;
-
-    ncchannels_set_fg_rgb8(&m_channels, r, g, b);
-    ncplane_set_channels(m_content_plane, m_channels);
+    m_fg_col = (uintattr_t)hex;
 }
 
 void TerminalDisplay::setTextBgColor(const uint32_t hex)
 {
-    uint8_t r = (hex >> 16) & 0xff;
-    uint8_t g = (hex >> 8) & 0xff;
-    uint8_t b = (hex) & 0xff;
-
-    ncchannels_set_bg_rgb8(&m_channels, r, g, b);
-    ncplane_set_channels(m_content_plane, m_channels);
+    m_bg_col = (uintattr_t)hex;
 }
 
 void TerminalDisplay::setCursor(const int x, const int y)
@@ -116,9 +85,9 @@ void TerminalDisplay::setFont(FigletType figlet_type, const std::string_view fon
 
     switch (figlet_type)
     {
-        case FIGLET_FULL_WIDTH: m_figlet.emplace(figlet(m_flf_font, full_width::make_shared())); break;
-        case FIGLET_KERNING:    m_figlet.emplace(figlet(m_flf_font, kerning::make_shared())); break;
-        case FIGLET_SMUSHED:    m_figlet.emplace(figlet(m_flf_font, smushed::make_shared())); break;
+        case FigletType::FullWidth: m_figlet.emplace(figlet(m_flf_font, full_width::make_shared())); break;
+        case FigletType::Kerning:   m_figlet.emplace(figlet(m_flf_font, kerning::make_shared())); break;
+        case FigletType::Smushed:   m_figlet.emplace(figlet(m_flf_font, smushed::make_shared())); break;
     }
 }
 
@@ -128,21 +97,16 @@ void TerminalDisplay::resetFont()
     m_figlet.reset();
 }
 
-void TerminalDisplay::drawPixel(int x, int y, char ch)
+void TerminalDisplay::drawPixel(int x, int y, unsigned char ch)
 {
-    if (x >= 0 && x < static_cast<int>(m_width) && y >= 0 && y < static_cast<int>(m_height))
-    {
-        int saved_x = m_cursor_x;
-        int saved_y = m_cursor_y;
+    updateDims();
+    if (x < 0 || x >= m_width || y < 0 || y >= m_height)
+        return;
 
-        setCursor(x, y);
-        ncplane_putchar_yx(m_content_plane, y, x, ch);
-
-        setCursor(saved_x, saved_y);
-    }
+    tb_set_cell(x, y, static_cast<uint32_t>(ch), m_fg_col, m_bg_col);
 }
 
-void TerminalDisplay::drawLine(int x0, int y0, int x1, int y1, char ch)
+void TerminalDisplay::drawLine(int x0, int y0, int x1, int y1, unsigned char ch)
 {
     // Bresenham's line algorithm
     int dx  = abs(x1 - x0);
@@ -172,7 +136,7 @@ void TerminalDisplay::drawLine(int x0, int y0, int x1, int y1, char ch)
     }
 }
 
-void TerminalDisplay::drawCircle(int center_x, int center_y, int radius, char ch)
+void TerminalDisplay::drawCircle(int center_x, int center_y, int radius, unsigned char ch)
 {
     // Midpoint circle algorithm
     int x   = radius;
@@ -203,7 +167,7 @@ void TerminalDisplay::drawCircle(int center_x, int center_y, int radius, char ch
     }
 }
 
-void TerminalDisplay::drawRect(int x, int y, int width, int height, char ch)
+void TerminalDisplay::drawRect(int x, int y, int width, int height, unsigned char ch)
 {
     // Top and bottom horizontal lines
     drawLine(x, y, x + width - 1, y, ch);
@@ -214,7 +178,7 @@ void TerminalDisplay::drawRect(int x, int y, int width, int height, char ch)
     drawLine(x + width - 1, y, x + width - 1, y + height - 1, ch);
 }
 
-void TerminalDisplay::drawFilledRect(int x, int y, int width, int height, char ch)
+void TerminalDisplay::drawFilledRect(int x, int y, int width, int height, unsigned char ch)
 {
     for (int row = y; row < y + height; ++row)
         for (int col = x; col < x + width; ++col)

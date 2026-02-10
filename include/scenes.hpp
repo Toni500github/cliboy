@@ -1,7 +1,6 @@
 #pragma once
 
-#include <notcurses/notcurses.h>
-
+#include <cstdint>
 #include <variant>
 
 enum class Scenes
