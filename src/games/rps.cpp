@@ -68,15 +68,15 @@ static void print_winner(Winner winner)
     switch (winner)
     {
         case CPU:
-            display.setTextColor(0xff0000);
+            display.setTextColor(TB_RED);
             display.centerText(display.getHeight() / 10, "CPU Wins");
             break;
         case DRAW:
-            display.setTextColor(0x9370DB);
+            display.setTextColor(TB_MAGENTA);
             display.centerText(display.getHeight() / 10, "Draw");
             break;
         case PLAYER:
-            display.setTextColor(0x00ff00);
+            display.setTextColor(TB_GREEN);
             display.centerText(display.getHeight() / 10, "You Won");
             break;
     }

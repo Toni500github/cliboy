@@ -48,7 +48,7 @@ void draw_piece(int row, int col, char piece)
     display.setCursor(cx, cy);
     display.print("*");
 
-    display.setTextBgColor(0xffffff);
+    display.setTextBgColor(TB_WHITE);
     switch (piece)
     {
         case 'X':
@@ -62,7 +62,7 @@ void draw_piece(int row, int col, char piece)
 
 void draw_game_screen()
 {
-    display.setTextBgColor(0xffffff);
+    display.setTextBgColor(TB_WHITE);
 
     // Vertical lines
     display.drawLine(BOARD_OFFSET_X + CELL_SIZE, BOARD_OFFSET_Y, BOARD_OFFSET_X + CELL_SIZE,
@@ -104,7 +104,7 @@ void animate_line(int x0, int y0, int x1, int y1)
         int xi = x0 + (x1 - x0) * i / steps;
         int yi = y0 + (y1 - y0) * i / steps;
         draw_game_screen();  // redraw board and pieces
-        display.setTextBgColor(0xffffff);
+        display.setTextBgColor(TB_WHITE);
         display.drawLine(x0, y0, xi, yi, ' ');
         display.display();
         std::this_thread::sleep_for(50ms);

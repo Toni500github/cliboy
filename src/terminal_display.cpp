@@ -41,7 +41,6 @@ void TerminalDisplay::clearDisplay()
     updateDims();
     resetColors();
     tb_clear();
-    tb_set_output_mode(TB_OUTPUT_TRUECOLOR);
     m_cursor_x = 0;
     m_cursor_y = 0;
 }

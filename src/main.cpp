@@ -23,8 +23,6 @@
  *
  */
 
-#include <memory>
-
 #include "games/rockpaperscissors.hpp"
 #include "games/tictactoe.hpp"
 #include "scenes.hpp"
