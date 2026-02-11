@@ -88,7 +88,7 @@ void game_loop()
         active_scene->render();
 
         tb_event ev;
-        tb_poll_event(&ev);
+        tb_peek_event(&ev, 33);
 
         uint32_t key = 0;
         if (ev.type == TB_EVENT_KEY)
