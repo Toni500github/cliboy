@@ -24,6 +24,8 @@ bool TerminalDisplay::begin()
 
     updateDims();
 
+    tb_hide_cursor();
+
     return true;
 }
 

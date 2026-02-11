@@ -9,7 +9,13 @@
 #include <vector>
 
 #include "srilakshmikanthanp/libfiglet.hpp"
+
+#ifdef _WIN32
+#include "termbox2_win.h"
+#else
 #include "termbox2.h"
+#endif
+
 #include "util.hpp"
 
 using namespace srilakshmikanthanp::libfiglet;
