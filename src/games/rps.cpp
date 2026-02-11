@@ -139,7 +139,7 @@ static void print_moves(Moves computer_move, Moves player_move)
     display.display();
 }
 
-void RpsScene::render()
+void RpsGame::render()
 {
     display.clearDisplay();
 
@@ -165,7 +165,7 @@ void RpsScene::render()
     selected = false;
 }
 
-SceneResult RpsScene::handle_input(uint32_t key)
+SceneResult RpsGame::handle_input(uint32_t key)
 {
     switch (key)
     {

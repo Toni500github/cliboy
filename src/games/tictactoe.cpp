@@ -174,7 +174,7 @@ void reset_game()
     currentPlayer                                                      = X_PLAYER;
 }
 
-TTTScene::TTTScene()
+TTTGame::TTTGame()
 {
     // board size should be about 2/3 of the smaller dimension
     BOARD_SIZE = (std::min(display.getWidth(), display.getHeight()) * 2) / 3;
@@ -189,7 +189,7 @@ TTTScene::TTTScene()
     BOARD_OFFSET_Y = (display.getHeight() - BOARD_SIZE) / 3;  // slightly higher than center
 }
 
-void TTTScene::render()
+void TTTGame::render()
 {
     currentPlayer = (moves % 2 == 0) ? X_PLAYER : O_PLAYER;
 
@@ -234,7 +234,7 @@ void TTTScene::render()
     display.display();
 }
 
-SceneResult TTTScene::handle_input(uint32_t key)
+SceneResult TTTGame::handle_input(uint32_t key)
 {
     switch (key)
     {

@@ -23,6 +23,7 @@
  *
  */
 
+#include "games/wordle.hpp"
 #include "games/rockpaperscissors.hpp"
 #include "games/tictactoe.hpp"
 #include "scenes.hpp"
@@ -38,18 +39,14 @@ struct overloaded : Ts...
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
-bool is_scene_none(const SceneResult& r)
-{
-    return std::visit([](auto v) { return v == std::decay_t<decltype(v)>::kNone; }, r);
-}
-
 void game_loop()
 {
     MainMenuScene  main_menu;
     GamesMenuScene games_menu;
     CreditsScene   credits;
-    TTTScene       game_ttt_scene;
-    RpsScene       game_rps_scene;
+    TTTGame       game_ttt;
+    RpsGame       game_rps;
+    WordleGame    game_wordle;
 
     SceneResult current_scene = Scenes::MainMenu;
     bool        running       = true;
@@ -74,8 +71,9 @@ void game_loop()
             [&](ScenesGame s) {
                 switch (s)
                 {
-                    case ScenesGame::RockPaperScissors: active_scene = &game_rps_scene; break;
-                    case ScenesGame::TicTacToe:         active_scene = &game_ttt_scene; break;
+                    case ScenesGame::RockPaperScissors: active_scene = &game_rps; break;
+                    case ScenesGame::TicTacToe:         active_scene = &game_ttt; break;
+                    case ScenesGame::Wordle:            active_scene = &game_wordle; break;
                     default:                            running = false; break;
                 }
             }
@@ -88,15 +86,14 @@ void game_loop()
         active_scene->render();
 
         tb_event ev;
-        tb_peek_event(&ev, 33);
+        tb_poll_event(&ev);
+        //tb_peek_event(&ev, 33);
 
         uint32_t key = 0;
         if (ev.type == TB_EVENT_KEY)
             key = ev.key ? ev.key : ev.ch;
 
-        const SceneResult& result = active_scene->handle_input(key);
-        if (!is_scene_none(result))
-            current_scene = result;
+        current_scene = active_scene->handle_input(key);
     }
 }
 

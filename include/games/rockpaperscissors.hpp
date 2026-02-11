@@ -2,7 +2,7 @@
 
 #include "scenes.hpp"
 
-class RpsScene : public Scene
+class RpsGame : public Scene
 {
 public:
     void        render() override;

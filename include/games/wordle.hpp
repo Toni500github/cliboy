@@ -2,10 +2,10 @@
 
 #include "scenes.hpp"
 
-class TTTGame : public Scene
+class WordleGame : public Scene
 {
 public:
-    TTTGame();
+    WordleGame();
     void        render() override;
     SceneResult handle_input(uint32_t key) override;
 };

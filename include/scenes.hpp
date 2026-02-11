@@ -12,11 +12,12 @@ enum class Scenes
     Exit,
 };
 
-enum class ScenesGame
+enum class ScenesGame : uint8_t
 {
-    kNone,
     RockPaperScissors,
     TicTacToe,
+    Wordle,
+    COUNT,
 };
 
 using SceneResult = std::variant<Scenes, ScenesGame>;
@@ -55,5 +56,5 @@ public:
 
 private:
     int                  m_selected_game = 0;
-    static constexpr int GAME_COUNT      = 2;
+    static constexpr int GAME_COUNT      = static_cast<int>(ScenesGame::COUNT);
 };
