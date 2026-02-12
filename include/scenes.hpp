@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <variant>
 
+#include "util.hpp"
+
 enum class Scenes
 {
     kNone,
@@ -28,6 +30,22 @@ public:
     virtual ~Scene()                               = default;
     virtual void        render()                   = 0;
     virtual SceneResult handle_input(uint32_t key) = 0;
+    Result<>            begin()
+    {
+        if (m_has_begun)
+            return Ok();
+
+        m_has_begun = true;
+        return on_begin();
+    }
+
+    bool has_begun() const { return m_has_begun; }
+
+protected:
+    virtual Result<> on_begin() { return Ok(); }
+
+private:
+    bool m_has_begun = false;
 };
 
 class CreditsScene : public Scene

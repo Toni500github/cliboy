@@ -1,15 +1,15 @@
 #include "games/wordle.hpp"
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <cstdlib>
-#include <iostream>
+#include <random>
 #include <string>
 #include <vector>
 #include "terminal_display.hpp"
 
 static std::string buf;
 static std::string guess;
-static size_t pos{};
 static std::vector<std::string> words;
 static bool selected{};
 
@@ -27,15 +27,18 @@ struct Tile
     TileState state;
 };
 
-static std::array<TileState, 5> get_states(const std::string& str)
+using RowStates = std::array<TileState, 5>;
+using WordleStates = std::array<std::array<Tile, 5>, 6>;
+
+static RowStates get_states(const std::string& str)
 {
-    std::array<TileState, 5> states;
+    RowStates states;
     for (size_t i = 0; i < str.size(); ++i)
     {
         char c = str[i];
         if (guess[i] == c)
             states[i] = TileState::Correct;
-        else if (std::count(guess.begin(), guess.end(), c) > 0)
+        else if (guess.find(c) != guess.npos)
             states[i] = TileState::Present;
         else
             states[i] = TileState::Absent;
@@ -55,7 +58,15 @@ static uint32_t bg_for(TileState s)
     return TB_DEFAULT;
 }
 
-static void draw_wordle_grid(const std::array<std::array<Tile, 5>, 6>& grid)
+static bool is_valid(const std::string& word)
+{
+    if (words.empty())
+        return false;
+
+    return std::binary_search(words.begin(), words.end(), word);
+}
+
+static void draw_wordle_grid(const WordleStates& grid)
 {
     display.clearDisplay();
 
@@ -83,14 +94,14 @@ static void draw_wordle_grid(const std::array<std::array<Tile, 5>, 6>& grid)
             const Tile& t = grid[r][c];
 
             // Fill
-            display.setTextColor(TB_WHITE);
+            //display.setTextColor(TB_WHITE);
             display.setTextBgColor(bg_for(t.state));
             display.drawFilledRect(x, y, cell_w, cell_h, ' ');
 
             // Border
             display.setTextColor(TB_BLACK);
             display.setTextBgColor(bg_for(t.state));
-            display.drawRect(x, y, cell_w, cell_h, '#');
+            display.drawRect(x, y, cell_w, cell_h, ' ');
 
             // Center letter
             if (t.ch != '\0' && t.ch != ' ')
@@ -110,49 +121,62 @@ static void draw_wordle_grid(const std::array<std::array<Tile, 5>, 6>& grid)
     display.display();
 }
 
-WordleGame::WordleGame()
+Result<> WordleGame::on_begin()
 {
     std::ifstream f("./assets/valid-wordle-words.txt");
-    if (!f.good())
-    {
-        tb_shutdown();
-        std::cerr << "failed to open valid-wordle-words.txt" << std::endl;
-        exit(-1);
-    }
+    if (f.bad())
+        return Err("Failed to open ./assets/valid-wordle-words.txt");
 
     std::string word;
     while (std::getline(f, word))
         words.push_back(word);
 
-    guess = words[rand() % words.size()];
-    for (char& c : guess)
-        c = toupper(c);
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    static std::uniform_int_distribution<> dist(1, words.size());
+
+    guess = str_toupper(words[dist(gen)]);
+
+    return Ok();
 }
 
 void WordleGame::render()
 {
-    static std::array<std::array<Tile, 5>, 6> grid{};
+    static WordleStates grid{};
     static int row{};
-    auto set_row = [&](int& r, const char* letters, const std::array<TileState, 5>& states) {
+
+    if (!selected)
+    {
         for (int c = 0; c < 5; ++c)
         {
-            grid[r][c].ch    = letters[c];
-            grid[r][c].state = states[c];
+            grid[row][c].ch    = c < static_cast<int>(buf.size()) ? buf[c] : ' ';
+            grid[row][c].state = TileState::Empty;
         }
-        r++;
-    };
-
-    if (selected)
+    }
+    else
     {
-        set_row(row, buf.c_str(), get_states(buf));
+        if (!is_valid(str_tolower(buf)))
+        {
+            selected = false;
+            return;
+        }
+
+        const auto& states = get_states(buf);
+        for (int c = 0; c < 5; ++c)
+        {
+            grid[row][c].ch    = buf[c];
+            grid[row][c].state = states[c];
+        }
+        row++;
         selected = false;
         buf.clear();
     }
 
     // Remaining empty rows
     for (int r = row; r < 6; ++r)
-        for (int c = 0; c < 5; ++c)
-            grid[r][c] = Tile{' ', TileState::Empty};
+        if (grid[r].empty())
+            for (int c = 0; c < 5; ++c)
+                grid[r][c] = Tile{' ', TileState::Empty};
 
     draw_wordle_grid(grid);
 }
@@ -165,6 +189,8 @@ SceneResult WordleGame::handle_input(uint32_t key)
         selected = true;
     else if (buf.size() < 5 && isalpha(key))
         buf.push_back(toupper(key));
+    else if (!buf.empty() && (key == TB_KEY_BACKSPACE || key == TB_KEY_BACKSPACE2 || key == 8))
+        buf.pop_back();
 
     return ScenesGame::Wordle;
 }

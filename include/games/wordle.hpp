@@ -5,7 +5,7 @@
 class WordleGame : public Scene
 {
 public:
-    WordleGame();
+    Result<>    on_begin() override;
     void        render() override;
     SceneResult handle_input(uint32_t key) override;
 };

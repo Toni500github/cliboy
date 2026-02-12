@@ -23,9 +23,11 @@
  *
  */
 
-#include "games/wordle.hpp"
+#include <iostream>
+
 #include "games/rockpaperscissors.hpp"
 #include "games/tictactoe.hpp"
+#include "games/wordle.hpp"
 #include "scenes.hpp"
 #include "terminal_display.hpp"
 
@@ -39,14 +41,14 @@ struct overloaded : Ts...
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
-void game_loop()
+int game_loop()
 {
     MainMenuScene  main_menu;
     GamesMenuScene games_menu;
     CreditsScene   credits;
-    TTTGame       game_ttt;
-    RpsGame       game_rps;
-    WordleGame    game_wordle;
+    TTTGame        game_ttt;
+    RpsGame        game_rps;
+    WordleGame     game_wordle;
 
     SceneResult current_scene = Scenes::MainMenu;
     bool        running       = true;
@@ -83,11 +85,18 @@ void game_loop()
         if (!running || !active_scene)
             break;
 
+        const Result<>& r = active_scene->begin();
+        if (!r.ok())
+        {
+            tb_shutdown();
+            std::cerr << "Error while initing a scene/game: " << r.error().value << std::endl;
+            return 1;
+        }
+
         active_scene->render();
 
         tb_event ev;
-        tb_poll_event(&ev);
-        //tb_peek_event(&ev, 33);
+        tb_peek_event(&ev, 33);
 
         uint32_t key = 0;
         if (ev.type == TB_EVENT_KEY)
@@ -95,6 +104,7 @@ void game_loop()
 
         current_scene = active_scene->handle_input(key);
     }
+    return 0;
 }
 
 int main()
@@ -102,7 +112,5 @@ int main()
     if (!display.begin())
         return 1;
 
-    game_loop();
-
-    return 0;
+    return game_loop();
 }

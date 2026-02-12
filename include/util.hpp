@@ -1,9 +1,9 @@
 #ifndef UTIL_HPP
 #define UTIL_HPP
 
-#include <cstdint>
 #include <sstream>
 #include <string>
+#include <variant>
 #include <vector>
 
 // Get string literal length
@@ -12,7 +12,6 @@ constexpr std::size_t operator""_len(const char*, std::size_t ln) noexcept
     return ln;
 }
 
-#if 0
 template <typename T = bool>
 struct Ok
 {
@@ -51,7 +50,6 @@ public:
     const T& get() const { return std::get<T>(value); }
     const E& error() const { return std::get<E>(value); }
 };
-#endif
 
 /* Spilt a string into a vector using a delimeter
  * @param text The string to split
@@ -68,6 +66,22 @@ inline std::vector<std::string> split(const std::string_view text, const char de
     }
 
     return vec;
+}
+
+inline std::string str_tolower(std::string str)
+{
+    for (char& x : str)
+        x = std::tolower(x);
+
+    return str;
+}
+
+inline std::string str_toupper(std::string str)
+{
+    for (char& x : str)
+        x = std::toupper(x);
+
+    return str;
 }
 
 #endif
