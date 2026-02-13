@@ -23,8 +23,8 @@ enum class TileState
 
 struct Tile
 {
-    char      ch;
-    TileState state;
+    char ch;
+    TileState     state;
 };
 
 using RowStates = std::array<TileState, 5>;
@@ -46,16 +46,29 @@ static RowStates get_states(const std::string& str)
     return states;
 }
 
-static uint32_t bg_for(TileState s)
+static uintattr_t bg_for(TileState s)
 {
     switch (s)
     {
         case TileState::Correct: return TB_GREEN;
         case TileState::Present: return TB_YELLOW;
-        case TileState::Absent:  return TB_REVERSE;
-        case TileState::Empty:   return TB_BLACK;
+        case TileState::Absent:  return TB_BLACK;
+        case TileState::Empty:   return TB_WHITE;
     }
-    return TB_DEFAULT;
+}
+
+static uintattr_t fg_for(TileState s)
+{
+    switch (s)
+    {
+        case TileState::Present:
+        case TileState::Empty:
+        case TileState::Correct:
+            return TB_BLACK | TB_BOLD;
+
+        case TileState::Absent:
+            return TB_WHITE | TB_BOLD;
+    }
 }
 
 static bool is_valid(const std::string& word)
@@ -70,6 +83,7 @@ static void draw_wordle_grid(const WordleStates& grid)
 {
     display.clearDisplay();
 
+    const uint32_t block = U'█';
     const int cols = 5;
     const int rows = 6;
 
@@ -94,22 +108,20 @@ static void draw_wordle_grid(const WordleStates& grid)
             const Tile& t = grid[r][c];
 
             // Fill
-            //display.setTextColor(TB_WHITE);
+            display.setTextColor(bg_for(t.state));
             display.setTextBgColor(bg_for(t.state));
-            display.drawFilledRect(x, y, cell_w, cell_h, ' ');
+            display.drawFilledRect(x, y, cell_w, cell_h, block);
 
             // Border
-            display.setTextColor(TB_BLACK);
-            display.setTextBgColor(bg_for(t.state));
-            display.drawRect(x, y, cell_w, cell_h, ' ');
+            display.drawRect(x, y, cell_w, cell_h, block);
 
             // Center letter
-            if (t.ch != '\0' && t.ch != ' ')
+            if (isalpha(t.ch))
             {
                 const int cx = x + cell_w / 2;
                 const int cy = y + cell_h / 2;
 
-                display.setTextColor(TB_WHITE);
+                display.setTextColor(fg_for(t.state));
                 display.setTextBgColor(bg_for(t.state));
                 display.setCursor(cx, cy);
                 display.print("{}", t.ch);

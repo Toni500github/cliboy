@@ -1,5 +1,4 @@
-#define TB_IMPL       1
-#define TB_OPT_ATTR_W 32
+#define TB_IMPL 1
 #include "terminal_display.hpp"
 
 #include <algorithm>
@@ -11,6 +10,22 @@
 #include "srilakshmikanthanp/libfiglet.hpp"
 using namespace srilakshmikanthanp::libfiglet;
 
+static void enable_ansi_colors()
+{
+#ifdef _WIN32
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut == INVALID_HANDLE_VALUE)
+        return;
+
+    DWORD mode = 0;
+    if (!GetConsoleMode(hOut, &mode))
+        return;
+
+    mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hOut, mode);
+#endif
+}
+
 TerminalDisplay::~TerminalDisplay()
 {
     clearDisplay();
@@ -19,6 +34,7 @@ TerminalDisplay::~TerminalDisplay()
 
 bool TerminalDisplay::begin()
 {
+    enable_ansi_colors();
     if (tb_init() < 0)
         return false;
 
@@ -59,14 +75,14 @@ void TerminalDisplay::resetColors()
     m_bg_col = TB_DEFAULT;
 }
 
-void TerminalDisplay::setTextColor(const uint32_t hex)
+void TerminalDisplay::setTextColor(const uintattr_t hex)
 {
-    m_fg_col = (uintattr_t)hex;
+    m_fg_col = hex;
 }
 
-void TerminalDisplay::setTextBgColor(const uint32_t hex)
+void TerminalDisplay::setTextBgColor(const uintattr_t hex)
 {
-    m_bg_col = (uintattr_t)hex;
+    m_bg_col = hex;
 }
 
 void TerminalDisplay::setCursor(const int x, const int y)
@@ -98,16 +114,15 @@ void TerminalDisplay::resetFont()
     m_figlet.reset();
 }
 
-void TerminalDisplay::drawPixel(int x, int y, unsigned char ch)
+void TerminalDisplay::drawPixel(int x, int y, uint32_t ch)
 {
-    updateDims();
     if (x < 0 || x >= m_width || y < 0 || y >= m_height)
         return;
 
-    tb_set_cell(x, y, static_cast<uint32_t>(ch), m_fg_col, m_bg_col);
+    tb_set_cell(x, y, ch, m_fg_col, m_bg_col);
 }
 
-void TerminalDisplay::drawLine(int x0, int y0, int x1, int y1, unsigned char ch)
+void TerminalDisplay::drawLine(int x0, int y0, int x1, int y1, uint32_t ch)
 {
     // Bresenham's line algorithm
     int dx  = abs(x1 - x0);
@@ -137,7 +152,7 @@ void TerminalDisplay::drawLine(int x0, int y0, int x1, int y1, unsigned char ch)
     }
 }
 
-void TerminalDisplay::drawCircle(int center_x, int center_y, int radius, unsigned char ch)
+void TerminalDisplay::drawCircle(int center_x, int center_y, int radius, uint32_t ch)
 {
     // Midpoint circle algorithm
     int x   = radius;
@@ -168,7 +183,7 @@ void TerminalDisplay::drawCircle(int center_x, int center_y, int radius, unsigne
     }
 }
 
-void TerminalDisplay::drawRect(int x, int y, int width, int height, unsigned char ch)
+void TerminalDisplay::drawRect(int x, int y, int width, int height, uint32_t ch)
 {
     // Top and bottom horizontal lines
     drawLine(x, y, x + width - 1, y, ch);
@@ -179,7 +194,7 @@ void TerminalDisplay::drawRect(int x, int y, int width, int height, unsigned cha
     drawLine(x + width - 1, y, x + width - 1, y + height - 1, ch);
 }
 
-void TerminalDisplay::drawFilledRect(int x, int y, int width, int height, unsigned char ch)
+void TerminalDisplay::drawFilledRect(int x, int y, int width, int height, uint32_t ch)
 {
     for (int row = y; row < y + height; ++row)
         for (int col = x; col < x + width; ++col)

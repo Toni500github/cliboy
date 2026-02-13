@@ -10,6 +10,7 @@
 
 #include "srilakshmikanthanp/libfiglet.hpp"
 
+#define TB_OPT_ATTR_W 32
 #ifdef _WIN32
 #  include "termbox2_win.h"
 #else
@@ -46,17 +47,17 @@ public:
     bool begin();
     void clearDisplay();
     void setCursor(const int x, const int y);
-    void setTextColor(const uint32_t hex);
-    void setTextBgColor(const uint32_t hex);
+    void setTextColor(const uintattr_t hex);
+    void setTextBgColor(const uintattr_t hex);
     void resetColors();
     void setFont(FigletType figlet_type, const std::string_view font);
     void resetFont();
     void updateDims();
-    void drawLine(int x0, int y0, int x1, int y1, unsigned char ch);
-    void drawCircle(int center_x, int center_y, int radius, unsigned char ch);
-    void drawRect(int x, int y, int width, int height, unsigned char ch);
-    void drawFilledRect(int x, int y, int width, int height, unsigned char ch);
-    void drawPixel(int x, int y, unsigned char ch);
+    void drawLine(int x0, int y0, int x1, int y1, uint32_t ch);
+    void drawCircle(int center_x, int center_y, int radius, uint32_t ch);
+    void drawRect(int x, int y, int width, int height, uint32_t ch);
+    void drawFilledRect(int x, int y, int width, int height, uint32_t ch);
+    void drawPixel(int x, int y, uint32_t ch);
     void display();
 
     template <typename... Args>
