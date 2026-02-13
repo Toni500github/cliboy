@@ -94,6 +94,7 @@ void draw_game_screen()
     display.resetFont();
 
     display.centerText(display.getHeight() * 0.9, "Arrow: Navigation | Place: ENTER | Exit: ESC");
+    display.display();
 }
 
 void animate_line(int x0, int y0, int x1, int y1)
@@ -191,7 +192,9 @@ TTTGame::TTTGame()
 
 void TTTGame::render()
 {
-    currentPlayer = (moves % 2 == 0) ? X_PLAYER : O_PLAYER;
+    display.clearDisplay();
+
+    char playerToPlace = (moves % 2 == 0) ? X_PLAYER : O_PLAYER;
 
     cursorX = currentPosX;
     cursorY = currentPosY;
@@ -200,13 +203,14 @@ void TTTGame::render()
     {
         if (board[currentPosY][currentPosX] == ' ')
         {
-            board[currentPosY][currentPosX] = currentPlayer;
+            board[currentPosY][currentPosX] = playerToPlace;
             ++moves;
         }
         choose_pos = false;
     }
 
-    display.clearDisplay();
+    currentPlayer = (moves % 2 == 0) ? X_PLAYER : O_PLAYER;
+
     draw_game_screen();
 
     Player winner = check_winner();
@@ -216,6 +220,7 @@ void TTTGame::render()
         display.display();
         std::this_thread::sleep_for(2s);
         reset_game();
+        render();
         return;
     }
 

@@ -30,6 +30,12 @@ public:
     virtual ~Scene()                               = default;
     virtual void        render()                   = 0;
     virtual SceneResult handle_input(uint32_t key) = 0;
+    virtual int         frame_ms()
+    {
+        // If -1, then the tb_peek_event will be blocking
+        // else it run every ms
+        return -1;
+    }
     Result<>            begin()
     {
         if (m_has_begun)
