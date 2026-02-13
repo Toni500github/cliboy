@@ -27,8 +27,8 @@ endif
 
 NAME		 = cliboy
 TARGET		?= $(NAME)
-OLDVERSION	 = 0.0.1
-VERSION    	 = 0.0.2-beta
+OLDVERSION	 = 0.0.2-beta
+VERSION    	 = 0.0.2-beta2
 SRC	 	 = $(wildcard src/*.cpp src/*/*.cpp)
 OBJ	 	 = $(SRC:.cpp=.o)
 LDFLAGS   	+= -L$(BUILDDIR)
@@ -54,6 +54,5 @@ distclean:
 
 updatever:
 	sed -i "s#$(OLDVERSION)#$(VERSION)#g" $(wildcard .github/workflows/*.yml) compile_flags.txt
-	sed -i "s#Project-Id-Version: $(NAME) $(OLDVERSION)#Project-Id-Version: $(NAME) $(VERSION)#g" po/*
 
 .PHONY: $(TARGET) updatever distclean clean all

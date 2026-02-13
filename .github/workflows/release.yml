@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update && sudo apt-get purge firefox -y
-          sudo apt-get install -y build-essential pkg-config make libnotcurses++-dev
+          sudo apt-get install -y build-essential pkg-config make
 
       - name: Build project
         run: |
@@ -67,14 +67,13 @@ jobs:
       - name: Install dependencies
         run: |
           brew update
-          brew install pkg-config make notcurses
+          brew install pkg-config make
 
       #- name: Setup SSH session
       #  uses: mxschmitt/action-tmate@v3
 
       - name: Build project
         run: |
-          brew ls --verbose notcurses
           make all DEBUG=0
 
       - name: Make Release
@@ -111,7 +110,6 @@ jobs:
             patch
             base-devel
             mingw-w64-x86_64-toolchain
-            mingw-w64-x86_64-notcurses
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-make
 
