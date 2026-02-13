@@ -1,7 +1,7 @@
 # cliboy
 
 ## Dependencies
-install `notcurses` (libnotcurses-dev) in order to compile/run cliboy
+NONE
 
 ## Building
 just run
@@ -14,4 +14,4 @@ $ ./build/release/cliboy
 
 ## Usage
 It's a simple terminal program where you can play games using button inputs (like joysticks) instead of relaying on user parsing input.
-You can change the movements and key inputs in the settings.
+It's suggested to resize the window to be big enough for the best experience
