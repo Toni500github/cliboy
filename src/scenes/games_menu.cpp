@@ -19,7 +19,7 @@ void GamesMenuScene::render()
         if (i == m_selected_game)
         {
             display.setTextColor(TB_WHITE | TB_BOLD);
-            //display.setTextBgColor(TB_BLACK);
+            // display.setTextBgColor(TB_BLACK);
             display.centerText(y, "> {} <", game_items[i]);
             display.resetColors();
         }
@@ -38,7 +38,7 @@ SceneResult GamesMenuScene::handle_input(uint32_t key)
 {
     switch (key)
     {
-        case 27:   return Scenes::MainMenu;
+        case 27: return Scenes::MainMenu;
 
         case TB_KEY_ARROW_UP:   m_selected_game = (m_selected_game - 1 + GAME_COUNT) % GAME_COUNT; break;
         case TB_KEY_ARROW_DOWN: m_selected_game = (m_selected_game + 1) % GAME_COUNT; break;

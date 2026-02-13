@@ -261,8 +261,7 @@ SceneResult TTTGame::handle_input(uint32_t key)
             break;
 
         case TB_KEY_ENTER:
-        case '\n':
-            choose_pos = true; break;
+        case '\n':         choose_pos = true; break;
     }
 
     return ScenesGame::TicTacToe;

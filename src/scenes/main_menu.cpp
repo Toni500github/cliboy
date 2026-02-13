@@ -22,7 +22,7 @@ void MainMenuScene::render()
         if (i == m_selected_item)
         {
             display.setTextColor(TB_WHITE | TB_BOLD);
-            //display.setTextBgColor(TB_BLACK);
+            // display.setTextBgColor(TB_BLACK);
             display.centerText(y, "> {} <", menu_items[i]);
             display.resetColors();
         }

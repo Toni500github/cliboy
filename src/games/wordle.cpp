@@ -1,4 +1,5 @@
 #include "games/wordle.hpp"
+
 #include <algorithm>
 #include <array>
 #include <cctype>
@@ -6,12 +7,13 @@
 #include <random>
 #include <string>
 #include <vector>
+
 #include "terminal_display.hpp"
 
-static std::string buf;
-static std::string guess;
+static std::string              buf;
+static std::string              guess;
 static std::vector<std::string> words;
-static bool selected{};
+static bool                     selected{};
 
 enum class TileState
 {
@@ -23,11 +25,11 @@ enum class TileState
 
 struct Tile
 {
-    char ch;
-    TileState     state;
+    char      ch;
+    TileState state;
 };
 
-using RowStates = std::array<TileState, 5>;
+using RowStates    = std::array<TileState, 5>;
 using WordleStates = std::array<std::array<Tile, 5>, 6>;
 
 static RowStates get_states(const std::string& str)
@@ -63,11 +65,9 @@ static uintattr_t fg_for(TileState s)
     {
         case TileState::Present:
         case TileState::Empty:
-        case TileState::Correct:
-            return TB_BLACK | TB_BOLD;
+        case TileState::Correct: return TB_BLACK | TB_BOLD;
 
-        case TileState::Absent:
-            return TB_WHITE | TB_BOLD;
+        case TileState::Absent: return TB_WHITE | TB_BOLD;
     }
 }
 
@@ -84,18 +84,18 @@ static void draw_wordle_grid(const WordleStates& grid)
     display.clearDisplay();
 
     const uint32_t block = U'█';
-    const int cols = 5;
-    const int rows = 6;
+    const int      cols  = 5;
+    const int      rows  = 6;
 
-    const int cell_w   = 5;  // width in characters
-    const int cell_h   = 3;  // height in characters
-    const int gap_x    = 1;
-    const int gap_y    = 1;
+    const int cell_w = 5;  // width in characters
+    const int cell_h = 3;  // height in characters
+    const int gap_x  = 1;
+    const int gap_y  = 1;
 
     const int grid_w = cols * cell_w + (cols - 1) * gap_x;
     const int grid_h = rows * cell_h + (rows - 1) * gap_y;
 
-    const int start_x = (display.getWidth()  - grid_w) / 2;
+    const int start_x = (display.getWidth() - grid_w) / 2;
     const int start_y = (display.getHeight() - grid_h) / 2;
 
     for (int r = 0; r < rows; ++r)
@@ -143,8 +143,8 @@ Result<> WordleGame::on_begin()
     while (std::getline(f, word))
         words.push_back(word);
 
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
+    static std::random_device              rd;
+    static std::mt19937                    gen(rd());
     static std::uniform_int_distribution<> dist(1, words.size());
 
     guess = str_toupper(words[dist(gen)]);
@@ -155,7 +155,7 @@ Result<> WordleGame::on_begin()
 void WordleGame::render()
 {
     static WordleStates grid{};
-    static int row{};
+    static int          row{};
 
     if (!selected)
     {
@@ -188,7 +188,7 @@ void WordleGame::render()
     for (int r = row; r < 6; ++r)
         if (grid[r].empty())
             for (int c = 0; c < 5; ++c)
-                grid[r][c] = Tile{' ', TileState::Empty};
+                grid[r][c] = Tile{ ' ', TileState::Empty };
 
     draw_wordle_grid(grid);
 }
