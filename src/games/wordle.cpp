@@ -65,6 +65,7 @@ static uintattr_t bg_for(TileState s)
         case TileState::Absent:  return TB_BLACK;
         case TileState::Empty:   return TB_WHITE;
     }
+    return TB_DEFAULT;  // silence -Wreturn-type
 }
 
 static uintattr_t fg_for(TileState s)
@@ -77,6 +78,7 @@ static uintattr_t fg_for(TileState s)
 
         case TileState::Absent: return TB_WHITE | TB_BOLD;
     }
+    return TB_DEFAULT;  // silence -Wreturn-type
 }
 
 static bool is_valid(const std::string& word)

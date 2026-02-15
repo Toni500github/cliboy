@@ -171,8 +171,9 @@ void reset_game()
         for (uint8_t col = 0; col < 3; ++col)
             board[row][col] = ' ';
 
-    choose_pos = moves = currentPosY = currentPosX = oldPosY = oldPosX = 0;
-    currentPlayer                                                      = X_PLAYER;
+    moves = currentPosY = currentPosX = oldPosY = oldPosX = 0;
+    choose_pos                                            = false;
+    currentPlayer                                         = X_PLAYER;
 }
 
 TTTGame::TTTGame()

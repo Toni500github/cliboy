@@ -2334,7 +2334,6 @@ static int bytebuf_flush(struct bytebuf *b, int fd);
 static int bytebuf_reserve(struct bytebuf *b, size_t sz);
 static int bytebuf_free(struct bytebuf *b);
 static int tb_iswprint_ex(uint32_t ch, int *width);
-static int tb_cluster_width(uint32_t *ch, size_t nch);
 
 int tb_init(void) {
     return tb_init_file("/dev/tty");
@@ -4251,6 +4250,7 @@ int tb_wcwidth(uint32_t ch) {
     return w;
 }
 
+#if 0
 static int tb_cluster_width(uint32_t *ch, size_t nch) {
     int wmax = -1;
     int vs15 = 0, vs16 = 0, ri = 0, zwj = 0;
@@ -4272,6 +4272,7 @@ static int tb_cluster_width(uint32_t *ch, size_t nch) {
     }
     return wmax;
 }
+#endif
 
 static int tb_iswprint_ex(uint32_t ch, int *w) {
 #ifdef TB_OPT_LIBC_WCHAR

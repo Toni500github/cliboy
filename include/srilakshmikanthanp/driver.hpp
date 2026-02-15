@@ -8,14 +8,9 @@
 #define SRILAKSHMIKANTHANP_LIBFIGLET_DRIVER_HPP
 
 #include "abstract.hpp"
-#include "types.hpp"
 
 #include <algorithm>
 #include <ostream>
-#include <string>
-#include <map>
-#include <iomanip>
-#include <regex>
 #include <vector>
 #include <memory>
 #include <fstream>
@@ -128,8 +123,6 @@ namespace srilakshmikanthanp
       {
         // Attributes for Transform
         std::vector<fig_char_type> fig_chs;
-        const auto hard_blank = this->font->get_hard_blank();
-        const auto height = this->font->get_height();
 
         // Transform to fig char
         std::transform(

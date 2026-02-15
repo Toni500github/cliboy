@@ -11,7 +11,6 @@
 #include "functions.hpp"
 #include "types.hpp"
 
-#include <algorithm>
 #include <ostream>
 #include <string>
 #include <map>
@@ -210,7 +209,7 @@ namespace srilakshmikanthanp
           string_type line;
 
           // read lines
-          for (auto i = 0; i < n && std::getline(is, line); ++i)
+          for (size_type i = 0; i < n && std::getline(is, line); ++i)
           {
             lines.push_back(line);
           }

@@ -11,12 +11,7 @@
 
 #include <algorithm>
 #include <ostream>
-#include <string>
-#include <map>
-#include <iomanip>
-#include <regex>
 #include <vector>
-#include <memory>
 #include <fstream>
 #include <sstream>
 

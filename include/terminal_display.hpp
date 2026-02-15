@@ -11,11 +11,14 @@
 #include "srilakshmikanthanp/libfiglet.hpp"
 
 #define TB_OPT_ATTR_W 32
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #ifdef _WIN32
 #  include "termbox2_win.h"
 #else
 #  include "termbox2.h"
 #endif
+#pragma GCC diagnostic pop
 
 #include "util.hpp"
 
