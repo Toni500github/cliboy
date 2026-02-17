@@ -9,6 +9,7 @@
 #include <thread>
 #include <vector>
 
+#include "settings.hpp"
 #include "terminal_display.hpp"
 
 static std::string                     buf;
@@ -36,7 +37,6 @@ struct Tile
     TileState state = TileState::Empty;
 };
 
-using namespace std::chrono_literals;
 using RowStates    = std::array<TileState, 5>;
 using WordleStates = std::array<std::array<Tile, 5>, 6>;
 
@@ -162,19 +162,15 @@ static void draw_not_valid(const std::string& word)
     display.display();
 }
 
-static void draw_lost()
+static void draw_end_game(bool won)
 {
-    display.setTextColor(TB_RED);
-    display.setFont(FigletType::FullWidth, "starwars");
-    display.centerText(display.getHeight() / 2, "You Lost");
-    display.display();
-}
+    display.setTextColor(won ? TB_GREEN : TB_RED);
+    display.setFont(FigletType::FullWidth, "Big");
+    display.centerText(display.getHeight() / 2.5, won ? "You Win!" : "You Lost");
 
-static void draw_win()
-{
-    display.setTextColor(TB_GREEN);
-    display.setFont(FigletType::FullWidth, "starwars");
-    display.centerText(display.getHeight() / 2, "You Win");
+    display.setTextColor(TB_WHITE);
+    display.resetFont();
+    display.centerText(display.getHeight() / 1.8, "Guess: {}", guess);
     display.display();
 }
 
@@ -190,9 +186,9 @@ static void reset(WordleStates& grid, int& row)
 
 Result<> WordleGame::on_begin()
 {
-    std::ifstream f("./assets/valid-wordle-words.txt");
-    if (f.bad())
-        return Err("Failed to open ./assets/valid-wordle-words.txt");
+    std::ifstream f(settings.game_wordle.wordle_txt_path);
+    if (!f)
+        return Err("Failed to open wordle list: " + settings.game_wordle.wordle_txt_path);
 
     std::string word;
     while (std::getline(f, word))
@@ -246,10 +242,10 @@ void WordleGame::render()
         if (correct)
         {
             draw_wordle_grid(grid);
-            std::this_thread::sleep_for(800ms);
+            sleep_for(duration<float>(settings.game_wordle.delay_show_final_grid));
             display.clearDisplay();
-            draw_win();
-            std::this_thread::sleep_for(1s);
+            draw_end_game(true);
+            sleep_for(duration<float>(settings.game_wordle.delay_show_endgame));
             reset(grid, row);
             display.clearDisplay();
         }
@@ -258,10 +254,10 @@ void WordleGame::render()
     if (row == 6 && !correct)
     {
         draw_wordle_grid(grid);
-        std::this_thread::sleep_for(800ms);
+        sleep_for(duration<float>(settings.game_wordle.delay_show_final_grid));
         display.clearDisplay();
-        draw_lost();
-        std::this_thread::sleep_for(1s);
+        draw_end_game(false);
+        sleep_for(duration<float>(settings.game_wordle.delay_show_endgame));
         reset(grid, row);
         display.clearDisplay();
     }
@@ -281,12 +277,12 @@ void WordleGame::render()
 SceneResult WordleGame::handle_input(uint32_t key)
 {
     if (key == 27)
-        return Scenes::Games;
+        return Scenes::GamesMenu;
     else if (buf.size() == 5 && (key == TB_KEY_ENTER || key == '\n'))
         selected = true;
     else if (buf.size() < 5 && isalpha(key))
         buf.push_back(toupper(key));
-    else if (!buf.empty() && (key == TB_KEY_BACKSPACE || key == TB_KEY_BACKSPACE2 || key == 8))
+    else if (!buf.empty() && (key == TB_KEY_BACKSPACE || key == TB_KEY_BACKSPACE2))
         buf.pop_back();
 
     return ScenesGame::Wordle;

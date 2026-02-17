@@ -41,3 +41,6 @@
 *.app
 .cache
 ulpm.json
+figlets.txt
+figlet.cpp
+assets/*.png

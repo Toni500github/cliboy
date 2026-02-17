@@ -58,7 +58,6 @@ void TerminalDisplay::clearDisplay()
 {
     updateDims();
     resetColors();
-    resetFont();
     tb_clear();
     m_cursor_x = 0;
     m_cursor_y = 0;

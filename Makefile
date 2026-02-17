@@ -31,14 +31,13 @@ OLDVERSION	 = 0.0.2-beta
 VERSION    	 = 0.0.2-beta2
 SRC	 	 = $(wildcard src/*.cpp src/*/*.cpp)
 OBJ	 	 = $(SRC:.cpp=.o)
-LDFLAGS   	+= -L$(BUILDDIR)
 CXXFLAGS        += $(LTO_FLAGS) -fvisibility-inlines-hidden -fvisibility=hidden -Iinclude -std=$(CXXSTD) $(VARS) -DVERSION=\"$(VERSION)\"
 
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
 	mkdir -p $(BUILDDIR)
-	$(CXX) -o $(BUILDDIR)/$(TARGET) $(OBJ) $(LDFLAGS) $(LDLIBS)
+	$(CXX) -o $(BUILDDIR)/$(TARGET) $(OBJ)
 
 dist: $(TARGET)
 	zip -j $(NAME)-v$(VERSION).zip LICENSE README.md $(BUILDDIR)/$(TARGET)

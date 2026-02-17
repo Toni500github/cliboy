@@ -23,15 +23,18 @@
  *
  */
 
+#include <cstdlib>
 #include <iostream>
 
 #include "games/rockpaperscissors.hpp"
 #include "games/tictactoe.hpp"
 #include "games/wordle.hpp"
 #include "scenes.hpp"
+#include "settings.hpp"
 #include "terminal_display.hpp"
 
 TerminalDisplay display;
+Settings        settings;
 
 template <class... Ts>
 struct overloaded : Ts...
@@ -46,6 +49,7 @@ int game_loop()
     MainMenuScene  main_menu;
     GamesMenuScene games_menu;
     CreditsScene   credits;
+    SettingsScene  settings_menu;
     TTTGame        game_ttt;
     RpsGame        game_rps;
     WordleGame     game_wordle;
@@ -62,12 +66,11 @@ int game_loop()
             [&](Scenes s) {
                 switch (s)
                 {
-                    case Scenes::MainMenu: active_scene = &main_menu; break;
-                    case Scenes::Games:    active_scene = &games_menu; break;
-                    case Scenes::Credits:  active_scene = &credits; break;
-
-                    case Scenes::Exit:
-                    default:               running = false; break;
+                    case Scenes::MainMenu:     active_scene = &main_menu; break;
+                    case Scenes::GamesMenu:    active_scene = &games_menu; break;
+                    case Scenes::Credits:      active_scene = &credits; break;
+                    case Scenes::SettingsMenu: active_scene = &settings_menu; break;
+                    default:                   running = false; break;
                 }
             },
             [&](ScenesGame s) {
@@ -107,10 +110,16 @@ int game_loop()
     return 0;
 }
 
+void exit()
+{
+    tb_shutdown();
+}
+
 int main()
 {
     if (!display.begin())
         return 1;
 
+    std::atexit(exit);
     return game_loop();
 }

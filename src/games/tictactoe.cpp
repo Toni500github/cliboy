@@ -2,9 +2,8 @@
 
 #include <thread>
 
+#include "settings.hpp"
 #include "terminal_display.hpp"
-
-using namespace std::chrono_literals;
 
 // I'm not singing for your XO... I'm singing cuz it's oveeeerrrrr
 enum Player
@@ -108,7 +107,7 @@ void animate_line(int x0, int y0, int x1, int y1)
         display.setTextBgColor(TB_WHITE);
         display.drawLine(x0, y0, xi, yi, ' ');
         display.display();
-        std::this_thread::sleep_for(50ms);
+        sleep_for(duration<float>(settings.game_ttt.delay_strike_anim));
     }
     display.resetColors();
 }
@@ -219,7 +218,7 @@ void TTTGame::render()
     {
         draw_winner(winner);
         display.display();
-        std::this_thread::sleep_for(2s);
+        sleep_for(duration<float>(settings.game_ttt.delay_show_endgame));
         reset_game();
         render();
         return;
@@ -232,7 +231,7 @@ void TTTGame::render()
         display.centerText(display.getHeight() / 2, "Board Full");
         display.resetFont();
         display.display();
-        std::this_thread::sleep_for(2s);
+        sleep_for(duration<float>(settings.game_ttt.delay_show_endgame));
         reset_game();
         return;
     }
@@ -244,7 +243,7 @@ SceneResult TTTGame::handle_input(uint32_t key)
 {
     switch (key)
     {
-        case 27: return Scenes::Games;
+        case 27: return Scenes::GamesMenu;
 
         case TB_KEY_ARROW_DOWN:
             if (currentPosY < 2)

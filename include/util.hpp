@@ -3,8 +3,13 @@
 
 #include <sstream>
 #include <string>
+#include <thread>
 #include <variant>
 #include <vector>
+
+using namespace std::chrono;
+using namespace std::this_thread;
+using namespace std::chrono_literals;
 
 // Get string literal length
 constexpr std::size_t operator""_len(const char*, std::size_t ln) noexcept

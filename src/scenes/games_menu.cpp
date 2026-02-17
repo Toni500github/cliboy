@@ -53,5 +53,5 @@ SceneResult GamesMenuScene::handle_input(uint32_t key)
             }
     }
 
-    return Scenes::Games;
+    return Scenes::GamesMenu;
 }

@@ -11,7 +11,7 @@ void MainMenuScene::render()
     display.centerText(5, "CliBoy");
     display.resetFont();
 
-    const char* menu_items[] = { "Games", "Credits" };
+    const char* menu_items[] = { "Games", "Settings", "Credits" };
     int         start_y      = rows / 2 - 2;
 
     display.setFont(FigletType::FullWidth, "Small Slant");
@@ -49,11 +49,12 @@ SceneResult MainMenuScene::handle_input(uint32_t key)
 
         case TB_KEY_ENTER:
         case '\n':
-            if (m_selected_item == 0)
-                return Scenes::Games;
-            else if (m_selected_item == 1)
-                return Scenes::Credits;
-            break;
+            switch (m_selected_item)
+            {
+                case 0: return Scenes::GamesMenu;
+                case 1: return Scenes::SettingsMenu;
+                case 2: return Scenes::Credits;
+            }
     }
 
     return Scenes::MainMenu;

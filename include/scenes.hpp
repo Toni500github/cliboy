@@ -7,14 +7,14 @@
 
 enum class Scenes
 {
-    kNone,
     MainMenu,
-    Games,
+    GamesMenu,
     Credits,
+    SettingsMenu,
     Exit,
 };
 
-enum class ScenesGame : uint8_t
+enum class ScenesGame
 {
     RockPaperScissors,
     TicTacToe,
@@ -36,7 +36,7 @@ public:
         // else it run every ms
         return -1;
     }
-    Result<>            begin()
+    Result<> begin()
     {
         if (m_has_begun)
             return Ok();
@@ -69,7 +69,7 @@ public:
 
 private:
     int                  m_selected_item = 0;
-    static constexpr int MENU_ITEM_COUNT = 2;
+    static constexpr int MENU_ITEM_COUNT = 3;
 };
 
 class GamesMenuScene : public Scene
@@ -81,4 +81,16 @@ public:
 private:
     int                  m_selected_game = 0;
     static constexpr int GAME_COUNT      = static_cast<int>(ScenesGame::COUNT);
+};
+
+class SettingsScene : public Scene
+{
+public:
+    void        render() override;
+    SceneResult handle_input(uint32_t key) override;
+
+private:
+    size_t      m_selected_item = 0;
+    bool        m_editing       = false;
+    std::string m_edit_buffer;
 };

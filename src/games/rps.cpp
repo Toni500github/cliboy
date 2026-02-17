@@ -1,12 +1,10 @@
 #include <cstdint>
 #include <cstdlib>
-#include <thread>
 
 #include "games/rockpaperscissors.hpp"
 #include "scenes.hpp"
+#include "settings.hpp"
 #include "terminal_display.hpp"
-
-using namespace std::chrono_literals;
 
 enum Winner
 {
@@ -35,7 +33,7 @@ static void print_count_down(uint8_t n)
     sprintf(str, "%hu", n);
     display.centerText(display.getHeight() / 2, str);
     display.display();
-    std::this_thread::sleep_for(850ms);
+    sleep_for(duration<float>(settings.game_rps.delay_countdown));
 }
 
 static std::string get_move_ascii(Moves whos_move)
@@ -158,7 +156,7 @@ void RpsGame::render()
 
     display.display();
 
-    std::this_thread::sleep_for(2s);
+    sleep_for(duration<float>(settings.game_rps.delay_show_winner));
 
     display.clearDisplay();
     print_player_move(NONE);
@@ -169,7 +167,7 @@ SceneResult RpsGame::handle_input(uint32_t key)
 {
     switch (key)
     {
-        case 27: return Scenes::Games;
+        case 27: return Scenes::GamesMenu;
 
         case 'r': player_move = ROCK; break;
         case 'p': player_move = PAPER; break;
