@@ -27,8 +27,8 @@ endif
 
 NAME		 = cliboy
 TARGET		?= $(NAME)
-OLDVERSION	 = 0.0.2-beta
-VERSION    	 = 0.0.2-beta2
+OLDVERSION	 = 0.0.2-beta2
+VERSION    	 = 0.1.0
 SRC	 	 = $(wildcard src/*.cpp src/*/*.cpp)
 OBJ	 	 = $(SRC:.cpp=.o)
 CXXFLAGS        += $(LTO_FLAGS) -fvisibility-inlines-hidden -fvisibility=hidden -Iinclude -std=$(CXXSTD) $(VARS) -DVERSION=\"$(VERSION)\"

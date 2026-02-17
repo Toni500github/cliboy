@@ -124,7 +124,7 @@ jobs:
           mkdir -p build-zip/
           mv ./build/release/cliboy.exe assets/ ./build-zip/
           cd ./build-zip/
-          ldd ./cliboy.exe | awk '{print $3}' | xargs -i cp {} ./
+          ldd ./cliboy.exe | grep -i mingw | awk '{print $3}' | xargs -i cp {} ./
           zip -r cli-boy.zip *
           ls -al
 

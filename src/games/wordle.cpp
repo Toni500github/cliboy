@@ -223,31 +223,32 @@ void WordleGame::render()
         {
             selected     = false;
             invalid_word = buf;
-            return;
         }
-
-        invalid_word.clear();
-
-        const RowStates& states = get_states(buf);
-        for (int c = 0; c < 5; ++c)
+        else
         {
-            grid[row][c].ch    = buf[c];
-            grid[row][c].state = states[c];
-        }
-        row++;
-        selected = false;
-        buf.clear();
+            invalid_word.clear();
 
-        correct = is_correct(states);
-        if (correct)
-        {
-            draw_wordle_grid(grid);
-            sleep_for(duration<float>(settings.game_wordle.delay_show_final_grid));
-            display.clearDisplay();
-            draw_end_game(true);
-            sleep_for(duration<float>(settings.game_wordle.delay_show_endgame));
-            reset(grid, row);
-            display.clearDisplay();
+            const RowStates& states = get_states(buf);
+            for (int c = 0; c < 5; ++c)
+            {
+                grid[row][c].ch    = buf[c];
+                grid[row][c].state = states[c];
+            }
+            row++;
+            selected = false;
+            buf.clear();
+
+            correct = is_correct(states);
+            if (correct)
+            {
+                draw_wordle_grid(grid);
+                sleep_for(duration<float>(settings.game_wordle.delay_show_final_grid));
+                display.clearDisplay();
+                draw_end_game(true);
+                sleep_for(duration<float>(settings.game_wordle.delay_show_endgame));
+                reset(grid, row);
+                display.clearDisplay();
+            }
         }
     }
 
