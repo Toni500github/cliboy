@@ -101,8 +101,6 @@ static void print_player_move(Moves player_move)
     display.centerText(display.getHeight() / 2.5, "Your move:");
     display.setFont(FigletType::FullWidth, "Ogre");
     display.centerText(display.getCursorY() + 2, "{}", get_move_ascii(player_move));
-    display.resetFont();
-    display.centerText(display.getHeight() * 0.9, "Rock: r | Paper: p | Scissors: s | Play: ENTER | Exit: ESC");
 
     display.display();
 }

@@ -21,8 +21,6 @@ void CreditsScene::render()
     for (size_t i = 0; i < sizeof(credits) / sizeof(credits[0]); i++)
         display.centerText(start_y + i, credits[i]);
 
-    display.centerText(rows - 2, "ESC: Back");
-
     display.display();
 }
 

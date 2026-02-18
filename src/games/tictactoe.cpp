@@ -36,7 +36,7 @@ static bool is_board_full()
     return true;
 }
 
-void draw_piece(int row, int col, char piece)
+static void draw_piece(int row, int col, char piece)
 {
     int x = BOARD_OFFSET_X + col * CELL_SIZE + CELL_SIZE / 4;
     int y = BOARD_OFFSET_Y + row * CELL_SIZE + CELL_SIZE / 4;
@@ -59,7 +59,7 @@ void draw_piece(int row, int col, char piece)
     display.resetColors();
 }
 
-void draw_game_screen()
+static void draw_game_screen()
 {
     display.setTextBgColor(TB_WHITE);
 
@@ -92,11 +92,10 @@ void draw_game_screen()
     display.print("{}", currentPlayer);
     display.resetFont();
 
-    display.centerText(display.getHeight() * 0.9, "Arrow: Navigation | Place: ENTER | Exit: ESC");
     display.display();
 }
 
-void animate_line(int x0, int y0, int x1, int y1)
+static void animate_line(int x0, int y0, int x1, int y1)
 {
     const int steps = 16;  // smoothness
     for (int i = 1; i <= steps; ++i)
@@ -112,7 +111,7 @@ void animate_line(int x0, int y0, int x1, int y1)
     display.resetColors();
 }
 
-Player check_winner()
+static Player check_winner()
 {
     // check rows
     for (uint8_t row = 0; row < 3; ++row)
@@ -160,7 +159,7 @@ void draw_winner(Player winner)
     display.display();
 }
 
-void reset_game()
+static void reset_game()
 {
     display.clearDisplay();
     display.resetColors();
@@ -175,8 +174,10 @@ void reset_game()
     currentPlayer                                         = X_PLAYER;
 }
 
-TTTGame::TTTGame()
+void TTTGame::render()
 {
+    display.clearDisplay();
+
     // board size should be about 2/3 of the smaller dimension
     BOARD_SIZE = (std::min(display.getWidth(), display.getHeight()) * 2) / 3;
 
@@ -188,11 +189,6 @@ TTTGame::TTTGame()
     // center the board
     BOARD_OFFSET_X = (display.getWidth() - BOARD_SIZE) / 2;
     BOARD_OFFSET_Y = (display.getHeight() - BOARD_SIZE) / 3;  // slightly higher than center
-}
-
-void TTTGame::render()
-{
-    display.clearDisplay();
 
     char playerToPlace = (moves % 2 == 0) ? X_PLAYER : O_PLAYER;
 
@@ -226,6 +222,7 @@ void TTTGame::render()
 
     if (is_board_full())
     {
+        sleep_for(500ms);
         display.clearDisplay();
         display.setFont(FigletType::Kerning, "starwars");
         display.centerText(display.getHeight() / 2, "Board Full");
@@ -233,6 +230,7 @@ void TTTGame::render()
         display.display();
         sleep_for(duration<float>(settings.game_ttt.delay_show_endgame));
         reset_game();
+        render();
         return;
     }
 

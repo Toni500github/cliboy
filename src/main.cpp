@@ -96,7 +96,7 @@ int game_loop()
             return 1;
         }
 
-        active_scene->render();
+        active_scene->render_all();
 
         tb_event ev;
         tb_peek_event(&ev, active_scene->frame_ms());

@@ -160,7 +160,6 @@ void SettingsScene::render()
     display.clearDisplay();
 
     const int cols = display.getWidth();
-    const int rows = display.getHeight();
 
     // Title
     display.setFont(FigletType::FullWidth, "Small Slant");
@@ -212,9 +211,9 @@ void SettingsScene::render()
     }
 
     if (m_editing)
-        display.centerText(rows - 2, "Type to edit | Backspace: Delete | Enter: Confirm | ESC: Cancel");
+        set_footer("Type to edit | Backspace: Delete | Enter: Confirm | ESC: Cancel");
     else
-        display.centerText(rows - 2, "↑↓: Navigate | ← →: Adjust | Enter: Edit string | ESC: Back");
+        set_footer("↑↓: Navigate | ← →: Adjust | Enter: Edit string | ESC: Back");
 
     display.display();
 }

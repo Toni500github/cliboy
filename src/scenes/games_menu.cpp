@@ -29,8 +29,6 @@ void GamesMenuScene::render()
         }
     }
 
-    display.centerText(rows - 2, "Arrow Keys: Navigate | Enter: Play | ESC: Back");
-
     display.display();
 }
 

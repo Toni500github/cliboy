@@ -33,8 +33,6 @@ void MainMenuScene::render()
     }
     display.resetFont();
 
-    display.centerText(rows - 2, "Arrow Keys: Navigate | Enter: Select | ESC: Exit");
-
     display.display();
 }
 

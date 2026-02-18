@@ -5,7 +5,11 @@
 class TTTGame : public Scene
 {
 public:
-    TTTGame();
+    Result<> on_begin() override
+    {
+        set_footer("Arrow: Navigation | Enter: Place | ESC: Back");
+        return Ok();
+    }
     void        render() override;
     SceneResult handle_input(uint32_t key) override;
 };

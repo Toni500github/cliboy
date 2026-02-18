@@ -198,6 +198,7 @@ Result<> WordleGame::on_begin()
 
     guess = str_toupper(words[dist(gen)]);
 
+    set_footer("Try to guess the word. Each letter color:\nBlack: Absent | Yellow: Present | Green: Correct");
     return Ok();
 }
 
@@ -271,6 +272,9 @@ void WordleGame::render()
 
     draw_wordle_grid(grid);
     draw_not_valid(invalid_word);
+
+    display.resetFont();
+    display.resetColors();
 
     display.display();
 }

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <variant>
 
+#include "terminal_display.hpp"
 #include "util.hpp"
 
 enum class Scenes
@@ -36,6 +37,7 @@ public:
         // else it run every ms
         return -1;
     }
+
     Result<> begin()
     {
         if (m_has_begun)
@@ -45,18 +47,53 @@ public:
         return on_begin();
     }
 
+    void render_all()
+    {
+        display.clearDisplay();
+        display.resetFont();
+
+        render();  // derived class implements this
+
+        render_footer();
+
+        display.display();
+    }
+
     bool has_begun() const { return m_has_begun; }
+
+    virtual void render_footer()
+    {
+        if (m_footer_text.empty())
+            return;
+
+        display.resetFont();
+        display.centerText(display.getHeight() - m_footer_padding, m_footer_text);
+        display.display();
+    }
 
 protected:
     virtual Result<> on_begin() { return Ok(); }
+    void             set_footer(std::string text, int padding = 3)
+    {
+        m_footer_text    = std::move(text);
+        m_footer_padding = padding;
+    }
 
 private:
-    bool m_has_begun = false;
+    bool        m_has_begun      = false;
+    int         m_footer_padding = 3;
+    std::string m_footer_text;
 };
 
 class CreditsScene : public Scene
 {
 public:
+    Result<> on_begin() override
+    {
+        set_footer("ESC: Back");
+        return Ok();
+    }
+
     void        render() override;
     SceneResult handle_input(uint32_t key) override;
 };
@@ -64,6 +101,12 @@ public:
 class MainMenuScene : public Scene
 {
 public:
+    Result<> on_begin() override
+    {
+        set_footer("Arrow Keys: Navigate | Enter: Select | ESC: Exit");
+        return Ok();
+    }
+
     void        render() override;
     SceneResult handle_input(uint32_t key) override;
 
@@ -75,6 +118,12 @@ private:
 class GamesMenuScene : public Scene
 {
 public:
+    Result<> on_begin() override
+    {
+        set_footer("Arrow Keys: Navigate | Enter: Play | ESC: Back");
+        return Ok();
+    }
+
     void        render() override;
     SceneResult handle_input(uint32_t key) override;
 
