@@ -5,14 +5,12 @@ void MainMenuScene::render()
 {
     display.clearDisplay();
 
-    int rows = display.getHeight();
-
     display.setFont(FigletType::FullWidth, "Big Money-nw");
-    display.centerText(5, "CliBoy");
+    display.centerText(display.pctY(0.10f), "CliBoy");
     display.resetFont();
 
     const char* menu_items[] = { "Games", "Settings", "Credits" };
-    int         start_y      = rows / 2 - 2;
+    int         start_y      = display.pctY(0.50f) - (MENU_ITEM_COUNT - 1) * 5 / 2;
 
     display.setFont(FigletType::FullWidth, "Small Slant");
     for (int i = 0; i < MENU_ITEM_COUNT; i++)

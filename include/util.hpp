@@ -17,17 +17,24 @@ constexpr std::size_t operator""_len(const char*, std::size_t ln) noexcept
     return ln;
 }
 
+// shotout to the better c++ server for these helper structs
 template <typename T = bool>
 struct Ok
 {
+    using value_type = T;
     T value;
 };
+template <typename T>
+Ok(T) -> Ok<T>;
 
 template <typename E = std::string>
 struct Err
 {
+    using value_type = E;
     E value;
 };
+template <typename E>
+Err(E) -> Err<E>;
 
 template <typename T = Ok<>, typename E = Err<>>
 class Result
@@ -54,7 +61,38 @@ public:
     E&       error() { return std::get<E>(value); }
     const T& get() const { return std::get<T>(value); }
     const E& error() const { return std::get<E>(value); }
+
+    template <typename U = T, typename = typename U::value_type>
+    typename U::value_type& get_v()
+    {
+        return std::get<T>(value).value;
+    }
+
+    template <typename U = T, typename = typename U::value_type>
+    const typename U::value_type& get_v() const
+    {
+        return std::get<T>(value).value;
+    }
+
+    template <typename U = E, typename = typename U::value_type>
+    typename U::value_type& error_v()
+    {
+        return std::get<E>(value).value;
+    }
+
+    template <typename U = E, typename = typename U::value_type>
+    const typename U::value_type& error_v() const
+    {
+        return std::get<E>(value).value;
+    }
 };
+
+template <typename E>
+constexpr size_t idx(E e) noexcept
+{
+    static_assert(std::is_enum_v<E>);
+    return static_cast<size_t>(e);
+}
 
 /* Spilt a string into a vector using a delimeter
  * @param text The string to split

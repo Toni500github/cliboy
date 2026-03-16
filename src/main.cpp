@@ -88,11 +88,12 @@ int game_loop()
         if (!running || !active_scene)
             break;
 
+        // Run only once
         const Result<>& r = active_scene->begin();
         if (!r.ok())
         {
             tb_shutdown();
-            std::cerr << "Error while initing a scene/game: " << r.error().value << std::endl;
+            std::cerr << "Error while initing a scene/game: " << r.error_v() << std::endl;
             return 1;
         }
 

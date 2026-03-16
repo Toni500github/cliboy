@@ -64,16 +64,24 @@ static void draw_game_screen()
     display.setTextBgColor(TB_WHITE);
 
     // Vertical lines
-    display.drawLine(BOARD_OFFSET_X + CELL_SIZE, BOARD_OFFSET_Y, BOARD_OFFSET_X + CELL_SIZE,
-                     BOARD_OFFSET_Y + BOARD_SIZE, ' ');
-    display.drawLine(BOARD_OFFSET_X + 2 * CELL_SIZE, BOARD_OFFSET_Y, BOARD_OFFSET_X + 2 * CELL_SIZE,
-                     BOARD_OFFSET_Y + BOARD_SIZE, ' ');
+    display.drawLine(
+        BOARD_OFFSET_X + CELL_SIZE, BOARD_OFFSET_Y, BOARD_OFFSET_X + CELL_SIZE, BOARD_OFFSET_Y + BOARD_SIZE, ' ');
+
+    display.drawLine(BOARD_OFFSET_X + 2 * CELL_SIZE,
+                     BOARD_OFFSET_Y,
+                     BOARD_OFFSET_X + 2 * CELL_SIZE,
+                     BOARD_OFFSET_Y + BOARD_SIZE,
+                     ' ');
 
     // Horizontal lines
-    display.drawLine(BOARD_OFFSET_X, BOARD_OFFSET_Y + CELL_SIZE, BOARD_OFFSET_X + BOARD_SIZE,
-                     BOARD_OFFSET_Y + CELL_SIZE, ' ');
-    display.drawLine(BOARD_OFFSET_X, BOARD_OFFSET_Y + 2 * CELL_SIZE, BOARD_OFFSET_X + BOARD_SIZE,
-                     BOARD_OFFSET_Y + 2 * CELL_SIZE, ' ');
+    display.drawLine(
+        BOARD_OFFSET_X, BOARD_OFFSET_Y + CELL_SIZE, BOARD_OFFSET_X + BOARD_SIZE, BOARD_OFFSET_Y + CELL_SIZE, ' ');
+
+    display.drawLine(BOARD_OFFSET_X,
+                     BOARD_OFFSET_Y + 2 * CELL_SIZE,
+                     BOARD_OFFSET_X + BOARD_SIZE,
+                     BOARD_OFFSET_Y + 2 * CELL_SIZE,
+                     ' ');
 
     display.resetColors();
 
@@ -82,12 +90,13 @@ static void draw_game_screen()
             if (board[r][c] != ' ')
                 draw_piece(r, c, board[r][c]);
 
-    int cx = BOARD_OFFSET_X + cursorX * CELL_SIZE + CELL_SIZE / 2;
-    int cy = BOARD_OFFSET_Y + cursorY * CELL_SIZE + CELL_SIZE / 2;
+    const int cx = BOARD_OFFSET_X + cursorX * CELL_SIZE + CELL_SIZE / 2;
+    const int cy = BOARD_OFFSET_Y + cursorY * CELL_SIZE + CELL_SIZE / 2;
     display.setCursor(cx, cy);
     display.print("*");
 
-    display.setCursor(15, 10);
+    // Place player indicator in the left margin, vertically centered on the board
+    display.setCursor(BOARD_OFFSET_X / 4, BOARD_OFFSET_Y + BOARD_SIZE / 2 - 2);
     display.setFont(FigletType::FullWidth, "Soft");
     display.print("{}", currentPlayer);
     display.resetFont();
@@ -117,7 +126,9 @@ static Player check_winner()
     for (uint8_t row = 0; row < 3; ++row)
         if (board[row][0] != ' ' && board[row][0] == board[row][1] && board[row][1] == board[row][2])
         {
-            animate_line(BOARD_OFFSET_X, BOARD_OFFSET_Y + row * CELL_SIZE + CELL_SIZE / 2, BOARD_OFFSET_X + BOARD_SIZE,
+            animate_line(BOARD_OFFSET_X,
+                         BOARD_OFFSET_Y + row * CELL_SIZE + CELL_SIZE / 2,
+                         BOARD_OFFSET_X + BOARD_SIZE,
                          BOARD_OFFSET_Y + row * CELL_SIZE + CELL_SIZE / 2);
             return (Player)board[row][0];
         }
@@ -126,8 +137,10 @@ static Player check_winner()
     for (uint8_t col = 0; col < 3; ++col)
         if (board[0][col] != ' ' && board[0][col] == board[1][col] && board[1][col] == board[2][col])
         {
-            animate_line(BOARD_OFFSET_X + col * CELL_SIZE + CELL_SIZE / 2, BOARD_OFFSET_Y,
-                         BOARD_OFFSET_X + col * CELL_SIZE + CELL_SIZE / 2, BOARD_OFFSET_Y + BOARD_SIZE);
+            animate_line(BOARD_OFFSET_X + col * CELL_SIZE + CELL_SIZE / 2,
+                         BOARD_OFFSET_Y,
+                         BOARD_OFFSET_X + col * CELL_SIZE + CELL_SIZE / 2,
+                         BOARD_OFFSET_Y + BOARD_SIZE);
             return (Player)board[0][col];
         }
 
@@ -151,7 +164,7 @@ void draw_winner(Player winner)
 {
     display.clearDisplay();
     display.setFont(FigletType::FullWidth, "starwars");
-    display.centerText(5, "Player");
+    display.centerText(display.pctY(0.10f), "Player");
     display.centerText(display.getCursorY() + 4, winner == X_PLAYER ? "X" : "O");
     display.centerText(display.getCursorY() + 3, "Wins");
 
@@ -178,19 +191,17 @@ void TTTGame::render()
 {
     display.clearDisplay();
 
-    // board size should be about 2/3 of the smaller dimension
-    BOARD_SIZE = (std::min(display.getWidth(), display.getHeight()) * 2) / 3;
+    {
+        // board size = 67% of the smaller terminal dimension, snapped to a multiple of 3
+        BOARD_SIZE = (std::min(display.pctX(0.67f), display.pctY(0.67f)) / 3) * 3;
+        CELL_SIZE  = BOARD_SIZE / 3;
 
-    // ensure BOARD_SIZE is divisible by 3 for clean cell boundaries
-    BOARD_SIZE = (BOARD_SIZE / 3) * 3;
+        // center horizontally, sit at 33% from top vertically
+        BOARD_OFFSET_X = (display.getWidth() - BOARD_SIZE) / 2;
+        BOARD_OFFSET_Y = display.pctY(0.1f);
+    }
 
-    CELL_SIZE = BOARD_SIZE / 3;
-
-    // center the board
-    BOARD_OFFSET_X = (display.getWidth() - BOARD_SIZE) / 2;
-    BOARD_OFFSET_Y = (display.getHeight() - BOARD_SIZE) / 3;  // slightly higher than center
-
-    char playerToPlace = (moves % 2 == 0) ? X_PLAYER : O_PLAYER;
+    const char playerToPlace = (moves % 2 == 0) ? X_PLAYER : O_PLAYER;
 
     cursorX = currentPosX;
     cursorY = currentPosY;
@@ -209,7 +220,7 @@ void TTTGame::render()
 
     draw_game_screen();
 
-    Player winner = check_winner();
+    const Player winner = check_winner();
     if (winner != NO_PLAYER)
     {
         draw_winner(winner);
@@ -225,7 +236,7 @@ void TTTGame::render()
         sleep_for(500ms);
         display.clearDisplay();
         display.setFont(FigletType::Kerning, "starwars");
-        display.centerText(display.getHeight() / 2, "Board Full");
+        display.centerText(display.pctY(0.50f), "Board Full");
         display.resetFont();
         display.display();
         sleep_for(duration<float>(settings.game_ttt.delay_show_endgame));

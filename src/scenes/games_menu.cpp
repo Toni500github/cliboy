@@ -5,12 +5,10 @@ void GamesMenuScene::render()
 {
     display.clearDisplay();
 
-    int rows = display.getHeight();
-
-    display.centerText(5, "Select a Game");
+    display.centerText(display.pctY(0.10f), "Select a Game");
 
     const char* game_items[] = { "Rock Paper Scissors", "Tic Tac Toe", "Wordle" };
-    int         start_y      = rows / 2 - 2;
+    int         start_y      = display.pctY(0.50f) - (GAME_COUNT - 1);
 
     for (int i = 0; i < GAME_COUNT; i++)
     {

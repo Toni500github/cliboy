@@ -77,6 +77,10 @@ AlignConsecutiveShortCaseStatements:
   AlignCaseColons: false
 
 AllowShortCaseLabelsOnASingleLine: true
+BinPackArguments: false
+BinPackParameters: OnePerLine
+ExperimentalAutoDetectBinPacking: false
+AllowAllParametersOfDeclarationOnNextLine: false
 IndentPPDirectives: AfterHash
 PPIndentWidth: 2
 FixNamespaceComments: true

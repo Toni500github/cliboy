@@ -31,7 +31,7 @@ static void print_count_down(uint8_t n)
     display.clearDisplay();
     char str[16];
     sprintf(str, "%hu", n);
-    display.centerText(display.getHeight() / 2, str);
+    display.centerText(display.pctY(0.50f), str);
     display.display();
     sleep_for(duration<float>(settings.game_rps.delay_countdown));
 }
@@ -67,15 +67,15 @@ static void print_winner(Winner winner)
     {
         case CPU:
             display.setTextColor(TB_RED);
-            display.centerText(display.getHeight() / 10, "CPU Wins");
+            display.centerText(display.pctY(0.10f), "CPU Wins");
             break;
         case DRAW:
             display.setTextColor(TB_MAGENTA);
-            display.centerText(display.getHeight() / 10, "Draw");
+            display.centerText(display.pctY(0.10f), "Draw");
             break;
         case PLAYER:
             display.setTextColor(TB_GREEN);
-            display.centerText(display.getHeight() / 10, "You Won");
+            display.centerText(display.pctY(0.10f), "You Won");
             break;
     }
 
@@ -98,7 +98,7 @@ static Winner calculate_winner(Moves cpu_move, Moves player_move)
 static void print_player_move(Moves player_move)
 {
     display.clearDisplay();
-    display.centerText(display.getHeight() / 2.5, "Your move:");
+    display.centerText(display.pctY(0.40f), "Your move:");
     display.setFont(FigletType::FullWidth, "Ogre");
     display.centerText(display.getCursorY() + 2, "{}", get_move_ascii(player_move));
 
@@ -110,13 +110,10 @@ static void print_moves(Moves computer_move, Moves player_move)
     display.clearDisplay();
     display.setFont(FigletType::Smushed, "Doom");
 
-    const int term_width  = display.getWidth();
-    const int term_height = display.getHeight();
-
-    int left_col  = term_width * 0.05;  // 5% from left
-    int right_col = term_width * 0.8;   // 80% from left
-    int header_y  = term_height * 0.4;  // 40% from top
-    int moves_y   = term_height * 0.6;  // 60% from top
+    int left_col  = display.pctX(0.05f);
+    int right_col = display.pctX(0.65f);
+    int header_y  = display.pctY(0.40f);
+    int moves_y   = display.pctY(0.60f);
 
     display.setCursor(left_col + 3, header_y);
     display.print("You");
@@ -127,7 +124,7 @@ static void print_moves(Moves computer_move, Moves player_move)
     display.setCursor(left_col, moves_y);
     display.print("{}", get_move_ascii(player_move));
 
-    display.centerText(moves_y - 8, "VS");
+    display.centerText((header_y + moves_y) / 2, "VS");
 
     display.setCursor(right_col - 8, moves_y);
     display.print("{}", get_move_ascii(computer_move));

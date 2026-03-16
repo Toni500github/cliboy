@@ -117,6 +117,10 @@ public:
     int getCursorX() const { return m_cursor_x; }
     int getCursorY() const { return m_cursor_y; }
 
+    // Return a column/row that is `p` percent (0.0–1.0) across the terminal
+    int pctX(float p) const { return static_cast<int>(m_width * p); }
+    int pctY(float p) const { return static_cast<int>(m_height * p); }
+
 private:
     int        m_width, m_height;
     int        m_cursor_x, m_cursor_y;

@@ -118,8 +118,12 @@ static const std::array<SettingEntry, 8> entries = {{
 }};
 // clang-format on
 
-static void render_value(const SettingEntry& e, bool selected, bool editing, const std::string& edit_buffer, int col,
-                         int row)
+static void render_value(const SettingEntry& e,
+                         bool                selected,
+                         bool                editing,
+                         const std::string&  edit_buffer,
+                         int                 col,
+                         int                 row)
 {
     const std::string val = e.get_value();
 
@@ -159,18 +163,18 @@ void SettingsScene::render()
 {
     display.clearDisplay();
 
-    const int cols = display.getWidth();
-
     // Title
     display.setFont(FigletType::FullWidth, "Small Slant");
-    display.centerText(2, "Settings");
+    display.centerText(display.pctY(0.10f), "Settings");
     display.resetFont();
 
-    // Column layout: labels on left third, values on right third
-    const int col_label = cols / 3;
-    const int col_value = cols * 3.5 / 6;
-    const int start_y   = 10;
-    const int row_step  = 2;
+    // Column layout: labels on left third, values on right ~58%
+    const int col_label = display.pctX(0.33f);
+    const int col_value = display.pctX(0.58f);
+
+    // Start entries below the figlet title
+    const int start_y  = display.pctY(0.25f);
+    const int row_step = 2;
 
     int         render_row   = start_y;
     const char* last_section = nullptr;

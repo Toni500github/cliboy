@@ -5,9 +5,7 @@ void CreditsScene::render()
 {
     display.clearDisplay();
 
-    int rows = display.getHeight();
-
-    display.centerText(2, "Credits");
+    display.centerText(display.pctY(0.10f), "Credits");
 
     const char* credits[] = {
         "CliBoy - Terminal Games Collection",
@@ -17,8 +15,9 @@ void CreditsScene::render()
         "Thank you for playing!",
     };
 
-    int start_y = rows / 2 - 3;
-    for (size_t i = 0; i < sizeof(credits) / sizeof(credits[0]); i++)
+    const int n_credits = static_cast<int>(sizeof(credits) / sizeof(credits[0]));
+    int       start_y   = display.pctY(0.50f) - (n_credits - 1) / 2;
+    for (int i = 0; i < n_credits; i++)
         display.centerText(start_y + i, credits[i]);
 
     display.display();

@@ -155,7 +155,8 @@ static void draw_not_valid(const std::string& word)
         return;
 
     display.resetColors();
-    const int y = (display.getHeight() - 25) / 2.55;
+    // Place warning just above the vertically-centered grid
+    const int y = display.pctY(0.50f) - (6 * 3 + 5 * 1) / 2 - 2;
 
     display.setTextColor(TB_RED | TB_BOLD);
     display.centerText(y, "Invalid word: {}", word);
@@ -166,11 +167,11 @@ static void draw_end_game(bool won)
 {
     display.setTextColor(won ? TB_GREEN : TB_RED);
     display.setFont(FigletType::FullWidth, "Big");
-    display.centerText(display.getHeight() / 2.5, won ? "You Win!" : "You Lost");
+    display.centerText(display.pctY(0.40f), won ? "You Win!" : "You Lost");
 
     display.setTextColor(TB_WHITE);
     display.resetFont();
-    display.centerText(display.getHeight() / 1.8, "Guess: {}", guess);
+    display.centerText(display.pctY(0.56f), "Guess: {}", guess);
     display.display();
 }
 
