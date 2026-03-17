@@ -25,7 +25,7 @@ void CreditsScene::render()
 
 SceneResult CreditsScene::handle_input(uint32_t key)
 {
-    if (key == 27)
+    if (key == TB_KEY_ESC)
         return Scenes::MainMenu;
     return Scenes::Credits;
 }

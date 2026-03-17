@@ -240,13 +240,13 @@ SceneResult SettingsScene::handle_input(uint32_t key)
     {
         switch (key)
         {
-            case 27:
+            case TB_KEY_ESC:
                 m_editing = false;
                 m_edit_buffer.clear();
                 break;
 
             case TB_KEY_ENTER:
-            case '\n':  // confirm
+            case '\n':
                 entries[m_selected_item].set_value(m_edit_buffer);
                 m_editing = false;
                 m_edit_buffer.clear();
@@ -272,10 +272,9 @@ SceneResult SettingsScene::handle_input(uint32_t key)
     // Normal navigation mode
     switch (key)
     {
-        case 27: return Scenes::MainMenu;
+        case TB_KEY_ESC: return Scenes::MainMenu;
 
-        case TB_KEY_ARROW_UP: m_selected_item = (m_selected_item - 1 + count) % count; break;
-
+        case TB_KEY_ARROW_UP:   m_selected_item = (m_selected_item - 1 + count) % count; break;
         case TB_KEY_ARROW_DOWN: m_selected_item = (m_selected_item + 1) % count; break;
 
         case TB_KEY_ARROW_LEFT:

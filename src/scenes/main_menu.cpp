@@ -38,7 +38,7 @@ SceneResult MainMenuScene::handle_input(uint32_t key)
 {
     switch (key)
     {
-        case 27: return Scenes::Exit;
+        case TB_KEY_ESC: return Scenes::Exit;
 
         case TB_KEY_ARROW_UP:   m_selected_item = (m_selected_item - 1 + MENU_ITEM_COUNT) % MENU_ITEM_COUNT; break;
         case TB_KEY_ARROW_DOWN: m_selected_item = (m_selected_item + 1) % MENU_ITEM_COUNT; break;

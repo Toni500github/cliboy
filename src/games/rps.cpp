@@ -162,7 +162,7 @@ SceneResult RpsGame::handle_input(uint32_t key)
 {
     switch (key)
     {
-        case 27: return Scenes::GamesMenu;
+        case TB_KEY_ESC: return Scenes::GamesMenu;
 
         case 'r': player_move = ROCK; break;
         case 'p': player_move = PAPER; break;

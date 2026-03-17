@@ -34,7 +34,7 @@ SceneResult GamesMenuScene::handle_input(uint32_t key)
 {
     switch (key)
     {
-        case 27: return Scenes::MainMenu;
+        case TB_KEY_ESC: return Scenes::MainMenu;
 
         case TB_KEY_ARROW_UP:   m_selected_game = (m_selected_game - 1 + GAME_COUNT) % GAME_COUNT; break;
         case TB_KEY_ARROW_DOWN: m_selected_game = (m_selected_game + 1) % GAME_COUNT; break;

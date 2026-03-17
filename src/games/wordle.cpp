@@ -282,7 +282,7 @@ void WordleGame::render()
 
 SceneResult WordleGame::handle_input(uint32_t key)
 {
-    if (key == 27)
+    if (key == TB_KEY_ESC)
         return Scenes::GamesMenu;
     else if (buf.size() == 5 && (key == TB_KEY_ENTER || key == '\n'))
         selected = true;
