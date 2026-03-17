@@ -1,13 +1,14 @@
 #define TB_IMPL 1
-#include "terminal_display.hpp"
-
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
+#include <filesystem>
 #include <format>
 #include <iostream>
 
+#include "settings.hpp"
 #include "srilakshmikanthanp/libfiglet.hpp"
+#include "terminal_display.hpp"
 using namespace srilakshmikanthanp::libfiglet;
 
 static void enable_ansi_colors()
@@ -93,10 +94,21 @@ void TerminalDisplay::setCursor(const int x, const int y)
 
 void TerminalDisplay::setFont(FigletType figlet_type, const std::string_view font)
 {
-    m_flf_font = flf_font::make_shared(std::format("./assets/fonts/{}.flf", font));
+    const std::string& path = std::format("{}/fonts/{}.flf", settings.general.assets_path, font);
+    if (!std::filesystem::exists(path))
+    {
+        clearDisplay();
+        tb_shutdown();
+        std::cerr << "Failed: assets path '" << path << "' doesn't exist";
+        std::exit(-1);
+    }
+
+    m_flf_font = flf_font::make_shared(path);
     if (!m_flf_font)
     {
-        std::cerr << "Failed to open font '" << font << "' at path ./assets/fonts";
+        clearDisplay();
+        tb_shutdown();
+        std::cerr << "Failed to open font '" << font << "' at path '" << path << "'";
         std::exit(-1);
     }
 

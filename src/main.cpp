@@ -99,6 +99,7 @@ int game_loop()
 
         active_scene->render_all();
 
+        // Acquire key input
         tb_event ev;
         tb_peek_event(&ev, active_scene->frame_ms());
 

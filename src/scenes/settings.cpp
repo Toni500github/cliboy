@@ -46,6 +46,16 @@ static void clamp_float(float& v, float step, float lo, float hi, int dir)
 
 // clang-format off
 static const std::array<SettingEntry, 8> entries = {{
+    // General
+    {
+        "General settings",
+        "Path to assets",
+        SettingKind::String,
+        [] { return settings.general.assets_path; },
+        nullptr,
+        [](const std::string& s) { settings.general.assets_path = s; }
+    },
+
     // Rock Paper Scissors
     {
         "Rock Paper Scissors",
@@ -63,14 +73,14 @@ static const std::array<SettingEntry, 8> entries = {{
         [](int d) { clamp_float(settings.game_rps.delay_show_winner, 0.1f, 0.1f, 10.0f, d); },
         nullptr
     },
-    {
+    /*{
         nullptr,
         "Toggle bool - Dummy",
         SettingKind::Bool,
         [] { return fmt_bool(settings.dummy); },
         [](int) { settings.dummy = !settings.dummy; },
         nullptr
-    },
+    },*/
 
     // Tic-Tac-Toe
     {
@@ -250,6 +260,7 @@ SceneResult SettingsScene::handle_input(uint32_t key)
 
             default:
                 // printable ASCII only
+                // for some reason isalpha() doesn't do its job here
                 if (key >= 0x20 && key <= 0x7E)
                     m_edit_buffer += static_cast<char>(key);
                 break;

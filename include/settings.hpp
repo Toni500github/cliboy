@@ -2,9 +2,13 @@
 
 #include <string>
 
-class Settings
+struct Settings
 {
-public:
+    struct general_settings_t
+    {
+        std::string assets_path = "./assets";
+    } general;
+
     struct game_rps_t
     {
         float delay_countdown   = 0.8;
@@ -23,8 +27,6 @@ public:
         float       delay_show_endgame    = 3.0;
         std::string wordle_txt_path       = "./assets/valid-wordle-words.txt";
     } game_wordle;
-
-    bool dummy = false;
 };
 
 extern Settings settings;

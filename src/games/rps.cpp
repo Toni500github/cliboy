@@ -111,7 +111,7 @@ static void print_moves(Moves computer_move, Moves player_move)
     display.setFont(FigletType::Smushed, "Doom");
 
     int left_col  = display.pctX(0.05f);
-    int right_col = display.pctX(0.65f);
+    int right_col = display.pctX(0.85f);
     int header_y  = display.pctY(0.40f);
     int moves_y   = display.pctY(0.60f);
 
