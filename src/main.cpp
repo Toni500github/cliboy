@@ -26,9 +26,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "games/rockpaperscissors.hpp"
-#include "games/tictactoe.hpp"
-#include "games/wordle.hpp"
+#include "games/all.hpp"
 #include "scenes.hpp"
 #include "settings.hpp"
 #include "terminal_display.hpp"
@@ -53,6 +51,7 @@ int game_loop()
     TTTGame        game_ttt;
     RpsGame        game_rps;
     WordleGame     game_wordle;
+    SnakeGame      game_snake;
 
     SceneResult current_scene = Scenes::MainMenu;
     bool        running       = true;
@@ -79,6 +78,7 @@ int game_loop()
                     case ScenesGame::RockPaperScissors: active_scene = &game_rps; break;
                     case ScenesGame::TicTacToe:         active_scene = &game_ttt; break;
                     case ScenesGame::Wordle:            active_scene = &game_wordle; break;
+                    case ScenesGame::Snake:             active_scene = &game_snake; break;
                     default:                            running = false; break;
                 }
             }

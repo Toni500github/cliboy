@@ -15,7 +15,7 @@ void CreditsScene::render()
         "Thank you for playing!",
     };
 
-    const int n_credits = static_cast<int>(sizeof(credits) / sizeof(credits[0]));
+    const int n_credits = ARRAY_SIZE(credits);
     int       start_y   = display.pctY(0.50f) - (n_credits - 1) / 2;
     for (int i = 0; i < n_credits; i++)
         display.centerText(start_y + i, credits[i]);

@@ -88,8 +88,8 @@ void TerminalDisplay::setTextBgColor(const uintattr_t hex)
 
 void TerminalDisplay::setCursor(const int x, const int y)
 {
-    m_cursor_x = std::clamp<int>(x, 0, m_width - 1);
-    m_cursor_y = std::clamp<int>(y, 0, m_height - 1);
+    m_cursor_x = std::clamp(x, 0, m_width - 1);
+    m_cursor_y = std::clamp(y, 0, m_height - 1);
 }
 
 void TerminalDisplay::setFont(FigletType figlet_type, const std::string_view font)

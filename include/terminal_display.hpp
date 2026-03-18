@@ -20,7 +20,16 @@
 #endif
 #pragma GCC diagnostic pop
 
+#include "utf8.h"
 #include "util.hpp"
+
+// utf8len requires const utf8_int8_t* (aka char8_t* in C++20), but
+// std::string::c_str() returns const char*.  This helper silences the
+// conversion at a single place rather than scattering casts everywhere.
+inline size_t utf8_len(const std::string& s)
+{
+    return utf8len(reinterpret_cast<const utf8_int8_t*>(s.c_str()));
+}
 
 using namespace srilakshmikanthanp::libfiglet;
 
@@ -76,7 +85,7 @@ public:
         {
             tb_print(m_cursor_x, m_cursor_y, m_fg_col, m_bg_col, line.c_str());
             m_cursor_y++;
-            max_width = std::max<int>(max_width, line.size());
+            max_width = std::max<int>(max_width, static_cast<int>(utf8_len(line)));
         }
 
         m_cursor_x += max_width;
@@ -99,12 +108,12 @@ public:
         const std::vector<std::string>& text_lines = split(text, '\n');
         size_t                          max_width  = 0;
         for (const auto& line : text_lines)
-            max_width = std::max(max_width, line.size());
+            max_width = std::max(max_width, utf8_len(line));
 
         int current_y = y;
         for (const auto& line : text_lines)
         {
-            int x = (m_width - static_cast<int>(line.size())) / 2;
+            int x = (m_width - static_cast<int>(utf8_len(line))) / 2;
             x     = std::max(0, x);
 
             tb_print(x, current_y++, m_fg_col, m_bg_col, line.c_str());

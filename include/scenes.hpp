@@ -19,6 +19,7 @@ enum class ScenesGame
 {
     RockPaperScissors,
     TicTacToe,
+    Snake,
     Wordle,
     COUNT,
 };

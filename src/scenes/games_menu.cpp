@@ -7,7 +7,7 @@ void GamesMenuScene::render()
 
     display.centerText(display.pctY(0.10f), "Select a Game");
 
-    const char* game_items[] = { "Rock Paper Scissors", "Tic Tac Toe", "Wordle" };
+    const char* game_items[] = { "Rock Paper Scissors", "Tic Tac Toe", "Snake", "Wordle" };
     int         start_y      = display.pctY(0.50f) - (GAME_COUNT - 1);
 
     for (int i = 0; i < GAME_COUNT; i++)
@@ -45,7 +45,8 @@ SceneResult GamesMenuScene::handle_input(uint32_t key)
             {
                 case 0: return ScenesGame::RockPaperScissors;
                 case 1: return ScenesGame::TicTacToe;
-                case 2: return ScenesGame::Wordle;
+                case 2: return ScenesGame::Snake;
+                case 3: return ScenesGame::Wordle;
             }
     }
 

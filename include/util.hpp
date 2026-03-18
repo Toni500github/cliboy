@@ -17,6 +17,8 @@ constexpr std::size_t operator""_len(const char*, std::size_t ln) noexcept
     return ln;
 }
 
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
+
 // shotout to the better c++ server for these helper structs
 template <typename T = bool>
 struct Ok
