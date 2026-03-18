@@ -1,11 +1,11 @@
-#define TB_IMPL 1
 #include <algorithm>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <filesystem>
 #include <format>
-#include <iostream>
 
+#define TB_IMPL 1
 #include "settings.hpp"
 #include "srilakshmikanthanp/libfiglet.hpp"
 #include "terminal_display.hpp"
@@ -99,7 +99,7 @@ void TerminalDisplay::setFont(FigletType figlet_type, const std::string_view fon
     {
         clearDisplay();
         tb_shutdown();
-        std::cerr << "Failed: assets path '" << path << "' doesn't exist";
+        fprintf(stderr, "assets path '%s' doesn't exist\n", path.c_str());
         std::exit(-1);
     }
 
@@ -108,7 +108,7 @@ void TerminalDisplay::setFont(FigletType figlet_type, const std::string_view fon
     {
         clearDisplay();
         tb_shutdown();
-        std::cerr << "Failed to open font '" << font << "' at path '" << path << "'";
+        fprintf(stderr, "Failed to open font '%s' at path '%s'\n", font.data(), path.c_str());
         std::exit(-1);
     }
 

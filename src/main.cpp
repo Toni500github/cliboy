@@ -23,8 +23,8 @@
  *
  */
 
+#include <cstdio>
 #include <cstdlib>
-#include <iostream>
 
 #include "games/rockpaperscissors.hpp"
 #include "games/tictactoe.hpp"
@@ -93,7 +93,7 @@ int game_loop()
         if (!r.ok())
         {
             tb_shutdown();
-            std::cerr << "Error while initing a scene/game: " << r.error_v() << std::endl;
+            fprintf(stderr, "Error while initing a scene/game: %s\n", r.error_v().c_str());
             return 1;
         }
 
