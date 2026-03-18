@@ -8,8 +8,20 @@
 #define TB_IMPL 1
 #include "settings.hpp"
 #include "srilakshmikanthanp/libfiglet.hpp"
+#include "utf8.h"
 #include "terminal_display.hpp"
 using namespace srilakshmikanthanp::libfiglet;
+
+// utf8len requires const utf8_int8_t* (aka char8_t* in C++20), but
+// std::string::c_str() returns const char*.  This helper silences the
+// conversion at a single place rather than scattering casts everywhere.
+size_t utf8_len(const std::string& s)
+{
+    if (settings.general.utf8)
+        return utf8len(reinterpret_cast<const utf8_int8_t*>(s.c_str()));
+    else
+        return s.size();
+}
 
 static void enable_ansi_colors()
 {
