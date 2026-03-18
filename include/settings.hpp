@@ -7,6 +7,7 @@ struct Settings
     struct general_settings_t
     {
         std::string assets_path = "./assets";
+        bool        utf8        = true;
     } general;
 
     struct game_rps_t
@@ -20,6 +21,12 @@ struct Settings
         float delay_show_endgame = 2.0;
         float delay_strike_anim  = 0.05;
     } game_ttt;
+
+    struct game_snake_t
+    {
+        float snake_min_speed = 40.0f;   // fastest tick floor (ms)
+        float snake_max_speed = 80.0f;   // starting tick speed (ms)
+    } game_snake;
 
     struct game_wordle_t
     {

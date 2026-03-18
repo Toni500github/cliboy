@@ -24,9 +24,8 @@ static constexpr uintattr_t COL_GAMEOVER   = TB_RED | TB_BOLD;
 static constexpr uintattr_t COL_PAUSED     = TB_YELLOW | TB_BOLD;
 
 // Speed
-static int SPEED_MIN_MS    = 50;  // fastest possible tick
-static int SPEED_STEP_MS   = 10;  // reduction per milestone
-static int SPEED_MILESTONE = 5;   // pts between speed-ups
+static constexpr int SPEED_STEP_MS   = 10;  // ms reduction per milestone
+static constexpr int SPEED_MILESTONE = 5;   // points between speed-ups
 
 Result<> SnakeGame::on_begin()
 {
@@ -46,6 +45,31 @@ Result<> SnakeGame::on_begin()
 
 void SnakeGame::render()
 {
+    if (settings.general.utf8)
+    {
+        CH_SNAKE_HEAD = U'◉';
+        CH_SNAKE_BODY = U'█';
+        CH_FOOD       = U'●';
+        CH_BORDER_H   = U'═';
+        CH_BORDER_V   = U'║';
+        CH_CORNER_TL  = U'╔';
+        CH_CORNER_TR  = U'╗';
+        CH_CORNER_BL  = U'╚';
+        CH_CORNER_BR  = U'╝';
+    }
+    else
+    {
+        CH_SNAKE_HEAD = 'O';
+        CH_SNAKE_BODY = '#';
+        CH_FOOD       = '*';
+        CH_BORDER_H   = '-';
+        CH_BORDER_V   = '|';
+        CH_CORNER_TL  = '+';
+        CH_CORNER_TR  = '+';
+        CH_CORNER_BL  = '+';
+        CH_CORNER_BR  = '+';
+    }
+
     update();
 
     draw_border();
@@ -125,7 +149,7 @@ void SnakeGame::init_game()
     m_paused   = false;
     m_dir      = SnakeDir::Right;
     m_next_dir = SnakeDir::Right;
-    m_speed_ms = 130;
+    m_speed_ms = static_cast<int>(settings.game_snake.snake_max_speed);
 
     // Start with a 3-segment snake centred in the playfield
     const int sx = m_board_x + m_board_w / 2;
@@ -180,12 +204,12 @@ void SnakeGame::update()
 
     if (head == m_food)
     {
-        // Grow and don't pop_back() the tail
+        // Grow (don't pop tail)
         m_score++;
 
         // Speed up every SPEED_MILESTONE points
         if (m_score % SPEED_MILESTONE == 0)
-            m_speed_ms = std::max(SPEED_MIN_MS, m_speed_ms - SPEED_STEP_MS);
+            m_speed_ms = std::max(static_cast<int>(settings.game_snake.snake_min_speed), m_speed_ms - SPEED_STEP_MS);
 
         spawn_food();
     }
@@ -197,15 +221,50 @@ void SnakeGame::update()
 
 void SnakeGame::spawn_food()
 {
-    // Random cell strictly inside the border
-    std::uniform_int_distribution<int> rx(m_board_x + 1, m_board_x + m_board_w - 2);
-    std::uniform_int_distribution<int> ry(m_board_y + 1, m_board_y + m_board_h - 2);
+    const int inner_x0 = m_board_x + 1;
+    const int inner_y0 = m_board_y + 1;
+    const int inner_x1 = m_board_x + m_board_w - 2;
+    const int inner_y1 = m_board_y + m_board_h - 2;
 
+    // Bias food toward the snake head so it never spawns unreachably far away.
+    // Radius scales with the board: ~25% of the smaller dimension, min 4 cells.
+    const int radius = std::max(4, std::min(inner_x1 - inner_x0, inner_y1 - inner_y0) / 4);
+
+    const Point& head = m_snake.front();
+
+    const int wx0 = std::max(inner_x0, head.x - radius);
+    const int wx1 = std::min(inner_x1, head.x + radius);
+    const int wy0 = std::max(inner_y0, head.y - radius);
+    const int wy1 = std::min(inner_y1, head.y + radius);
+
+    std::uniform_int_distribution<int> rx_near(wx0, wx1);
+    std::uniform_int_distribution<int> ry_near(wy0, wy1);
+    std::uniform_int_distribution<int> rx_full(inner_x0, inner_x1);
+    std::uniform_int_distribution<int> ry_full(inner_y0, inner_y1);
+
+    auto occupied = [&](const Point& p) {
+        return std::any_of(m_snake.begin(), m_snake.end(), [&](const Point& s) { return s == p; });
+    };
+
+    // Try up to 16 times inside the proximity window first
+    for (int i = 0; i < 16; ++i)
+    {
+        Point candidate{ rx_near(m_rng), ry_near(m_rng) };
+        if (!occupied(candidate))
+        {
+            m_food = candidate;
+            return;
+        }
+    }
+
+    // Fallback: full-board random (snake may be very long)
+    Point candidate;
     do
     {
-        m_food.x = rx(m_rng);
-        m_food.y = ry(m_rng);
-    } while (std::any_of(m_snake.begin(), m_snake.end(), [&](const Point& p) { return p == m_food; }));
+        candidate = { rx_full(m_rng), ry_full(m_rng) };
+    } while (occupied(candidate));
+
+    m_food = candidate;
 }
 
 void SnakeGame::draw_border()
@@ -254,11 +313,22 @@ void SnakeGame::draw_game_over()
     const int mid_y = m_board_y + m_board_h / 2;
 
     // clang-format off
-    display.centerText(mid_y - 2, "╔══════════════════╗");
-    display.centerText(mid_y - 1, "║    GAME  OVER    ║");
-    display.centerText(mid_y,     "║  Score:  {:>6}  ║", m_score);
-    display.centerText(mid_y + 1, "║  Length: {:>6}  ║", static_cast<int>(m_snake.size()));
-    display.centerText(mid_y + 2, "╚══════════════════╝");
+    if (settings.general.utf8)
+    {
+        display.centerText(mid_y - 2, "╔══════════════════╗");
+        display.centerText(mid_y - 1, "║    GAME  OVER    ║");
+        display.centerText(mid_y,     "║  Score:  {:>6}  ║", m_score);
+        display.centerText(mid_y + 1, "║  Length: {:>6}  ║", static_cast<int>(m_snake.size()));
+        display.centerText(mid_y + 2, "╚══════════════════╝");
+    }
+    else
+    {
+        display.centerText(mid_y - 2, "+------------------+");
+        display.centerText(mid_y - 1, "|    GAME  OVER    |");
+        display.centerText(mid_y,     "|  Score:  {:>6}  |", m_score);
+        display.centerText(mid_y + 1, "|  Length: {:>6}  |", static_cast<int>(m_snake.size()));
+        display.centerText(mid_y + 2, "+------------------+");
+    }
     // clang-format on
 
     display.setTextColor(TB_WHITE);
@@ -271,8 +341,17 @@ void SnakeGame::draw_paused()
     const int mid_y = m_board_y + m_board_h / 2;
 
     // clang-format off
-    display.centerText(mid_y - 1, "╔════════════╗");
-    display.centerText(mid_y,     "║   PAUSED   ║");
-    display.centerText(mid_y + 1, "╚════════════╝");
+    if (settings.general.utf8)
+    {
+        display.centerText(mid_y - 1, "╔════════════╗");
+        display.centerText(mid_y,     "║   PAUSED   ║");
+        display.centerText(mid_y + 1, "╚════════════╝");
+    }
+    else
+    {
+        display.centerText(mid_y - 1, "+------------+");
+        display.centerText(mid_y,     "|   PAUSED   |");
+        display.centerText(mid_y + 1, "+------------+");
+    }
     // clang-format on
 }

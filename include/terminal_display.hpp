@@ -8,6 +8,7 @@
 #include <string_view>
 #include <vector>
 
+#include "settings.hpp"
 #include "srilakshmikanthanp/libfiglet.hpp"
 
 #define TB_OPT_ATTR_W 32
@@ -28,9 +29,11 @@
 // conversion at a single place rather than scattering casts everywhere.
 inline size_t utf8_len(const std::string& s)
 {
-    return utf8len(reinterpret_cast<const utf8_int8_t*>(s.c_str()));
+    if (settings.general.utf8)
+        return utf8len(reinterpret_cast<const utf8_int8_t*>(s.c_str()));
+    else
+        return s.size();
 }
-
 using namespace srilakshmikanthanp::libfiglet;
 
 enum class FigletType

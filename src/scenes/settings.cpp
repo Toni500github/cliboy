@@ -1,6 +1,5 @@
 #include "settings.hpp"
 
-#include <array>
 #include <format>
 #include <functional>
 #include <string>
@@ -45,10 +44,18 @@ static void clamp_float(float& v, float step, float lo, float hi, int dir)
 }
 
 // clang-format off
-static const std::array<SettingEntry, 8> entries = {{
+static const SettingEntry entries[] = {
     // General
     {
-        "General settings",
+        "General settngs",
+        "Enable UTF-8 gameplay",
+        SettingKind::Bool,
+        [] { return fmt_bool(settings.general.utf8); },
+        [](int) { settings.general.utf8 = !settings.general.utf8; },
+        nullptr
+    },
+    {
+        nullptr,
         "Path to assets",
         SettingKind::String,
         [] { return settings.general.assets_path; },
@@ -73,14 +80,6 @@ static const std::array<SettingEntry, 8> entries = {{
         [](int d) { clamp_float(settings.game_rps.delay_show_winner, 0.1f, 0.1f, 10.0f, d); },
         nullptr
     },
-    /*{
-        nullptr,
-        "Toggle bool - Dummy",
-        SettingKind::Bool,
-        [] { return fmt_bool(settings.dummy); },
-        [](int) { settings.dummy = !settings.dummy; },
-        nullptr
-    },*/
 
     // Tic-Tac-Toe
     {
@@ -97,6 +96,24 @@ static const std::array<SettingEntry, 8> entries = {{
         SettingKind::Float,
         [] { return fmt_float(settings.game_ttt.delay_strike_anim); },
         [](int d) { clamp_float(settings.game_ttt.delay_strike_anim, 0.01f, 0.01f, 1.0f, d); },
+        nullptr
+    },
+
+    // Snake
+    {
+        "Snake",
+        "Minimum speed (ms/tick)",
+        SettingKind::Float,
+        [] { return fmt_float(settings.game_snake.snake_min_speed); },
+        [](int d) { clamp_float(settings.game_snake.snake_min_speed, 5.0f, 5.0f, 500.0f, d); },
+        nullptr
+    },
+    {
+        nullptr,
+        "Maximum speed (ms/tick)",
+        SettingKind::Float,
+        [] { return fmt_float(settings.game_snake.snake_max_speed); },
+        [](int d) { clamp_float(settings.game_snake.snake_max_speed, 5.0f, 5.0f, 500.0f, d); },
         nullptr
     },
 
@@ -125,7 +142,7 @@ static const std::array<SettingEntry, 8> entries = {{
         nullptr,
         [](const std::string& s) { settings.game_wordle.wordle_txt_path = s; }
     },
-}};
+};
 // clang-format on
 
 static void render_value(const SettingEntry& e,
@@ -189,7 +206,7 @@ void SettingsScene::render()
     int         render_row   = start_y;
     const char* last_section = nullptr;
 
-    for (size_t i = 0; i < entries.size(); ++i)
+    for (size_t i = 0; i < ARRAY_SIZE(entries); ++i)
     {
         const SettingEntry& e        = entries[i];
         const bool          selected = (i == m_selected_item);
@@ -234,7 +251,7 @@ void SettingsScene::render()
 
 SceneResult SettingsScene::handle_input(uint32_t key)
 {
-    static const size_t count = entries.size();
+    static const size_t count = ARRAY_SIZE(entries);
 
     if (m_editing)
     {
