@@ -1,9 +1,8 @@
-name: Release Cli-Boy (cross-platform)
+name: Build Cli-Boy (cross-platform, debug)
 
 on:
-  workflow_dispatch:
   push:
-    tags: "*"
+  pull_request:
 
 jobs:
   get-version:
@@ -29,13 +28,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-latest
             arch: x86_64
             artifact-name: cli-boy-linux-x86_64
             package-ext: tar.gz
             content-type: application/gzip
 
-          - os: ubuntu-22.04-arm
+          - os: ubuntu-24.04-arm
             arch: aarch64
             artifact-name: cli-boy-linux-aarch64
             package-ext: tar.gz
@@ -96,18 +95,18 @@ jobs:
       # Build
       - name: Build project (Linux / macOS)
         if: runner.os != 'Windows'
-        run: make all DEBUG=0
+        run: make all DEBUG=1
 
       - name: Build project (Windows)
         if: runner.os == 'Windows'
         shell: msys2 {0}
-        run: make all DEBUG=0
+        run: make all DEBUG=1
 
       # Packaging
       - name: Package (Linux / macOS)
         if: runner.os != 'Windows'
         run: |
-          mv ./build/release/cliboy .
+          mv ./build/debug/cliboy .
           tar -zcf ${{ matrix.artifact-name }}.tar.gz cliboy assets/
 
       - name: Package (Windows)
@@ -115,7 +114,7 @@ jobs:
         shell: msys2 {0}
         run: |
           mkdir -p build-zip/
-          mv ./build/release/cliboy.exe assets/ ./build-zip/
+          mv ./build/debug/cliboy.exe assets/ ./build-zip/
           cd ./build-zip/
           ldd ./cliboy.exe | grep -i mingw | awk '{print $3}' | xargs -i cp {} ./
           zip -r ../${{ matrix.artifact-name }}.zip *
@@ -127,30 +126,3 @@ jobs:
           name: ${{ matrix.artifact-name }}
           if-no-files-found: error
           path: ./${{ matrix.artifact-name }}.${{ matrix.package-ext }}
-
-  release:
-    name: Create GitHub Release & Upload Assets
-    needs: [build, get-version]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts/
-
-      - name: Show artifact tree
-        run: find artifacts/ -type f
-
-      - name: Create release and upload binaries
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.get-version.outputs.version }}
-          name: Cli-Boy ${{ needs.get-version.outputs.version }}
-          draft: false
-          prerelease: false
-          fail_on_unmatched_files: true
-          files: artifacts/**/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
