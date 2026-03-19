@@ -25,19 +25,25 @@ else
         BUILDDIR  := build/release
 endif
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	LDFLAGS += -static-libstdc++ -static-libgcc
+endif
+
 NAME		 = cliboy
 TARGET		?= $(NAME)
 OLDVERSION	 = 0.1.0
 VERSION    	 = 0.1.1
 SRC	 	 = $(wildcard src/*.cpp src/*/*.cpp)
 OBJ	 	 = $(SRC:.cpp=.o)
+LDFLAGS			+=
 CXXFLAGS        += $(LTO_FLAGS) -fvisibility-inlines-hidden -fvisibility=hidden -Iinclude -std=$(CXXSTD) $(VARS) -DVERSION=\"$(VERSION)\"
 
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
 	mkdir -p $(BUILDDIR)
-	$(CXX) -o $(BUILDDIR)/$(TARGET) $(OBJ)
+	$(CXX) -o $(BUILDDIR)/$(TARGET) $(OBJ) $(LDFLAGS) $(LDLIBS)
 
 dist: $(TARGET)
 	zip -j $(NAME)-v$(VERSION).zip LICENSE README.md $(BUILDDIR)/$(TARGET)
