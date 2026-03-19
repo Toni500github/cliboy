@@ -21,7 +21,6 @@
 #endif
 #pragma GCC diagnostic pop
 
-#include "utf8.h"
 #include "util.hpp"
 
 size_t utf8_len(const std::string& s);

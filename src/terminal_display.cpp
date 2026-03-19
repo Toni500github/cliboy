@@ -17,10 +17,7 @@ using namespace srilakshmikanthanp::libfiglet;
 // conversion at a single place rather than scattering casts everywhere.
 size_t utf8_len(const std::string& s)
 {
-    if (settings.general.utf8)
-        return utf8len(reinterpret_cast<const utf8_int8_t*>(s.c_str()));
-    else
-        return s.size();
+    return utf8len(reinterpret_cast<const utf8_int8_t*>(s.c_str()));
 }
 
 static void enable_ansi_colors()
