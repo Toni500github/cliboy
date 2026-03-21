@@ -14,16 +14,35 @@
 RowStates WordleGame::get_states(const std::string& str)
 {
     RowStates states;
+    states.fill(TileState::Absent);
+
+    // Track how many of each letter in the answer are still "available"
+    // to be matched as Present (i.e. not already consumed by a Correct match)
+    int letter_count[26] = {};
+
+    // Pass 1: mark Correct tiles and deduct from available counts
     for (size_t i = 0; i < str.size(); ++i)
     {
-        char c = str[i];
-        if (m_guess[i] == c)
+        if (str[i] == m_guess[i])
             states[i] = TileState::Correct;
-        else if (m_guess.find(c) != std::string::npos)
-            states[i] = TileState::Present;
         else
-            states[i] = TileState::Absent;
+            letter_count[m_guess[i] - 'A']++;  // still available for Present
     }
+
+    // Pass 2: mark Present tiles, consuming available letters
+    for (size_t i = 0; i < str.size(); ++i)
+    {
+        if (states[i] == TileState::Correct)
+            continue;
+
+        int& available = letter_count[str[i] - 'A'];
+        if (available > 0)
+        {
+            states[i] = TileState::Present;
+            available--;
+        }
+    }
+
     return states;
 }
 
