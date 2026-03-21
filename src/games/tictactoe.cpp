@@ -5,21 +5,6 @@
 #include "settings.hpp"
 #include "terminal_display.hpp"
 
-// I'm not singing for your XO... I'm singing cuz it's oveeeerrrrr
-enum Player
-{
-    NO_PLAYER = 0,
-    X_PLAYER  = 'X',
-    O_PLAYER  = 'O',
-};
-
-static char board[3][3]   = { { ' ', ' ', ' ' }, { ' ', ' ', ' ' }, { ' ', ' ', ' ' } };
-static bool choose_pos    = false;
-static char currentPlayer = X_PLAYER;
-static int  currentPosX, oldPosX, cursorX = 0;
-static int  currentPosY, oldPosY, cursorY = 0;
-static int  moves = 0;
-
 // Tic-Tac-Toe board lines
 // These will be calculated dynamically in TTTScene constructor
 static int BOARD_SIZE     = 0;
@@ -27,23 +12,19 @@ static int CELL_SIZE      = 0;
 static int BOARD_OFFSET_X = 0;
 static int BOARD_OFFSET_Y = 0;
 
-static bool is_board_full()
+bool TTTGame::is_board_full()
 {
-    for (int r = 0; r < 3; ++r)
-        for (int c = 0; c < 3; ++c)
-            if (board[r][c] == ' ')
-                return false;
-    return true;
+    return !iterate_board([](char& c, int, int) -> bool { return c == ' '; });
 }
 
-static void draw_piece(int row, int col, char piece)
+void TTTGame::draw_piece(int row, int col, char piece)
 {
     int x = BOARD_OFFSET_X + col * CELL_SIZE + CELL_SIZE / 4;
     int y = BOARD_OFFSET_Y + row * CELL_SIZE + CELL_SIZE / 4;
 
     // draw cursor marker
-    int cx = BOARD_OFFSET_X + cursorX * CELL_SIZE + CELL_SIZE / 2;
-    int cy = BOARD_OFFSET_Y + cursorY * CELL_SIZE + CELL_SIZE / 2;
+    int cx = BOARD_OFFSET_X + m_cursor_x * CELL_SIZE + CELL_SIZE / 2;
+    int cy = BOARD_OFFSET_Y + m_cursor_y * CELL_SIZE + CELL_SIZE / 2;
     display.setCursor(cx, cy);
     display.print("*");
 
@@ -59,7 +40,7 @@ static void draw_piece(int row, int col, char piece)
     display.resetColors();
 }
 
-static void draw_game_screen()
+void TTTGame::draw_game_screen()
 {
     display.setTextBgColor(TB_WHITE);
 
@@ -85,26 +66,26 @@ static void draw_game_screen()
 
     display.resetColors();
 
-    for (int r = 0; r < 3; ++r)
-        for (int c = 0; c < 3; ++c)
-            if (board[r][c] != ' ')
-                draw_piece(r, c, board[r][c]);
+    iterate_board([&](char& c, int r, int col) {
+        if (c != ' ')
+            draw_piece(r, col, c);
+    });
 
-    const int cx = BOARD_OFFSET_X + cursorX * CELL_SIZE + CELL_SIZE / 2;
-    const int cy = BOARD_OFFSET_Y + cursorY * CELL_SIZE + CELL_SIZE / 2;
+    const int cx = BOARD_OFFSET_X + m_cursor_x * CELL_SIZE + CELL_SIZE / 2;
+    const int cy = BOARD_OFFSET_Y + m_cursor_y * CELL_SIZE + CELL_SIZE / 2;
     display.setCursor(cx, cy);
     display.print("*");
 
     // Place player indicator in the left margin, vertically centered on the board
     display.setCursor(BOARD_OFFSET_X / 4, BOARD_OFFSET_Y + BOARD_SIZE / 2 - 2);
     display.setFont(FigletType::FullWidth, "Soft");
-    display.print("{}", currentPlayer);
+    display.print("{}", static_cast<char>(m_current_player));
     display.resetFont();
 
     display.display();
 }
 
-static void animate_line(int x0, int y0, int x1, int y1)
+void TTTGame::animate_line(int x0, int y0, int x1, int y1)
 {
     const int steps = 16;  // smoothness
     for (int i = 1; i <= steps; ++i)
@@ -120,71 +101,73 @@ static void animate_line(int x0, int y0, int x1, int y1)
     display.resetColors();
 }
 
-static Player check_winner()
+Player TTTGame::check_winner()
 {
     // check rows
     for (uint8_t row = 0; row < 3; ++row)
-        if (board[row][0] != ' ' && board[row][0] == board[row][1] && board[row][1] == board[row][2])
+        if (m_board[row][0] != ' ' && m_board[row][0] == m_board[row][1] && m_board[row][1] == m_board[row][2])
         {
             animate_line(BOARD_OFFSET_X,
                          BOARD_OFFSET_Y + row * CELL_SIZE + CELL_SIZE / 2,
                          BOARD_OFFSET_X + BOARD_SIZE,
                          BOARD_OFFSET_Y + row * CELL_SIZE + CELL_SIZE / 2);
-            return (Player)board[row][0];
+            return (Player)m_board[row][0];
         }
 
     // check columns
     for (uint8_t col = 0; col < 3; ++col)
-        if (board[0][col] != ' ' && board[0][col] == board[1][col] && board[1][col] == board[2][col])
+        if (m_board[0][col] != ' ' && m_board[0][col] == m_board[1][col] && m_board[1][col] == m_board[2][col])
         {
             animate_line(BOARD_OFFSET_X + col * CELL_SIZE + CELL_SIZE / 2,
                          BOARD_OFFSET_Y,
                          BOARD_OFFSET_X + col * CELL_SIZE + CELL_SIZE / 2,
                          BOARD_OFFSET_Y + BOARD_SIZE);
-            return (Player)board[0][col];
+            return (Player)m_board[0][col];
         }
 
     // check diagonals
-    if (board[0][0] != ' ' && board[0][0] == board[1][1] && board[1][1] == board[2][2])
+    if (m_board[0][0] != ' ' && m_board[0][0] == m_board[1][1] && m_board[1][1] == m_board[2][2])
     {
         animate_line(BOARD_OFFSET_X, BOARD_OFFSET_Y, BOARD_OFFSET_X + BOARD_SIZE, BOARD_OFFSET_Y + BOARD_SIZE);
-        return (Player)board[0][0];
+        return (Player)m_board[0][0];
     }
 
-    if (board[0][2] != ' ' && board[0][2] == board[1][1] && board[1][1] == board[2][0])
+    if (m_board[0][2] != ' ' && m_board[0][2] == m_board[1][1] && m_board[1][1] == m_board[2][0])
     {
         animate_line(BOARD_OFFSET_X + BOARD_SIZE, BOARD_OFFSET_Y, BOARD_OFFSET_X, BOARD_OFFSET_Y + BOARD_SIZE);
-        return (Player)board[0][2];
+        return (Player)m_board[0][2];
     }
 
-    return NO_PLAYER;
+    return Player::None;
 }
 
-void draw_winner(Player winner)
+void TTTGame::draw_winner(Player winner)
 {
     display.clearDisplay();
     display.setFont(FigletType::FullWidth, "starwars");
     display.centerText(display.pctY(0.10f), "Player");
-    display.centerText(display.getCursorY() + 4, winner == X_PLAYER ? "X" : "O");
+    display.centerText(display.getCursorY() + 4, winner == Player::X ? "X" : "O");
     display.centerText(display.getCursorY() + 3, "Wins");
 
     display.resetFont();
     display.display();
 }
 
-static void reset_game()
+void TTTGame::reset_game()
 {
     display.clearDisplay();
     display.resetColors();
     display.resetFont();
 
-    for (uint8_t row = 0; row < 3; ++row)
-        for (uint8_t col = 0; col < 3; ++col)
-            board[row][col] = ' ';
+    iterate_board([](char& c, int, int) { c = ' '; });
 
-    moves = currentPosY = currentPosX = oldPosY = oldPosX = 0;
-    choose_pos                                            = false;
-    currentPlayer                                         = X_PLAYER;
+    m_moves          = 0;
+    m_cursor_y       = 0;
+    m_cursor_x       = 0;
+    m_old_pos_x      = 0;
+    m_old_pos_y      = 0;
+    m_choose_pos     = false;
+    m_current_player = Player::X;
 }
 
 void TTTGame::render()
@@ -201,27 +184,25 @@ void TTTGame::render()
         BOARD_OFFSET_Y = display.pctY(0.1f);
     }
 
-    const char playerToPlace = (moves % 2 == 0) ? X_PLAYER : O_PLAYER;
+    Player player_to_place = (m_moves % 2 == 0) ? Player::X : Player::O;
 
-    cursorX = currentPosX;
-    cursorY = currentPosY;
-
-    if (choose_pos)
+    if (m_choose_pos)
     {
-        if (board[currentPosY][currentPosX] == ' ')
+        if (m_board[m_cursor_y][m_cursor_x] == ' ')
         {
-            board[currentPosY][currentPosX] = playerToPlace;
-            ++moves;
+            m_board[m_cursor_y][m_cursor_x] = static_cast<char>(player_to_place);
+            m_moves++;
+            player_to_place = (m_moves % 2 == 0) ? Player::X : Player::O;
         }
-        choose_pos = false;
+        m_choose_pos = false;
     }
 
-    currentPlayer = (moves % 2 == 0) ? X_PLAYER : O_PLAYER;
+    m_current_player = player_to_place;
 
     draw_game_screen();
 
     const Player winner = check_winner();
-    if (winner != NO_PLAYER)
+    if (winner != Player::None)
     {
         draw_winner(winner);
         display.display();
@@ -255,27 +236,27 @@ SceneResult TTTGame::handle_input(uint32_t key)
         case TB_KEY_ESC: return Scenes::GamesMenu;
 
         case TB_KEY_ARROW_DOWN:
-            if (currentPosY < 2)
-                currentPosY++;
+            if (m_cursor_y < 2)
+                m_cursor_y++;
             break;
 
         case TB_KEY_ARROW_UP:
-            if (currentPosY > 0)
-                currentPosY--;
+            if (m_cursor_y > 0)
+                m_cursor_y--;
             break;
 
         case TB_KEY_ARROW_RIGHT:
-            if (currentPosX < 2)
-                ++currentPosX;
+            if (m_cursor_x < 2)
+                m_cursor_x++;
             break;
 
         case TB_KEY_ARROW_LEFT:
-            if (currentPosX > 0)
-                --currentPosX;
+            if (m_cursor_x > 0)
+                m_cursor_x--;
             break;
 
         case TB_KEY_ENTER:
-        case '\n':         choose_pos = true; break;
+        case '\n':         m_choose_pos = true; break;
     }
 
     return ScenesGame::TicTacToe;

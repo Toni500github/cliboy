@@ -1,32 +1,49 @@
 #include <cstdint>
-#include <cstdlib>
+#include <random>
 
 #include "games/rockpaperscissors.hpp"
 #include "scenes.hpp"
 #include "settings.hpp"
 #include "terminal_display.hpp"
 
-enum Winner
+std::string RpsGame::get_move_str(Moves move)
 {
-    CPU = 0,
-    DRAW,
-    PLAYER
-};
+    switch (move)
+    {
+        case Moves::Rock:     return "Rock";
+        case Moves::Paper:    return "Paper";
+        case Moves::Scissors: return "Scissors";
+        default:              return "";
+    }
+}
 
-enum Moves
+Moves RpsGame::get_cpu_move()
 {
-    NONE = 10,
-    ROCK,
-    PAPER,
-    SCISSORS,
-    DONE
-};
+    static std::mt19937                rng{ std::random_device{}() };
+    std::uniform_int_distribution<int> dist(0, 2);
+    switch (dist(rng))
+    {
+        case 0:  return Moves::Rock;
+        case 1:  return Moves::Paper;
+        case 2:  return Moves::Scissors;
+        default: return Moves::Rock;
+    }
+}
 
-Moves player_move = NONE;
-bool  selected    = false;
-bool  restart     = false;
+Winner RpsGame::calculate_winner(Moves cpu_move, Moves player_move)
+{
+    if (player_move == cpu_move)
+        return Winner::DRAW;
 
-static void print_count_down(uint8_t n)
+    if ((cpu_move == Moves::Rock && player_move == Moves::Scissors) ||
+        (cpu_move == Moves::Scissors && player_move == Moves::Paper) ||
+        (cpu_move == Moves::Paper && player_move == Moves::Rock))
+        return Winner::CPU;
+
+    return Winner::PLAYER;
+}
+
+void RpsGame::print_countdown(uint8_t n)
 {
     display.clearDisplay();
     char str[16];
@@ -36,76 +53,16 @@ static void print_count_down(uint8_t n)
     sleep_for(duration<float>(settings.game_rps.delay_countdown));
 }
 
-static std::string get_move_ascii(Moves whos_move)
-{
-    switch (whos_move)
-    {
-        case ROCK:     return "Rock";
-        case PAPER:    return "Paper";
-        case SCISSORS: return "Scissors";
-        default:       return "";
-    }
-}
-
-static Moves get_cpu_move()
-{
-    int random = rand() % 3;
-    switch (random)
-    {
-        case 0:  return ROCK;
-        case 1:  return PAPER;
-        case 2:  return SCISSORS;
-        default: return ROCK;
-    }
-}
-
-static void print_winner(Winner winner)
-{
-    // display.clearDisplay();
-    display.setFont(FigletType::FullWidth, "starwars");
-    switch (winner)
-    {
-        case CPU:
-            display.setTextColor(TB_RED);
-            display.centerText(display.pctY(0.10f), "CPU Wins");
-            break;
-        case DRAW:
-            display.setTextColor(TB_MAGENTA);
-            display.centerText(display.pctY(0.10f), "Draw");
-            break;
-        case PLAYER:
-            display.setTextColor(TB_GREEN);
-            display.centerText(display.pctY(0.10f), "You Won");
-            break;
-    }
-
-    display.resetFont();
-    display.display();
-}
-
-static Winner calculate_winner(Moves cpu_move, Moves player_move)
-{
-    if (player_move == cpu_move)
-        return DRAW;
-
-    if ((cpu_move == ROCK && player_move == SCISSORS) || (cpu_move == SCISSORS && player_move == PAPER) ||
-        (cpu_move == PAPER && player_move == ROCK))
-        return CPU;
-
-    return PLAYER;
-}
-
-static void print_player_move(Moves player_move)
+void RpsGame::print_player_move(Moves player_move)
 {
     display.clearDisplay();
     display.centerText(display.pctY(0.40f), "Your move:");
     display.setFont(FigletType::FullWidth, "Ogre");
-    display.centerText(display.getCursorY() + 2, "{}", get_move_ascii(player_move));
-
+    display.centerText(display.getCursorY() + 2, "{}", get_move_str(player_move));
     display.display();
 }
 
-static void print_moves(Moves computer_move, Moves player_move)
+void RpsGame::print_moves(Moves computer_move, Moves player_move)
 {
     display.clearDisplay();
     display.setFont(FigletType::Smushed, "Doom");
@@ -122,13 +79,36 @@ static void print_moves(Moves computer_move, Moves player_move)
     display.print("CPU");
 
     display.setCursor(left_col, moves_y);
-    display.print("{}", get_move_ascii(player_move));
+    display.print("{}", get_move_str(player_move));
 
     display.centerText((header_y + moves_y) / 2, "VS");
 
     display.setCursor(right_col - 8, moves_y);
-    display.print("{}", get_move_ascii(computer_move));
+    display.print("{}", get_move_str(computer_move));
 
+    display.display();
+}
+
+void RpsGame::print_winner(Winner winner)
+{
+    display.setFont(FigletType::FullWidth, "starwars");
+    switch (winner)
+    {
+        case Winner::CPU:
+            display.setTextColor(TB_RED);
+            display.centerText(display.pctY(0.10f), "CPU Wins");
+            break;
+        case Winner::DRAW:
+            display.setTextColor(TB_MAGENTA);
+            display.centerText(display.pctY(0.10f), "Draw");
+            break;
+        case Winner::PLAYER:
+            display.setTextColor(TB_GREEN);
+            display.centerText(display.pctY(0.10f), "You Won");
+            break;
+    }
+
+    display.resetFont();
     display.display();
 }
 
@@ -136,26 +116,27 @@ void RpsGame::render()
 {
     display.clearDisplay();
 
-    print_player_move(player_move);
-    if (player_move == NONE || !selected)
+    print_player_move(m_player_move);
+    if (m_player_move == Moves::None || !m_selected)
         return;
 
-    Moves computer_move = get_cpu_move();
-    display.setFont(FigletType::FullWidth, "Stop");
-    print_count_down(3);
-    print_count_down(2);
-    print_count_down(1);
-    Winner winner = calculate_winner(computer_move, player_move);
-    print_moves(computer_move, player_move);
-    print_winner(winner);
+    Moves  computer_move = get_cpu_move();
+    Winner winner        = calculate_winner(computer_move, m_player_move);
 
+    display.setFont(FigletType::FullWidth, "Stop");
+    print_countdown(3);
+    print_countdown(2);
+    print_countdown(1);
+
+    print_moves(computer_move, m_player_move);
+    print_winner(winner);
     display.display();
 
     sleep_for(duration<float>(settings.game_rps.delay_show_winner));
 
     display.clearDisplay();
-    print_player_move(NONE);
-    selected = false;
+    print_player_move(Moves::None);
+    m_selected = false;
 }
 
 SceneResult RpsGame::handle_input(uint32_t key)
@@ -164,14 +145,14 @@ SceneResult RpsGame::handle_input(uint32_t key)
     {
         case TB_KEY_ESC: return Scenes::GamesMenu;
 
-        case 'r': player_move = ROCK; break;
-        case 'p': player_move = PAPER; break;
-        case 's': player_move = SCISSORS; break;
+        case 'r': m_player_move = Moves::Rock; break;
+        case 'p': m_player_move = Moves::Paper; break;
+        case 's': m_player_move = Moves::Scissors; break;
 
         case TB_KEY_ENTER:
         case '\n':
-            if (player_move != NONE)
-                selected = true;
+            if (m_player_move != Moves::None)
+                m_selected = true;
             break;
     }
     return ScenesGame::RockPaperScissors;

@@ -24,8 +24,8 @@ struct Settings
 
     struct game_snake_t
     {
-        float snake_min_speed = 40.0f;   // fastest tick floor (ms)
-        float snake_max_speed = 80.0f;   // starting tick speed (ms)
+        float snake_min_speed = 40.0f;  // fastest tick floor (ms)
+        float snake_max_speed = 80.0f;  // starting tick speed (ms)
     } game_snake;
 
     struct game_wordle_t

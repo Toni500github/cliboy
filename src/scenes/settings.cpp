@@ -276,9 +276,7 @@ SceneResult SettingsScene::handle_input(uint32_t key)
                 break;
 
             default:
-                // printable ASCII only
-                // for some reason isalpha() doesn't do its job here
-                if (key >= 0x20 && key <= 0x7E)
+                if (is_alnum(key))
                     m_edit_buffer += static_cast<char>(key);
                 break;
         }

@@ -129,4 +129,15 @@ inline std::string str_toupper(std::string str)
     return str;
 }
 
+// for some reason isalpha() doesn't do its job here
+inline bool is_alnum(const uint32_t key)
+{
+    return key >= 0x20 && key <= 0x7E;
+}
+
+inline bool is_alpha(const uint32_t key)
+{
+    return (key | 32) - 'a' < 26;
+}
+
 #endif
