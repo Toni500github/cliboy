@@ -47,7 +47,7 @@ static void clamp_float(float& v, float step, float lo, float hi, int dir)
 static const SettingEntry entries[] = {
     // General
     {
-        "General settngs",
+        "General settings",
         "ASCII characters gameplay",
         SettingKind::Bool,
         [] { return fmt_bool(!settings.general.utf8); },
@@ -262,9 +262,9 @@ void SettingsScene::render()
     display.clearDisplay();
 
     // Title
-    display.setTextColor(TB_CYAN | TB_BOLD);
+    display.setTextColor(TB_WHITE | TB_BOLD);
     display.setFont(FigletType::FullWidth, "Small Slant");
-    display.centerText(display.pctY(0.10f), "Settings");
+    display.centerText(display.pctY(0.05f), "Settings");
     display.resetFont();
 
     // Column layout: labels on left third, values on right ~58%
@@ -307,7 +307,7 @@ void SettingsScene::render()
 
         // Label
         if (selected && !editing)
-            display.setTextColor(TB_WHITE | TB_BOLD);
+            display.setTextColor(TB_YELLOW | TB_BOLD);
 
         display.setCursor(col_label + 2, render_row);
         display.print(e.label);
@@ -315,7 +315,7 @@ void SettingsScene::render()
 
         // Value
         if (selected && !editing)
-            display.setTextColor(TB_WHITE | TB_BOLD);
+            display.setTextColor(TB_YELLOW | TB_BOLD);
 
         render_value(e, selected, editing, m_edit_buffer, col_value, render_row);
         display.resetColors();

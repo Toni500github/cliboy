@@ -36,6 +36,25 @@ static void enable_ansi_colors()
 #endif
 }
 
+static uintattr_t map_color(const uintattr_t col)
+{
+    // strip style flags, map the color part, reapply flags
+    const uintattr_t flags = col & (TB_BOLD | TB_ITALIC | TB_UNDERLINE | TB_BLINK | TB_REVERSE | TB_DIM);
+    switch (col & ~flags)
+    {
+        case TB_DEFAULT: return TB_DEFAULT;
+        case TB_BLACK:   return 0x1e2127 | flags;
+        case TB_RED:     return 0xe06c75 | flags;
+        case TB_GREEN:   return 0x98c379 | flags;
+        case TB_YELLOW:  return 0xe5c07b | flags;
+        case TB_BLUE:    return 0x61afef | flags;
+        case TB_MAGENTA: return 0xc678dd | flags;
+        case TB_CYAN:    return 0x56b6c2 | flags;
+        case TB_WHITE:   return 0xdcdfe4 | flags;
+        default:         return col;  // already hex
+    }
+}
+
 TerminalDisplay::~TerminalDisplay()
 {
     clearDisplay();
@@ -48,10 +67,10 @@ bool TerminalDisplay::begin()
     if (tb_init() < 0)
         return false;
 
+    tb_set_output_mode(TB_OUTPUT_TRUECOLOR);
+
     updateDims();
-
     tb_hide_cursor();
-
     return true;
 }
 
@@ -85,14 +104,14 @@ void TerminalDisplay::resetColors()
     m_bg_col = TB_DEFAULT;
 }
 
-void TerminalDisplay::setTextColor(const uintattr_t hex)
+void TerminalDisplay::setTextColor(uintattr_t col)
 {
-    m_fg_col = hex;
+    m_fg_col = map_color(col);
 }
 
-void TerminalDisplay::setTextBgColor(const uintattr_t hex)
+void TerminalDisplay::setTextBgColor(uintattr_t col)
 {
-    m_bg_col = hex;
+    m_bg_col = map_color(col);
 }
 
 void TerminalDisplay::setCursor(const int x, const int y)
