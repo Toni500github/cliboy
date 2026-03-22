@@ -11,7 +11,7 @@ enum class Scenes
     GamesMenu,
     SettingsMenu,
     Credits,
-    COUNT, // If you not using it in MainMenuScene, then use Exit
+    COUNT,  // If you not using it in MainMenuScene, then use Exit
 
     MainMenu,
     Exit,

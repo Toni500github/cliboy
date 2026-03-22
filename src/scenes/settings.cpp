@@ -21,7 +21,8 @@ struct SettingEntry
     SettingKind                  kind;
     std::function<std::string()> get_value;
     std::function<void(int)>     adjust;  // Float: -1/+1; Bool: called with any n to toggle; nullptr for String
-    std::function<void(const std::string&)> set_value;  // String only; nullptr for Float/Bool
+    std::function<void(const std::string&)> set_str_value;  // String only; nullptr for Float/Bool
+    const uint32_t*                         preview_color = nullptr;
 };
 
 static std::string fmt_float(float v)
@@ -32,6 +33,25 @@ static std::string fmt_float(float v)
 static std::string fmt_bool(bool v)
 {
     return v ? "ON" : "OFF";
+}
+
+static std::string fmt_hex(uint32_t v)
+{
+    char buf[8];
+    snprintf(buf, sizeof(buf), "#%06x", v);
+    return buf;
+}
+
+static void set_hex(uint32_t& target, const std::string& s)
+{
+    // accept both "rrggbb" and "#rrggbb"
+    const char* src = s.c_str();
+    if (*src == '#')
+        src++;
+    char*    end;
+    uint32_t val = strtoul(src, &end, 16);
+    if (end != src)  // valid hex
+        target = val;
 }
 
 static void clamp_float(float& v, float step, float lo, float hi, int dir)
@@ -61,6 +81,80 @@ static const SettingEntry entries[] = {
         [] { return settings.general.assets_path; },
         nullptr,
         [](const std::string& s) { settings.general.assets_path = s; }
+    },
+
+    // Colors
+    {
+        "Colors",
+        "Black",
+        SettingKind::String,
+        [] { return fmt_hex(settings.colors.black); },
+        nullptr,
+        [](const std::string& s) { set_hex(settings.colors.black, s); },
+        &settings.colors.black
+    },
+    {
+        nullptr,
+        "Red",
+        SettingKind::String,
+        [] { return fmt_hex(settings.colors.red); },
+        nullptr,
+        [](const std::string& s) { set_hex(settings.colors.red, s); },
+        &settings.colors.red
+    },
+    {
+        nullptr,
+        "Green",
+        SettingKind::String,
+        [] { return fmt_hex(settings.colors.green); },
+        nullptr,
+        [](const std::string& s) { set_hex(settings.colors.green, s); },
+        &settings.colors.green
+    },
+    {
+        nullptr,
+        "Yellow",
+        SettingKind::String,
+        [] { return fmt_hex(settings.colors.yellow); },
+        nullptr,
+        [](const std::string& s) { set_hex(settings.colors.yellow, s); },
+        &settings.colors.yellow
+    },
+    {
+        nullptr,
+        "Blue",
+        SettingKind::String,
+        [] { return fmt_hex(settings.colors.blue); },
+        nullptr,
+        [](const std::string& s) { set_hex(settings.colors.blue, s); },
+        &settings.colors.blue
+    },
+    {
+        nullptr,
+        "Magenta",
+        SettingKind::String,
+        [] { return fmt_hex(settings.colors.magenta); },
+        nullptr,
+        [](const std::string& s) { set_hex(settings.colors.magenta, s); },
+        &settings.colors.magenta
+    },
+    {
+        nullptr,
+        "Cyan",
+        SettingKind::String,
+        [] { return fmt_hex(settings.colors.cyan); },
+        nullptr,
+        [](const std::string& s) { set_hex(settings.colors.cyan, s); },
+        &settings.colors.cyan
+    },
+    {
+        nullptr,
+        "White",
+        SettingKind::String,
+        [] { return fmt_hex(settings.colors.white); },
+        nullptr,
+        [](const std::string& s) { set_hex(settings.colors.white, s); },
+        &settings.colors.white
     },
 
     // Rock Paper Scissors
@@ -153,7 +247,6 @@ static void render_value(const SettingEntry& e,
                          int                 row)
 {
     const std::string val = e.get_value();
-
     display.setCursor(col, row);
 
     switch (e.kind)
@@ -169,7 +262,6 @@ static void render_value(const SettingEntry& e,
         case SettingKind::String:
             if (editing)
             {
-                // Show the live edit buffer with a block cursor appended
                 display.setTextColor(TB_YELLOW | TB_BOLD);
                 display.print("{}{}", edit_buffer, settings.general.utf8 ? "\u2588" : "|");
                 display.resetColors();
@@ -183,6 +275,31 @@ static void render_value(const SettingEntry& e,
                 display.print("{}", val);
             }
             break;
+    }
+
+    // Draw color preview swatch if this entry has one
+    if (e.preview_color != nullptr)
+    {
+        // pick a live color: if currently editing, try to parse the buffer
+        uint32_t swatch = *e.preview_color;
+        if (editing)
+        {
+            // preview the typed value live before confirming
+            uint32_t parsed = swatch;
+            set_hex(parsed, edit_buffer);  // reuse the helper
+            swatch = parsed;
+        }
+
+        const int swatch_x = col + 20;  // fixed offset past the value column
+        display.setTextBgColor(swatch);
+        display.setTextColor(swatch);
+        // draw 3 spaces as a filled block
+        for (int i = 0; i < 3; i++)
+        {
+            display.setCursor(swatch_x + i, row);
+            display.print(" ");
+        }
+        display.resetColors();
     }
 }
 
@@ -342,7 +459,7 @@ SceneResult SettingsScene::handle_input(uint32_t key)
 
             case TB_KEY_ENTER:
             case '\n':
-                entries[m_selected_item].set_value(m_edit_buffer);
+                entries[m_selected_item].set_str_value(m_edit_buffer);
                 m_editing = false;
                 m_edit_buffer.clear();
                 break;

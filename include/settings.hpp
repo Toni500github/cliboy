@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 
 struct Settings
@@ -9,6 +10,18 @@ struct Settings
         std::string assets_path = "./assets";
         bool        utf8        = true;
     } general;
+
+    struct colors_t
+    {
+        uint32_t black   = 0x1e2127;
+        uint32_t red     = 0xe06c75;
+        uint32_t green   = 0x98c379;
+        uint32_t yellow  = 0xe5c07b;
+        uint32_t blue    = 0x61afef;
+        uint32_t magenta = 0xc678dd;
+        uint32_t cyan    = 0x56b6c2;
+        uint32_t white   = 0xdcdfe4;
+    } colors;
 
     struct game_rps_t
     {

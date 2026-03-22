@@ -43,15 +43,15 @@ static uintattr_t map_color(const uintattr_t col)
     switch (col & ~flags)
     {
         case TB_DEFAULT: return TB_DEFAULT;
-        case TB_BLACK:   return 0x1e2127 | flags;
-        case TB_RED:     return 0xe06c75 | flags;
-        case TB_GREEN:   return 0x98c379 | flags;
-        case TB_YELLOW:  return 0xe5c07b | flags;
-        case TB_BLUE:    return 0x61afef | flags;
-        case TB_MAGENTA: return 0xc678dd | flags;
-        case TB_CYAN:    return 0x56b6c2 | flags;
-        case TB_WHITE:   return 0xdcdfe4 | flags;
-        default:         return col;  // already hex
+        case TB_BLACK:   return settings.colors.black   | flags;
+        case TB_RED:     return settings.colors.red     | flags;
+        case TB_GREEN:   return settings.colors.green   | flags;
+        case TB_YELLOW:  return settings.colors.yellow  | flags;
+        case TB_BLUE:    return settings.colors.blue    | flags;
+        case TB_MAGENTA: return settings.colors.magenta | flags;
+        case TB_CYAN:    return settings.colors.cyan    | flags;
+        case TB_WHITE:   return settings.colors.white   | flags;
+        default:         return col;
     }
 }
 
