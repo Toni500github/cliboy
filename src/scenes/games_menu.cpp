@@ -1,4 +1,5 @@
-#include "scenes.hpp"
+#include "scenes/games_menu.hpp"
+
 #include "terminal_display.hpp"
 
 void GamesMenuScene::render()
@@ -41,13 +42,7 @@ SceneResult GamesMenuScene::handle_input(uint32_t key)
 
         case TB_KEY_ENTER:
         case '\n':
-            switch (m_selected_game)
-            {
-                case 0: return ScenesGame::RockPaperScissors;
-                case 1: return ScenesGame::TicTacToe;
-                case 2: return ScenesGame::Snake;
-                case 3: return ScenesGame::Wordle;
-            }
+            return static_cast<ScenesGame>(m_selected_game);
     }
 
     return Scenes::GamesMenu;

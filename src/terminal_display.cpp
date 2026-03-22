@@ -103,16 +103,16 @@ void TerminalDisplay::setCursor(const int x, const int y)
 
 void TerminalDisplay::setFont(FigletType figlet_type, const std::string_view font)
 {
-    const std::string& path = std::format("{}/fonts/{}.flf", settings.general.assets_path, font);
-    if (!std::filesystem::exists(path))
+    if (!std::filesystem::exists(settings.general.assets_path))
     {
         clearDisplay();
         tb_shutdown();
-        fprintf(stderr, "assets path '%s' doesn't exist\n", path.c_str());
+        fprintf(stderr, "assets path '%s' doesn't exist\n", settings.general.assets_path.c_str());
         std::exit(-1);
     }
 
-    m_flf_font = flf_font::make_shared(path);
+    const std::string& path = std::format("{}/fonts/{}.flf", settings.general.assets_path, font);
+    m_flf_font              = flf_font::make_shared(path);
     if (!m_flf_font)
     {
         clearDisplay();

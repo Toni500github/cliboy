@@ -26,8 +26,14 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "games/all.hpp"
-#include "scenes.hpp"
+#include "games/rockpaperscissors.hpp"
+#include "games/snake.hpp"
+#include "games/tictactoe.hpp"
+#include "games/wordle.hpp"
+#include "scenes/credits.hpp"
+#include "scenes/games_menu.hpp"
+#include "scenes/main_menu.hpp"
+#include "scenes/settings.hpp"
 #include "settings.hpp"
 #include "terminal_display.hpp"
 

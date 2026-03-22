@@ -1,4 +1,5 @@
-#include "scenes.hpp"
+#include "scenes/credits.hpp"
+
 #include "terminal_display.hpp"
 
 void CreditsScene::render()

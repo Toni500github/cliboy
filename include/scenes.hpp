@@ -8,10 +8,12 @@
 
 enum class Scenes
 {
-    MainMenu,
     GamesMenu,
-    Credits,
     SettingsMenu,
+    Credits,
+    COUNT, // If you not using it in MainMenuScene, then use Exit
+
+    MainMenu,
     Exit,
 };
 
@@ -39,6 +41,16 @@ public:
         return -1;
     }
 
+    virtual void render_footer()
+    {
+        if (m_footer_text.empty())
+            return;
+
+        display.resetFont();
+        display.centerText(display.getHeight() - m_footer_padding, m_footer_text);
+        display.display();
+    }
+
     Result<> begin()
     {
         if (m_has_begun)
@@ -62,16 +74,6 @@ public:
 
     bool has_begun() const { return m_has_begun; }
 
-    virtual void render_footer()
-    {
-        if (m_footer_text.empty())
-            return;
-
-        display.resetFont();
-        display.centerText(display.getHeight() - m_footer_padding, m_footer_text);
-        display.display();
-    }
-
 protected:
     virtual Result<> on_begin() { return Ok(); }
     void             set_footer(std::string text, int padding = 3)
@@ -84,68 +86,4 @@ private:
     bool        m_has_begun      = false;
     int         m_footer_padding = 3;
     std::string m_footer_text;
-};
-
-class CreditsScene : public Scene
-{
-public:
-    Result<> on_begin() override
-    {
-        set_footer("ESC: Back");
-        return Ok();
-    }
-
-    void        render() override;
-    SceneResult handle_input(uint32_t key) override;
-};
-
-class MainMenuScene : public Scene
-{
-public:
-    Result<> on_begin() override
-    {
-        set_footer("Arrow Keys: Navigate | Enter: Select | ESC: Exit");
-        return Ok();
-    }
-
-    void        render() override;
-    SceneResult handle_input(uint32_t key) override;
-
-private:
-    int                  m_selected_item = 0;
-    static constexpr int MENU_ITEM_COUNT = 3;
-};
-
-class GamesMenuScene : public Scene
-{
-public:
-    Result<> on_begin() override
-    {
-        set_footer("Arrow Keys: Navigate | Enter: Play | ESC: Back");
-        return Ok();
-    }
-
-    void        render() override;
-    SceneResult handle_input(uint32_t key) override;
-
-private:
-    int                  m_selected_game = 0;
-    static constexpr int GAME_COUNT      = static_cast<int>(ScenesGame::COUNT);
-};
-
-class SettingsScene : public Scene
-{
-public:
-    void        render() override;
-    SceneResult handle_input(uint32_t key) override;
-
-private:
-    size_t      m_selected_item = 0;
-    size_t      m_scroll_offset = 0;  // index of the first rendered entry
-    bool        m_editing       = false;
-    std::string m_edit_buffer;
-
-    // Adjusts m_scroll_offset so that m_selected_item is always in the
-    // visible portion of the list.
-    void ensure_visible();
 };

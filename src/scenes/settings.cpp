@@ -4,7 +4,7 @@
 #include <functional>
 #include <string>
 
-#include "scenes.hpp"
+#include "scenes/settings.hpp"
 #include "terminal_display.hpp"
 
 enum class SettingKind
@@ -243,7 +243,7 @@ void SettingsScene::ensure_visible()
     }
 
     // Scroll down: advance scroll_offset until the selected item fits.
-    const int start_y  = display.pctY(0.25f);
+    const int start_y  = display.pctY(0.3f);
     const int row_step = 2;
     // Reserve space for the footer area (approx 4 rows from the bottom).
     const int max_y = display.getHeight() - 4;
@@ -262,6 +262,7 @@ void SettingsScene::render()
     display.clearDisplay();
 
     // Title
+    display.setTextColor(TB_CYAN | TB_BOLD);
     display.setFont(FigletType::FullWidth, "Small Slant");
     display.centerText(display.pctY(0.10f), "Settings");
     display.resetFont();
@@ -275,14 +276,6 @@ void SettingsScene::render()
     const int row_step = 2;
     // Stop rendering before the footer area.
     const int max_y = display.getHeight() - 4;
-
-    if (m_scroll_offset > 0)
-    {
-        display.setTextColor(TB_CYAN);
-        display.setCursor(col_label, start_y - row_step);
-        display.print("▲");
-        display.resetColors();
-    }
 
     int         render_row   = start_y;
     const char* last_section = nullptr;
@@ -298,13 +291,7 @@ void SettingsScene::render()
         if (e.section != nullptr && e.section != last_section)
         {
             if (render_row + row_step * 2 > max_y)
-            {
-                display.setTextColor(TB_CYAN);
-                display.setCursor(col_label, render_row);
-                display.print("▼");
-                display.resetColors();
                 break;
-            }
 
             last_section = e.section;
             display.setTextColor(TB_CYAN | TB_BOLD);
@@ -316,13 +303,7 @@ void SettingsScene::render()
 
         // Stop if the item row itself is out of the visible area.
         if (render_row >= max_y)
-        {
-            display.setTextColor(TB_CYAN);
-            display.setCursor(col_label, render_row);
-            display.print("▼");
-            display.resetColors();
             break;
-        }
 
         // Label
         if (selected && !editing)

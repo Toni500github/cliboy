@@ -1,4 +1,4 @@
-#include "scenes.hpp"
+#include "scenes/main_menu.hpp"
 #include "terminal_display.hpp"
 
 void MainMenuScene::render()
@@ -45,12 +45,7 @@ SceneResult MainMenuScene::handle_input(uint32_t key)
 
         case TB_KEY_ENTER:
         case '\n':
-            switch (m_selected_item)
-            {
-                case 0: return Scenes::GamesMenu;
-                case 1: return Scenes::SettingsMenu;
-                case 2: return Scenes::Credits;
-            }
+            return static_cast<Scenes>(m_selected_item);
     }
 
     return Scenes::MainMenu;
