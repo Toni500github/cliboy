@@ -89,9 +89,9 @@ bool WordleGame::is_correct(const RowStates& row)
 
 void WordleGame::draw_wordle_grid(const WordleStates& grid)
 {
-    const uint32_t block = U'█';
-    const int      cols  = 5;
-    const int      rows  = 6;
+    const char block = ' ';  // will be filled in bg
+    const int  cols  = 5;
+    const int  rows  = 6;
 
     const int cell_w = 5;  // width in characters
     const int cell_h = 3;  // height in characters
@@ -122,7 +122,6 @@ void WordleGame::draw_wordle_grid(const WordleStates& grid)
             display.drawRect(x, y, cell_w, cell_h, block);
 
             // Center letter
-            if (isalpha(t.ch))
             {
                 const int cx = x + cell_w / 2;
                 const int cy = y + cell_h / 2;

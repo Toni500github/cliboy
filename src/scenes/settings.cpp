@@ -48,9 +48,9 @@ static const SettingEntry entries[] = {
     // General
     {
         "General settngs",
-        "Enable UTF-8 gameplay",
+        "ASCII characters gameplay",
         SettingKind::Bool,
-        [] { return fmt_bool(settings.general.utf8); },
+        [] { return fmt_bool(!settings.general.utf8); },
         [](int) { settings.general.utf8 = !settings.general.utf8; },
         nullptr
     },
@@ -171,7 +171,7 @@ static void render_value(const SettingEntry& e,
             {
                 // Show the live edit buffer with a block cursor appended
                 display.setTextColor(TB_YELLOW | TB_BOLD);
-                display.print("{}\u2588", edit_buffer);  // '█'
+                display.print("{}{}", edit_buffer, settings.general.utf8 ? "\u2588" : "|");
                 display.resetColors();
             }
             else if (selected)
@@ -183,6 +183,77 @@ static void render_value(const SettingEntry& e,
                 display.print("{}", val);
             }
             break;
+    }
+}
+
+// -----------------------------------------------------
+// Scrolling helper
+// -----------------------------------------------------
+
+// Simulates the row layout starting from a given scroll offset and returns
+// the render_row at which entry `target` would be drawn, or -1 if it would
+// fall entirely above the window (shouldn't happen after clamping).
+static int row_of_entry(size_t       target,
+                        size_t       scroll_offset,
+                        int          start_y,
+                        int          row_step,
+                        const char** out_last_section = nullptr)
+{
+    int         row          = start_y;
+    const char* last_section = nullptr;
+
+    for (size_t i = scroll_offset;; ++i)
+    {
+        if (i >= ARRAY_SIZE(entries))
+            return -1;
+
+        const SettingEntry& e = entries[i];
+
+        if (e.section != nullptr && e.section != last_section)
+        {
+            last_section = e.section;
+            if (i == target)
+            {
+                // target is a section-header row; report the item row below it
+                if (out_last_section)
+                    *out_last_section = last_section;
+                return row + row_step;
+            }
+            row += row_step;
+        }
+
+        if (i == target)
+        {
+            if (out_last_section)
+                *out_last_section = last_section;
+            return row;
+        }
+
+        row += row_step;
+    }
+}
+
+void SettingsScene::ensure_visible()
+{
+    // Scroll up: selected item is above the current window.
+    if (m_selected_item < m_scroll_offset)
+    {
+        m_scroll_offset = m_selected_item;
+        return;
+    }
+
+    // Scroll down: advance scroll_offset until the selected item fits.
+    const int start_y  = display.pctY(0.25f);
+    const int row_step = 2;
+    // Reserve space for the footer area (approx 4 rows from the bottom).
+    const int max_y = display.getHeight() - 4;
+
+    while (m_scroll_offset < m_selected_item)
+    {
+        int r = row_of_entry(m_selected_item, m_scroll_offset, start_y, row_step);
+        if (r != -1 && r < max_y)
+            break;  // selected item fits in the visible area
+        ++m_scroll_offset;
     }
 }
 
@@ -202,25 +273,55 @@ void SettingsScene::render()
     // Start entries below the figlet title
     const int start_y  = display.pctY(0.25f);
     const int row_step = 2;
+    // Stop rendering before the footer area.
+    const int max_y = display.getHeight() - 4;
+
+    if (m_scroll_offset > 0)
+    {
+        display.setTextColor(TB_CYAN);
+        display.setCursor(col_label, start_y - row_step);
+        display.print("▲");
+        display.resetColors();
+    }
 
     int         render_row   = start_y;
     const char* last_section = nullptr;
 
-    for (size_t i = 0; i < ARRAY_SIZE(entries); ++i)
+    for (size_t i = m_scroll_offset; i < ARRAY_SIZE(entries); ++i)
     {
         const SettingEntry& e        = entries[i];
         const bool          selected = (i == m_selected_item);
         const bool          editing  = selected && m_editing;
 
-        // Section header
+        // Section header. Check that both the header and the first item
+        // below it still fit; otherwise stop and show the indicator.
         if (e.section != nullptr && e.section != last_section)
         {
+            if (render_row + row_step * 2 > max_y)
+            {
+                display.setTextColor(TB_CYAN);
+                display.setCursor(col_label, render_row);
+                display.print("▼");
+                display.resetColors();
+                break;
+            }
+
             last_section = e.section;
             display.setTextColor(TB_CYAN | TB_BOLD);
             display.setCursor(col_label, render_row);
             display.print("── {} ──", e.section);
             display.resetColors();
             render_row += row_step;
+        }
+
+        // Stop if the item row itself is out of the visible area.
+        if (render_row >= max_y)
+        {
+            display.setTextColor(TB_CYAN);
+            display.setCursor(col_label, render_row);
+            display.print("▼");
+            display.resetColors();
+            break;
         }
 
         // Label
@@ -289,8 +390,14 @@ SceneResult SettingsScene::handle_input(uint32_t key)
     {
         case TB_KEY_ESC: return Scenes::MainMenu;
 
-        case TB_KEY_ARROW_UP:   m_selected_item = (m_selected_item - 1 + count) % count; break;
-        case TB_KEY_ARROW_DOWN: m_selected_item = (m_selected_item + 1) % count; break;
+        case TB_KEY_ARROW_UP:
+            m_selected_item = (m_selected_item - 1 + count) % count;
+            ensure_visible();
+            break;
+        case TB_KEY_ARROW_DOWN:
+            m_selected_item = (m_selected_item + 1) % count;
+            ensure_visible();
+            break;
 
         case TB_KEY_ARROW_LEFT:
         case TB_KEY_ARROW_RIGHT:

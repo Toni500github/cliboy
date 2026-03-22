@@ -45,31 +45,6 @@ Result<> SnakeGame::on_begin()
 
 void SnakeGame::render()
 {
-    if (settings.general.utf8)
-    {
-        CH_SNAKE_HEAD = U'◉';
-        CH_SNAKE_BODY = U'█';
-        CH_FOOD       = U'●';
-        CH_BORDER_H   = U'═';
-        CH_BORDER_V   = U'║';
-        CH_CORNER_TL  = U'╔';
-        CH_CORNER_TR  = U'╗';
-        CH_CORNER_BL  = U'╚';
-        CH_CORNER_BR  = U'╝';
-    }
-    else
-    {
-        CH_SNAKE_HEAD = 'O';
-        CH_SNAKE_BODY = '#';
-        CH_FOOD       = '*';
-        CH_BORDER_H   = '-';
-        CH_BORDER_V   = '|';
-        CH_CORNER_TL  = '+';
-        CH_CORNER_TR  = '+';
-        CH_CORNER_BL  = '+';
-        CH_CORNER_BR  = '+';
-    }
-
     update();
 
     draw_border();
@@ -157,6 +132,31 @@ void SnakeGame::init_game()
     m_snake.push_back({ sx, sy });
     m_snake.push_back({ sx - 1, sy });
     m_snake.push_back({ sx - 2, sy });
+
+    if (settings.general.utf8)
+    {
+        CH_SNAKE_HEAD = U'◉';
+        CH_SNAKE_BODY = U'█';
+        CH_FOOD       = U'●';
+        CH_BORDER_H   = U'═';
+        CH_BORDER_V   = U'║';
+        CH_CORNER_TL  = U'╔';
+        CH_CORNER_TR  = U'╗';
+        CH_CORNER_BL  = U'╚';
+        CH_CORNER_BR  = U'╝';
+    }
+    else
+    {
+        CH_SNAKE_HEAD = 'O';
+        CH_SNAKE_BODY = '#';
+        CH_FOOD       = '*';
+        CH_BORDER_H   = '-';
+        CH_BORDER_V   = '|';
+        CH_CORNER_TL  = '+';
+        CH_CORNER_TR  = '+';
+        CH_CORNER_BL  = '+';
+        CH_CORNER_BR  = '+';
+    }
 
     spawn_food();
 }
