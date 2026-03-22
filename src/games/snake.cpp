@@ -31,14 +31,6 @@ Result<> SnakeGame::on_begin()
 {
     set_footer("Arrows: Move | P: Pause | ESC: Back");
 
-    // ~75% of the terminal, centred.
-    // Inner playfield is (board_w-2) × (board_h-2) after the border.
-    m_board_w = std::max(10, (display.getWidth() * 3) / 4);
-    m_board_h = std::max(8, (display.getHeight() * 3) / 4);
-
-    m_board_x = (display.getWidth() - m_board_w) / 2;
-    m_board_y = (display.getHeight() - m_board_h) / 2;
-
     init_game();
     return Ok();
 }
@@ -118,20 +110,13 @@ SceneResult SnakeGame::handle_input(uint32_t key)
 
 void SnakeGame::init_game()
 {
-    m_snake.clear();
-    m_score    = 0;
-    m_dead     = false;
-    m_paused   = false;
-    m_dir      = SnakeDir::Right;
-    m_next_dir = SnakeDir::Right;
-    m_speed_ms = static_cast<int>(settings.game_snake.snake_max_speed);
+    // ~75% of the terminal, centred.
+    // Inner playfield is (board_w-2) × (board_h-2) after the border.
+    m_board_w = std::max(10, (display.getWidth() * 3) / 4);
+    m_board_h = std::max(8, (display.getHeight() * 3) / 4);
 
-    // Start with a 3-segment snake centred in the playfield
-    const int sx = m_board_x + m_board_w / 2;
-    const int sy = m_board_y + m_board_h / 2;
-    m_snake.push_back({ sx, sy });
-    m_snake.push_back({ sx - 1, sy });
-    m_snake.push_back({ sx - 2, sy });
+    m_board_x = (display.getWidth() - m_board_w) / 2;
+    m_board_y = (display.getHeight() - m_board_h) / 2;
 
     if (settings.general.utf8)
     {
@@ -157,6 +142,21 @@ void SnakeGame::init_game()
         CH_CORNER_BL  = '+';
         CH_CORNER_BR  = '+';
     }
+
+    m_snake.clear();
+    m_score    = 0;
+    m_dead     = false;
+    m_paused   = false;
+    m_dir      = SnakeDir::Right;
+    m_next_dir = SnakeDir::Right;
+    m_speed_ms = static_cast<int>(settings.game_snake.snake_max_speed);
+
+    // Start with a 3-segment snake centred in the playfield
+    const int sx = m_board_x + m_board_w / 2;
+    const int sy = m_board_y + m_board_h / 2;
+    m_snake.push_back({ sx, sy });
+    m_snake.push_back({ sx - 1, sy });
+    m_snake.push_back({ sx - 2, sy });
 
     spawn_food();
 }

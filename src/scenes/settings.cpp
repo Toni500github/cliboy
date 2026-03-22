@@ -31,7 +31,7 @@ static std::string fmt_float(float v)
 
 static std::string fmt_bool(bool v)
 {
-    return v ? "On" : "Off";
+    return v ? "ON" : "OFF";
 }
 
 static void clamp_float(float& v, float step, float lo, float hi, int dir)
@@ -185,10 +185,6 @@ static void render_value(const SettingEntry& e,
             break;
     }
 }
-
-// -----------------------------------------------------
-// Scrolling helper
-// -----------------------------------------------------
 
 // Simulates the row layout starting from a given scroll offset and returns
 // the render_row at which entry `target` would be drawn, or -1 if it would
