@@ -304,7 +304,7 @@ void SnakeGame::draw_hud()
     // Score line above the board (or at row 0 if board is near the top)
     const int hud_y = std::max(0, m_board_y - 2);
     display.setCursor(m_board_x, hud_y);
-    display.print(" Score: {}   Length: {} ", m_score, static_cast<int>(m_snake.size()));
+    display.print(" Score: {}   Length: {} ", m_score, m_snake.size());
 }
 
 void SnakeGame::draw_game_over()
@@ -318,7 +318,7 @@ void SnakeGame::draw_game_over()
         display.centerText(mid_y - 2, "╔══════════════════╗");
         display.centerText(mid_y - 1, "║    GAME  OVER    ║");
         display.centerText(mid_y,     "║  Score:  {:>6}  ║", m_score);
-        display.centerText(mid_y + 1, "║  Length: {:>6}  ║", static_cast<int>(m_snake.size()));
+        display.centerText(mid_y + 1, "║  Length: {:>6}  ║", m_snake.size());
         display.centerText(mid_y + 2, "╚══════════════════╝");
     }
     else
@@ -326,7 +326,7 @@ void SnakeGame::draw_game_over()
         display.centerText(mid_y - 2, "+------------------+");
         display.centerText(mid_y - 1, "|    GAME  OVER    |");
         display.centerText(mid_y,     "|  Score:  {:>6}  |", m_score);
-        display.centerText(mid_y + 1, "|  Length: {:>6}  |", static_cast<int>(m_snake.size()));
+        display.centerText(mid_y + 1, "|  Length: {:>6}  |", m_snake.size());
         display.centerText(mid_y + 2, "+------------------+");
     }
     // clang-format on

@@ -26,7 +26,6 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "games/rockpaperscissors.hpp"
 #include "games/snake.hpp"
 #include "games/tictactoe.hpp"
 #include "games/wordle.hpp"
@@ -55,7 +54,6 @@ int game_loop()
     CreditsScene   credits;
     SettingsScene  settings_menu;
     TTTGame        game_ttt;
-    RpsGame        game_rps;
     WordleGame     game_wordle;
     SnakeGame      game_snake;
 
@@ -81,7 +79,6 @@ int game_loop()
             [&](ScenesGame s) {
                 switch (s)
                 {
-                    case ScenesGame::RockPaperScissors: active_scene = &game_rps; break;
                     case ScenesGame::TicTacToe:         active_scene = &game_ttt; break;
                     case ScenesGame::Wordle:            active_scene = &game_wordle; break;
                     case ScenesGame::Snake:             active_scene = &game_snake; break;
@@ -120,6 +117,7 @@ int game_loop()
 
 void exit()
 {
+    display.clearDisplay();
     tb_shutdown();
 }
 
