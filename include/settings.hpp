@@ -23,12 +23,6 @@ struct Settings
         uint32_t white   = 0xdcdfe4;
     } colors;
 
-    struct game_rps_t
-    {
-        float delay_countdown   = 0.8;
-        float delay_show_winner = 2.0;
-    } game_rps;
-
     struct game_ttt_t
     {
         float delay_show_endgame = 2.0;

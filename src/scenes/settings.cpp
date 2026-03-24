@@ -157,24 +157,6 @@ static const SettingEntry entries[] = {
         &settings.colors.white
     },
 
-    // Rock Paper Scissors
-    {
-        "Rock Paper Scissors",
-        "Countdown Delay",
-        SettingKind::Float,
-        [] { return fmt_float(settings.game_rps.delay_countdown); },
-        [](int d) { clamp_float(settings.game_rps.delay_countdown, 0.05f, 0.05f, 5.0f, d); },
-        nullptr
-    },
-    {
-        nullptr,
-        "Show Winner Delay",
-        SettingKind::Float,
-        [] { return fmt_float(settings.game_rps.delay_show_winner); },
-        [](int d) { clamp_float(settings.game_rps.delay_show_winner, 0.1f, 0.1f, 10.0f, d); },
-        nullptr
-    },
-
     // Tic-Tac-Toe
     {
         "Tic-Tac-Toe",

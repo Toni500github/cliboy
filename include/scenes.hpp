@@ -19,7 +19,7 @@ enum class Scenes
 
 enum class ScenesGame
 {
-    RockPaperScissors,
+    Tetris,
     TicTacToe,
     Snake,
     Wordle,

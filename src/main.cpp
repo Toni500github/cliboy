@@ -27,6 +27,7 @@
 #include <cstdlib>
 
 #include "games/snake.hpp"
+#include "games/tetris.hpp"
 #include "games/tictactoe.hpp"
 #include "games/wordle.hpp"
 #include "scenes/credits.hpp"
@@ -53,9 +54,11 @@ int game_loop()
     GamesMenuScene games_menu;
     CreditsScene   credits;
     SettingsScene  settings_menu;
-    TTTGame        game_ttt;
-    WordleGame     game_wordle;
-    SnakeGame      game_snake;
+
+    TetrisGame game_tetris;
+    TTTGame    game_ttt;
+    WordleGame game_wordle;
+    SnakeGame  game_snake;
 
     SceneResult current_scene = Scenes::MainMenu;
     bool        running       = true;
@@ -79,10 +82,11 @@ int game_loop()
             [&](ScenesGame s) {
                 switch (s)
                 {
-                    case ScenesGame::TicTacToe:         active_scene = &game_ttt; break;
-                    case ScenesGame::Wordle:            active_scene = &game_wordle; break;
-                    case ScenesGame::Snake:             active_scene = &game_snake; break;
-                    default:                            running = false; break;
+                    case ScenesGame::Tetris:    active_scene = &game_tetris; break;
+                    case ScenesGame::TicTacToe: active_scene = &game_ttt; break;
+                    case ScenesGame::Wordle:    active_scene = &game_wordle; break;
+                    case ScenesGame::Snake:     active_scene = &game_snake; break;
+                    default:                    running = false; break;
                 }
             }
         }, current_scene);
