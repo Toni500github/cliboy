@@ -7,10 +7,8 @@
 
 #define TB_IMPL 1
 #include "settings.hpp"
-#include "srilakshmikanthanp/libfiglet.hpp"
 #include "terminal_display.hpp"
 #include "utf8.h"
-using namespace srilakshmikanthanp::libfiglet;
 
 // utf8len requires const utf8_int8_t* (aka char8_t* in C++20), but
 // std::string::c_str() returns const char*. This helper silences the

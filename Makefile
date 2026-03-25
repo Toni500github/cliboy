@@ -36,8 +36,7 @@ OLDVERSION	 = 0.1.0
 VERSION    	 = 0.1.1
 SRC	 	 = $(wildcard src/*.cpp src/*/*.cpp)
 OBJ	 	 = $(SRC:.cpp=.o)
-LDFLAGS			+=
-CXXFLAGS        += $(LTO_FLAGS) -fvisibility-inlines-hidden -fvisibility=hidden -Iinclude -std=$(CXXSTD) $(VARS) -DVERSION=\"$(VERSION)\"
+CXXFLAGS        += $(LTO_FLAGS) -fvisibility-inlines-hidden -fvisibility=hidden -Iinclude -Iinclude/libs -std=$(CXXSTD) $(VARS) -DVERSION=\"$(VERSION)\"
 
 all: $(TARGET)
 

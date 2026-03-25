@@ -8,8 +8,7 @@
 #include <string_view>
 #include <vector>
 
-#include "settings.hpp"
-#include "srilakshmikanthanp/libfiglet.hpp"
+#include "libfiglet/libfiglet.hpp"
 
 #define TB_OPT_ATTR_W 32
 #pragma GCC diagnostic push

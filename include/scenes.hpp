@@ -4,6 +4,7 @@
 #include <variant>
 
 #include "terminal_display.hpp"
+#include "settings.hpp"
 #include "util.hpp"
 
 enum class Scenes
