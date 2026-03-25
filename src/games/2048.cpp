@@ -28,11 +28,10 @@ static constexpr uintattr_t COLOR_2048     = 0x808080 | TB_BOLD;
 static constexpr uintattr_t COLOR_HUD      = TB_CYAN | TB_BOLD;
 static constexpr uintattr_t COLOR_GAMEOVER = TB_RED | TB_BOLD;
 static constexpr uintattr_t COLOR_WIN      = TB_GREEN | TB_BOLD;
-static constexpr uintattr_t COLOR_PAUSED   = TB_YELLOW | TB_BOLD;
 
 Result<> Game2048::on_begin()
 {
-    set_footer("Arrows: Move | P: Pause | R: Restart | ESC: Back");
+    set_footer("Arrows: Move | R: Restart | ESC: Back");
 
     init_game();
     return Ok();
@@ -73,7 +72,6 @@ void Game2048::init_game()
     m_score     = 0;
     m_game_over = false;
     m_won       = false;
-    m_paused    = false;
 
     // Add starting tiles
     add_new_tile();
@@ -220,8 +218,6 @@ void Game2048::render()
         draw_game_over();
     else if (m_won)
         draw_win();
-    else if (m_paused)
-        draw_paused();
 }
 
 void Game2048::draw_border()
@@ -344,25 +340,6 @@ void Game2048::draw_win()
     display.centerText(mid_y + 3, "R: Restart   ESC: Menu");
 }
 
-void Game2048::draw_paused()
-{
-    display.setTextColor(COLOR_PAUSED);
-    int mid_y = m_grid_y + (GRID_SIZE * m_cell_h) / 2;
-
-    if (settings.general.utf8)
-    {
-        display.centerText(mid_y - 1, "╔════════════╗");
-        display.centerText(mid_y - 0, "║   PAUSED   ║");
-        display.centerText(mid_y + 1, "╚════════════╝");
-    }
-    else
-    {
-        display.centerText(mid_y - 1, "+------------+");
-        display.centerText(mid_y - 0, "|   PAUSED   |");
-        display.centerText(mid_y + 1, "+------------+");
-    }
-}
-
 SceneResult Game2048::handle_input(uint32_t key)
 {
     if (key == TB_KEY_ESC)
@@ -374,13 +351,7 @@ SceneResult Game2048::handle_input(uint32_t key)
         return ScenesGame::Game2048;
     }
 
-    if (key == 'p' || key == 'P')
-    {
-        m_paused = !m_paused;
-        return ScenesGame::Game2048;
-    }
-
-    if (m_game_over || m_paused)
+    if (m_game_over)
         return ScenesGame::Game2048;
 
     bool moved = false;

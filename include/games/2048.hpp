@@ -27,7 +27,6 @@ public:
           m_best_score(0),
           m_game_over(false),
           m_won(false),
-          m_paused(false),
           m_grid_x(0),
           m_grid_y(0),
           m_cell_w(0),
@@ -48,7 +47,6 @@ private:
     int  m_best_score;
     bool m_game_over;
     bool m_won;
-    bool m_paused;
 
     // Position and dimensions
     int m_grid_x;
@@ -72,6 +70,5 @@ private:
     void draw_hud();
     void draw_game_over();
     void draw_win();
-    void draw_paused();
     void draw_border();
 };
