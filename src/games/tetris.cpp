@@ -33,14 +33,6 @@ static constexpr uintattr_t COLOR_PAUSED   = TB_YELLOW | TB_BOLD;
 // Scoring
 static constexpr int SCORES[] = { 0, 40, 100, 300, 1200 };  // 1, 2, 3, 4 lines
 
-template <typename Func>
-static void for_2d(int width, int height, Func&& fun)
-{
-    for (int y = 0; y < height; ++y)
-        for (int x = 0; x < width; ++x)
-            fun(x, y);  // x = col, y = row
-}
-
 Result<> TetrisGame::on_begin()
 {
     set_footer("← →: Move | ↑: Rotate | ↓: Soft Drop | Space: Hard Drop | P: Pause | ESC: Back");
@@ -51,6 +43,8 @@ Result<> TetrisGame::on_begin()
 
 void TetrisGame::init_game()
 {
+    m_grid.assign(GRID_HEIGHT, std::vector<uint32_t>(GRID_WIDTH, 0));
+
     // Choose cell size based on terminal dimensions
     // We need at least GRID_WIDTH * cell_size width and GRID_HEIGHT * cell_size height
     m_cell_size         = 1;
@@ -66,9 +60,6 @@ void TetrisGame::init_game()
     // Center the grid
     m_grid_x = (display.getWidth() - m_grid_w - NEXT_SIZE * m_cell_size - 8) / 2;
     m_grid_y = (display.getHeight() - m_grid_h) / 2;
-
-    // Initialize empty grid
-    m_grid.assign(GRID_HEIGHT, std::vector<uint32_t>(GRID_WIDTH, 0));
 
     if (settings.general.utf8)
     {
@@ -109,7 +100,6 @@ Tetromino TetrisGame::get_random_piece()
     static std::mt19937               rng{ std::random_device{}() };
     static std::vector<TetrominoType> bag;
 
-    // Refill bag if empty
     if (bag.empty())
     {
         bag = { TetrominoType::I, TetrominoType::O, TetrominoType::T, TetrominoType::S,
@@ -563,12 +553,11 @@ void TetrisGame::draw_game_over()
     display.setTextColor(COLOR_GAMEOVER);
     int mid_y = m_grid_y + m_grid_h / 2;
 
-    // clang-format off
     if (settings.general.utf8)
     {
         display.centerText(mid_y - 2, "╔══════════════════╗");
         display.centerText(mid_y - 1, "║    GAME  OVER    ║");
-        display.centerText(mid_y,     "║   Score: {:>6}  ║", m_score);
+        display.centerText(mid_y - 0, "║   Score: {:>6}  ║", m_score);
         display.centerText(mid_y + 1, "║   Lines: {:>6}  ║", m_lines_cleared);
         display.centerText(mid_y + 2, "╚══════════════════╝");
     }
@@ -576,11 +565,10 @@ void TetrisGame::draw_game_over()
     {
         display.centerText(mid_y - 2, "+------------------+");
         display.centerText(mid_y - 1, "|    GAME  OVER    |");
-        display.centerText(mid_y,     "|   Score: {:>6}  |", m_score);
+        display.centerText(mid_y - 0, "|   Score: {:>6}  |", m_score);
         display.centerText(mid_y + 1, "|   Lines: {:>6}  |", m_lines_cleared);
         display.centerText(mid_y + 2, "+------------------+");
     }
-    // clang-format on
 
     display.setTextColor(TB_WHITE);
     display.centerText(mid_y + 4, "R: Restart   ESC: Menu");
@@ -591,20 +579,18 @@ void TetrisGame::draw_paused()
     display.setTextColor(COLOR_PAUSED);
     int mid_y = m_grid_y + m_grid_h / 2;
 
-    // clang-format off
     if (settings.general.utf8)
     {
         display.centerText(mid_y - 1, "╔════════════╗");
-        display.centerText(mid_y,     "║   PAUSED   ║");
+        display.centerText(mid_y - 0, "║   PAUSED   ║");
         display.centerText(mid_y + 1, "╚════════════╝");
     }
     else
     {
         display.centerText(mid_y - 1, "+------------+");
-        display.centerText(mid_y,     "|   PAUSED   |");
+        display.centerText(mid_y - 0, "|   PAUSED   |");
         display.centerText(mid_y + 1, "+------------+");
     }
-    // clang-format on
 }
 
 SceneResult TetrisGame::handle_input(uint32_t key)

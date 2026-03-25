@@ -26,6 +26,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "games/2048.hpp"
 #include "games/snake.hpp"
 #include "games/tetris.hpp"
 #include "games/tictactoe.hpp"
@@ -59,6 +60,7 @@ int game_loop()
     TTTGame    game_ttt;
     WordleGame game_wordle;
     SnakeGame  game_snake;
+    Game2048   game_2048;
 
     SceneResult current_scene = Scenes::MainMenu;
     bool        running       = true;
@@ -85,6 +87,7 @@ int game_loop()
                     case ScenesGame::Tetris:    active_scene = &game_tetris; break;
                     case ScenesGame::TicTacToe: active_scene = &game_ttt; break;
                     case ScenesGame::Wordle:    active_scene = &game_wordle; break;
+                    case ScenesGame::Game2048:  active_scene = &game_2048; break;
                     case ScenesGame::Snake:     active_scene = &game_snake; break;
                     default:                    running = false; break;
                 }

@@ -96,6 +96,24 @@ constexpr size_t idx(E e) noexcept
     return static_cast<size_t>(e);
 }
 
+template <typename Func>
+void for_2d(int width, int height, Func&& fun)
+{
+    for (int y = 0; y < height; ++y)
+        for (int x = 0; x < width; ++x)
+            fun(x, y);  // x = col, y = row
+}
+
+template <typename Func>
+bool for_2d_until(int width, int height, Func&& func)
+{
+    for (int y = 0; y < height; ++y)
+        for (int x = 0; x < width; ++x)
+            if (func(x, y))  // Return true to stop
+                return true;
+    return false;
+}
+
 /* Spilt a string into a vector using a delimeter
  * @param text The string to split
  * @param delim The delimeter used for spliting the text

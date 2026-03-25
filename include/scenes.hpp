@@ -23,6 +23,7 @@ enum class ScenesGame
     TicTacToe,
     Snake,
     Wordle,
+    Game2048,
     COUNT,
 };
 
