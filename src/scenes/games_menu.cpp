@@ -1,5 +1,6 @@
 #include "scenes/games_menu.hpp"
 
+#include "audio_player.hpp"
 #include "terminal_display.hpp"
 
 struct GameEntry
@@ -76,8 +77,8 @@ SceneResult GamesMenuScene::handle_input(uint32_t key)
     {
         case TB_KEY_ESC: return Scenes::MainMenu;
 
-        case TB_KEY_ARROW_UP:   m_selected_game = (m_selected_game - 1 + GAME_COUNT) % GAME_COUNT; break;
-        case TB_KEY_ARROW_DOWN: m_selected_game = (m_selected_game + 1) % GAME_COUNT; break;
+        case TB_KEY_ARROW_UP:   playback.playSfx(MenuSounds::NAVIGATE); m_selected_game = (m_selected_game - 1 + GAME_COUNT) % GAME_COUNT; break;
+        case TB_KEY_ARROW_DOWN: playback.playSfx(MenuSounds::NAVIGATE); m_selected_game = (m_selected_game + 1) % GAME_COUNT; break;
 
         case '\n':
         case TB_KEY_ENTER: return static_cast<ScenesGame>(m_selected_game);

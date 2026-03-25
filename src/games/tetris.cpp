@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <random>
 
+#include "audio_player.hpp"
+
 static constexpr int GRID_WIDTH  = 10;
 static constexpr int GRID_HEIGHT = 20;
 static constexpr int NEXT_SIZE   = 4;  // Size of next piece preview area
@@ -36,6 +38,7 @@ static constexpr int SCORES[] = { 0, 40, 100, 300, 1200 };  // 1, 2, 3, 4 lines
 Result<> TetrisGame::on_begin()
 {
     set_footer("← →: Move | ↑: Rotate | ↓: Soft Drop | Space: Hard Drop | P: Pause | ESC: Back");
+    playback.playMusic(TetrisSounds::BGM);
 
     init_game();
     return Ok();
@@ -403,6 +406,8 @@ void TetrisGame::render()
         draw_game_over();
     else if (m_paused)
         draw_paused();
+    else if (!playback.isMusicPlaying())
+        playback.resumeMusic();
 }
 
 void TetrisGame::draw_border()
@@ -596,7 +601,10 @@ void TetrisGame::draw_paused()
 SceneResult TetrisGame::handle_input(uint32_t key)
 {
     if (key == TB_KEY_ESC)
+    {
+        playback.pauseMusic();
         return Scenes::GamesMenu;
+    }
 
     if (m_game_over)
     {
@@ -608,6 +616,10 @@ SceneResult TetrisGame::handle_input(uint32_t key)
     if (key == 'p' || key == 'P')
     {
         m_paused = !m_paused;
+        if (m_paused)
+            playback.pauseMusic();
+        else
+            playback.resumeMusic();
         return ScenesGame::Tetris;
     }
 

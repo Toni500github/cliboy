@@ -26,6 +26,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "audio_player.hpp"
 #include "games/2048.hpp"
 #include "games/snake.hpp"
 #include "games/tetris.hpp"
@@ -38,6 +39,7 @@
 #include "settings.hpp"
 #include "terminal_display.hpp"
 
+AudioPlayer     playback;
 TerminalDisplay display;
 Settings        settings;
 
@@ -130,6 +132,9 @@ void exit()
 
 int main()
 {
+    if (!playback.begin())
+        return -1;
+
     if (!display.begin())
         return 1;
 

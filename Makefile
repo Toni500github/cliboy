@@ -36,13 +36,20 @@ OLDVERSION	 = 0.1.0
 VERSION    	 = 0.1.1
 SRC	 	 = $(wildcard src/*.cpp src/*/*.cpp)
 OBJ	 	 = $(SRC:.cpp=.o)
+LDLIBS 		+= -ldl -lpthread
 CXXFLAGS        += $(LTO_FLAGS) -fvisibility-inlines-hidden -fvisibility=hidden -Iinclude -Iinclude/libs -std=$(CXXSTD) $(VARS) -DVERSION=\"$(VERSION)\"
 
-all: $(TARGET)
+all: miniaudio $(TARGET)
 
-$(TARGET): $(OBJ)
+miniaudio:
+ifeq ($(wildcard $(BUILDDIR)/miniaudio.o),)
 	mkdir -p $(BUILDDIR)
-	$(CXX) -o $(BUILDDIR)/$(TARGET) $(OBJ) $(LDFLAGS) $(LDLIBS)
+	$(MAKE) -C src/libs/miniaudio BUILDDIR=$(BUILDDIR)
+endif
+
+$(TARGET): miniaudio $(OBJ)
+	mkdir -p $(BUILDDIR)
+	$(CXX) -o $(BUILDDIR)/$(TARGET) $(BUILDDIR)/*.o $(OBJ) $(LDFLAGS) $(LDLIBS)
 
 dist: $(TARGET)
 	zip -j $(NAME)-v$(VERSION).zip LICENSE README.md $(BUILDDIR)/$(TARGET)
@@ -59,4 +66,4 @@ distclean:
 updatever:
 	sed -i "s#$(OLDVERSION)#$(VERSION)#g" $(wildcard .github/workflows/*.yml) compile_flags.txt
 
-.PHONY: $(TARGET) updatever distclean clean all
+.PHONY: $(TARGET) updatever distclean clean miniaudio all

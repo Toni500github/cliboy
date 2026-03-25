@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <variant>
 
-#include "terminal_display.hpp"
 #include "settings.hpp"
+#include "terminal_display.hpp"
 #include "util.hpp"
 
 enum class Scenes
