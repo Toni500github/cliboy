@@ -28,6 +28,7 @@ endif
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	LDFLAGS += -static-libstdc++ -static-libgcc
+	LDLIBS += -ldl
 endif
 
 NAME		 = cliboy
@@ -36,7 +37,7 @@ OLDVERSION	 = 0.1.0
 VERSION    	 = 0.1.1
 SRC	 	 = $(wildcard src/*.cpp src/*/*.cpp)
 OBJ	 	 = $(SRC:.cpp=.o)
-LDLIBS 		+= -ldl -lpthread
+LDLIBS 		+= -lpthread
 CXXFLAGS        += $(LTO_FLAGS) -fvisibility-inlines-hidden -fvisibility=hidden -Iinclude -Iinclude/libs -std=$(CXXSTD) $(VARS) -DVERSION=\"$(VERSION)\"
 
 all: miniaudio $(TARGET)

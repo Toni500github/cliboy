@@ -2,14 +2,7 @@ CC	?= cc
 SRC 	 = miniaudio.c
 TARGET   = miniaudio.o
 CFLAGS 	 = -I../../../include/libs $(LTO_FLAGS) -fvisibility=hidden -fPIC
-CFLAGS += -DMA_NO_ENCODING \
-          -DMA_ENABLE_ONLY_SPECIFIC_BACKENDS \
-          -DMA_ENABLE_ALSA \
-          -DMA_ENABLE_OSS \
-          -DMA_ENABLE_JACK \
-          -DMA_ENABLE_SNDIO \
-          -DMA_ENABLE_WASAPI \
-          -DMA_ENABLE_COREAUDIO
+CFLAGS += -DMA_NO_ENCODING
 
 all: $(TARGET)
 
