@@ -8,6 +8,7 @@
 #include <string>
 #include <thread>
 
+#include "audio_player.hpp"
 #include "settings.hpp"
 #include "terminal_display.hpp"
 
@@ -200,6 +201,9 @@ Result<> WordleGame::on_begin()
 
 void WordleGame::render()
 {
+    if (!playback.isMusicPlaying())
+        playback.playMusic(WordleSounds::BGM);
+
     display.clearDisplay();
 
     if (!m_is_selected)

@@ -210,6 +210,9 @@ std::string Game2048::format_number(int value) const
 
 void Game2048::render()
 {
+    if (!playback.isMusicPlaying())
+        playback.playMusic(Game2048Sounds::BGM);
+
     draw_border();
     draw_grid();
     draw_hud();

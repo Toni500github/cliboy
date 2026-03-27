@@ -4,6 +4,9 @@
 
 void MainMenuScene::render()
 {
+    if (!playback.isMusicPlaying())
+        playback.playMusic(MenuSounds::BGM);
+
     display.clearDisplay();
 
     // Colored title

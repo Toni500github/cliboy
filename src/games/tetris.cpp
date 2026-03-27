@@ -38,7 +38,6 @@ static constexpr int SCORES[] = { 0, 40, 100, 300, 1200 };  // 1, 2, 3, 4 lines
 Result<> TetrisGame::on_begin()
 {
     set_footer("← →: Move | ↑: Rotate | ↓: Soft Drop | Space: Hard Drop | P: Pause | ESC: Back");
-    playback.playMusic(TetrisSounds::BGM);
 
     init_game();
     return Ok();
@@ -336,6 +335,7 @@ void TetrisGame::clear_lines_and_update_score()
         m_lines_cleared += lines_cleared;
         m_score += calculate_score(lines_cleared);
         update_level();
+        playback.playSfx(TetrisSounds::LINE_CLEAR);
     }
 }
 
@@ -372,6 +372,9 @@ void TetrisGame::spawn_new_piece()
 
 void TetrisGame::render()
 {
+    if (!playback.isMusicPlaying())
+        playback.playMusic(TetrisSounds::BGM);
+
     auto now =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
             .count();
@@ -601,10 +604,7 @@ void TetrisGame::draw_paused()
 SceneResult TetrisGame::handle_input(uint32_t key)
 {
     if (key == TB_KEY_ESC)
-    {
-        playback.pauseMusic();
         return Scenes::GamesMenu;
-    }
 
     if (m_game_over)
     {

@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <string>
+
 #include "settings.hpp"
 
 AudioPlayer::~AudioPlayer()
@@ -36,15 +37,17 @@ void AudioPlayer::playMusic(const char* audio)
     if (!m_engine_ready)
         return;
 
-    unloadMusic();
-
     const std::string path = settings.general.assets_path + "/audios/" + audio;
 
-    ma_result result = ma_sound_init_from_file(
-        &m_engine, path.c_str(),
-        MA_SOUND_FLAG_DECODE,  // synchronous, pre-decoded for gapless looping
-        nullptr, nullptr, &m_music
-    );
+    // Already playing this exact track — do nothing
+    if (m_music_loaded && m_current_music == path && ma_sound_is_playing(&m_music))
+        return;
+
+    unloadMusic();
+    m_current_music = path;
+
+    ma_result result =
+        ma_sound_init_from_file(&m_engine, path.c_str(), MA_SOUND_FLAG_STREAM, nullptr, nullptr, &m_music);
 
     if (result != MA_SUCCESS)
     {
@@ -104,11 +107,7 @@ void AudioPlayer::playSfx(const char* audio)
 
     const std::string path = settings.general.assets_path + "/audios/" + audio;
 
-    ma_result result = ma_sound_init_from_file(
-        &m_engine, path.c_str(),
-        MA_SOUND_FLAG_DECODE,
-        nullptr, nullptr, &m_sfx
-    );
+    ma_result result = ma_sound_init_from_file(&m_engine, path.c_str(), MA_SOUND_FLAG_DECODE, nullptr, nullptr, &m_sfx);
 
     if (result != MA_SUCCESS)
     {

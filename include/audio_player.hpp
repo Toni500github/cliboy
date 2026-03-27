@@ -1,14 +1,33 @@
 #pragma once
 
+#include <string>
+
 #include "miniaudio.h"
 
-namespace TetrisSounds {
-    constexpr const char* BGM        = "tetris.wav";
-    //constexpr const char* LINE_CLEAR = "sfx_line_clear.mp3";
+namespace TetrisSounds
+{
+constexpr const char* BGM = "tetris.mp3";
+constexpr const char* LINE_CLEAR = "sfx_tetris_clear_line.wav";
+}  // namespace TetrisSounds
+
+namespace SnakeSounds
+{
+constexpr const char* FOOD = "sfx_snake_food.mp3";
 }
 
-namespace MenuSounds {
-    constexpr const char* NAVIGATE = "sfx_item_select.mp3";
+namespace Game2048Sounds
+{
+constexpr const char* BGM = "2048.mp3";
+}
+
+namespace WordleSounds
+{
+constexpr const char* BGM = "wordle.mp3";
+}
+
+namespace MenuSounds
+{
+constexpr const char* BGM = "bg_music.mp3";
 }
 
 class AudioPlayer
@@ -46,11 +65,13 @@ private:
     ma_sound  m_music{};
     ma_sound  m_sfx{};
 
-    bool  m_engine_ready  = false;
-    bool  m_music_loaded  = false;
-    bool  m_sfx_loaded    = false;
-    float m_music_volume  = 1.0f;
-    float m_sfx_volume    = 1.0f;
+    std::string m_current_music;
+
+    bool  m_engine_ready = false;
+    bool  m_music_loaded = false;
+    bool  m_sfx_loaded   = false;
+    float m_music_volume = 1.0f;
+    float m_sfx_volume   = 1.0f;
 };
 
 extern AudioPlayer playback;

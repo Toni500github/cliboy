@@ -12,6 +12,9 @@ struct GameEntry
 
 void GamesMenuScene::render()
 {
+    if (!playback.isMusicPlaying())
+        playback.playMusic(MenuSounds::BGM);
+
     display.clearDisplay();
 
     // Title
@@ -77,12 +80,20 @@ SceneResult GamesMenuScene::handle_input(uint32_t key)
     {
         case TB_KEY_ESC: return Scenes::MainMenu;
 
-        case TB_KEY_ARROW_UP:   playback.playSfx(MenuSounds::NAVIGATE); m_selected_game = (m_selected_game - 1 + GAME_COUNT) % GAME_COUNT; break;
-        case TB_KEY_ARROW_DOWN: playback.playSfx(MenuSounds::NAVIGATE); m_selected_game = (m_selected_game + 1) % GAME_COUNT; break;
+        case TB_KEY_ARROW_UP:   m_selected_game = (m_selected_game - 1 + GAME_COUNT) % GAME_COUNT; break;
+        case TB_KEY_ARROW_DOWN: m_selected_game = (m_selected_game + 1) % GAME_COUNT; break;
 
         case '\n':
         case TB_KEY_ENTER: return static_cast<ScenesGame>(m_selected_game);
     }
 
     return Scenes::GamesMenu;
+}
+
+void GamesMenuScene::end(SceneResult next_scen)
+{
+    // Keep music running if staying within menu scenes (MainMenu shares the BGM).
+    // Stop it if heading into a game.
+    if (std::holds_alternative<ScenesGame>(next_scen))
+        playback.stopMusic();
 }

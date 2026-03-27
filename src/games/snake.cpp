@@ -212,6 +212,7 @@ void SnakeGame::update()
             m_speed_ms = std::max(static_cast<int>(settings.game_snake.snake_min_speed), m_speed_ms - SPEED_STEP_MS);
 
         spawn_food();
+        playback.playSfx(SnakeSounds::FOOD);
     }
     else
     {

@@ -65,38 +65,43 @@ int game_loop()
     Game2048   game_2048;
 
     SceneResult current_scene = Scenes::MainMenu;
+    Scene*      active_scene  = nullptr;
     bool        running       = true;
 
     while (running)
     {
-        Scene* active_scene = nullptr;
+        Scene* next_scene = nullptr;
 
         // clang-format off
         std::visit(overloaded{
             [&](Scenes s) {
                 switch (s)
                 {
-                    case Scenes::MainMenu:     active_scene = &main_menu; break;
-                    case Scenes::GamesMenu:    active_scene = &games_menu; break;
-                    case Scenes::Credits:      active_scene = &credits; break;
-                    case Scenes::SettingsMenu: active_scene = &settings_menu; break;
+                    case Scenes::MainMenu:     next_scene = &main_menu; break;
+                    case Scenes::GamesMenu:    next_scene = &games_menu; break;
+                    case Scenes::Credits:      next_scene = &credits; break;
+                    case Scenes::SettingsMenu: next_scene = &settings_menu; break;
                     default:                   running = false; break;
                 }
             },
             [&](ScenesGame s) {
                 switch (s)
                 {
-                    case ScenesGame::Tetris:    active_scene = &game_tetris; break;
-                    case ScenesGame::TicTacToe: active_scene = &game_ttt; break;
-                    case ScenesGame::Wordle:    active_scene = &game_wordle; break;
-                    case ScenesGame::Game2048:  active_scene = &game_2048; break;
-                    case ScenesGame::Snake:     active_scene = &game_snake; break;
+                    case ScenesGame::Tetris:    next_scene = &game_tetris; break;
+                    case ScenesGame::TicTacToe: next_scene = &game_ttt; break;
+                    case ScenesGame::Wordle:    next_scene = &game_wordle; break;
+                    case ScenesGame::Game2048:  next_scene = &game_2048; break;
+                    case ScenesGame::Snake:     next_scene = &game_snake; break;
                     default:                    running = false; break;
                 }
             }
         }, current_scene);
         // clang-format on
 
+        if (active_scene && next_scene != active_scene)
+            active_scene->end(current_scene);
+
+        active_scene = next_scene;
         if (!running || !active_scene)
             break;
 

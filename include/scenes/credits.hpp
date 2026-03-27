@@ -12,5 +12,6 @@ public:
     }
 
     void        render() override;
+    void        end(SceneResult) override {}
     SceneResult handle_input(uint32_t key) override;
 };

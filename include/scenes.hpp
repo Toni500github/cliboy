@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <variant>
 
+#include "audio_player.hpp"
 #include "settings.hpp"
 #include "terminal_display.hpp"
 #include "util.hpp"
@@ -36,6 +37,7 @@ public:
     virtual ~Scene()                               = default;
     virtual void        render()                   = 0;
     virtual SceneResult handle_input(uint32_t key) = 0;
+    virtual void        end(SceneResult /*next_scene*/) {playback.stopMusic();}
     virtual int         frame_ms()
     {
         // If -1, then the tb_peek_event will be blocking
