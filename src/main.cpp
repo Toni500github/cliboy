@@ -105,7 +105,7 @@ int game_loop()
         if (!running || !active_scene)
             break;
 
-        // Run only once
+        // Run only once forever
         const Result<>& r = active_scene->begin();
         if (!r.ok())
         {

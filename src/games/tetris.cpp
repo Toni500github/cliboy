@@ -372,9 +372,6 @@ void TetrisGame::spawn_new_piece()
 
 void TetrisGame::render()
 {
-    if (!playback.isMusicPlaying())
-        playback.playMusic(TetrisSounds::BGM);
-
     auto now =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
             .count();
@@ -410,7 +407,7 @@ void TetrisGame::render()
     else if (m_paused)
         draw_paused();
     else if (!playback.isMusicPlaying())
-        playback.resumeMusic();
+        playback.playMusic(TetrisSounds::BGM);
 }
 
 void TetrisGame::draw_border()
