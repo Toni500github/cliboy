@@ -35,7 +35,7 @@ jobs:
             package-ext: tar.gz
             content-type: application/gzip
 
-          - os: ubuntu-22.04-arm
+          - os: ubuntu-24.04-arm
             arch: aarch64
             artifact-name: cli-boy-linux-aarch64
             package-ext: tar.gz
@@ -72,6 +72,12 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get purge firefox -y
           sudo apt-get install -y build-essential pkg-config make
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y g++-13
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 100
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100
 
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
