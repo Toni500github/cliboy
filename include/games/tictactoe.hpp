@@ -23,6 +23,7 @@ public:
     }
     void        render() override;
     SceneResult handle_input(uint32_t key) override;
+    SceneResult scene_id() const override { return ScenesGame::TicTacToe; }
 
 private:
     char   m_board[3][3]    = { { ' ', ' ', ' ' }, { ' ', ' ', ' ' }, { ' ', ' ', ' ' } };

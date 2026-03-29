@@ -6,7 +6,7 @@
 
 namespace TetrisSounds
 {
-constexpr const char* BGM = "tetris.mp3";
+constexpr const char* BGM        = "tetris.mp3";
 constexpr const char* LINE_CLEAR = "sfx_tetris_clear_line.wav";
 }  // namespace TetrisSounds
 

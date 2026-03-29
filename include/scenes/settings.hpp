@@ -8,6 +8,7 @@ public:
     void        render() override;
     void        end(SceneResult) override {}
     SceneResult handle_input(uint32_t key) override;
+    SceneResult scene_id() const override { return Scenes::SettingsMenu; }
 
 private:
     size_t      m_selected_item = 0;

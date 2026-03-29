@@ -13,27 +13,23 @@ static uint32_t CH_CORNER_BL = U'╚';
 static uint32_t CH_CORNER_BR = U'╝';
 
 // Colors
-static constexpr uintattr_t COLOR_EMPTY    = TB_DEFAULT;
-static constexpr uintattr_t COLOR_2        = TB_WHITE | TB_BOLD;
-static constexpr uintattr_t COLOR_4        = TB_YELLOW | TB_BOLD;
-static constexpr uintattr_t COLOR_8        = TB_RED | TB_BOLD;
-static constexpr uintattr_t COLOR_16       = TB_MAGENTA | TB_BOLD;
-static constexpr uintattr_t COLOR_32       = TB_BLUE | TB_BOLD;
-static constexpr uintattr_t COLOR_64       = TB_CYAN | TB_BOLD;
-static constexpr uintattr_t COLOR_128      = TB_GREEN | TB_BOLD;
-static constexpr uintattr_t COLOR_256      = 0xff135a | TB_BOLD;
-static constexpr uintattr_t COLOR_512      = 0x424b59 | TB_BOLD;
-static constexpr uintattr_t COLOR_1024     = 0xff4f75 | TB_BOLD;
-static constexpr uintattr_t COLOR_2048     = 0x808080 | TB_BOLD;
-static constexpr uintattr_t COLOR_HUD      = TB_CYAN | TB_BOLD;
-static constexpr uintattr_t COLOR_GAMEOVER = TB_RED | TB_BOLD;
-static constexpr uintattr_t COLOR_WIN      = TB_GREEN | TB_BOLD;
+static constexpr uintattr_t COLOR_EMPTY = TB_DEFAULT;
+static constexpr uintattr_t COLOR_2     = TB_WHITE | TB_BOLD;
+static constexpr uintattr_t COLOR_4     = TB_YELLOW | TB_BOLD;
+static constexpr uintattr_t COLOR_8     = TB_RED | TB_BOLD;
+static constexpr uintattr_t COLOR_16    = TB_MAGENTA | TB_BOLD;
+static constexpr uintattr_t COLOR_32    = TB_BLUE | TB_BOLD;
+static constexpr uintattr_t COLOR_64    = TB_CYAN | TB_BOLD;
+static constexpr uintattr_t COLOR_128   = TB_GREEN | TB_BOLD;
+static constexpr uintattr_t COLOR_256   = 0xff135a | TB_BOLD;
+static constexpr uintattr_t COLOR_512   = 0x424b59 | TB_BOLD;
+static constexpr uintattr_t COLOR_1024  = 0xff4f75 | TB_BOLD;
+static constexpr uintattr_t COLOR_2048  = 0x808080 | TB_BOLD;
+static constexpr uintattr_t COLOR_HUD   = TB_CYAN | TB_BOLD;
 
-Result<> Game2048::on_begin()
+Result<> Game2048::on_game_begin()
 {
     set_footer("Arrows: Move | R: Restart | ESC: Back");
-
-    init_game();
     return Ok();
 }
 
@@ -68,10 +64,9 @@ void Game2048::init_game()
         CH_CORNER_BR = '+';
     }
 
-    m_grid      = {};
-    m_score     = 0;
-    m_game_over = false;
-    m_won       = false;
+    m_grid = {};
+
+    reset_score();
 
     // Add starting tiles
     add_new_tile();
@@ -128,7 +123,7 @@ bool Game2048::move(Direction dir)
             if (line[k] == line[k + 1])
             {
                 line[k] *= 2;
-                m_score += line[k];
+                add_score(line[k]);
                 line.erase(line.begin() + k + 1);
                 changed = true;
             }
@@ -208,7 +203,7 @@ std::string Game2048::format_number(int value) const
     return std::format("{:^{}}", value, m_cell_w);
 }
 
-void Game2048::render()
+void Game2048::render_game()
 {
     if (!playback.isMusicPlaying())
         playback.playMusic(Game2048Sounds::BGM);
@@ -217,10 +212,10 @@ void Game2048::render()
     draw_grid();
     draw_hud();
 
-    if (m_game_over)
-        draw_game_over();
-    else if (m_won)
-        draw_win();
+    if (is_game_over())
+        draw_game_over_overlay({ { "Score", std::to_string(score()) } });
+    else if (is_won())
+        draw_win_overlay({ { "Score", std::to_string(score()) } });
 }
 
 void Game2048::draw_border()
@@ -288,77 +283,24 @@ void Game2048::draw_hud()
     int hud_y = m_grid_y - 3;
 
     display.setCursor(hud_x, hud_y);
-    display.print("Score: {}", m_score);
+    display.print("Score: {}", score());
 
-    if (m_best_score > 0)
+    if (best_score() > 0)
     {
         display.setCursor(hud_x + 15, hud_y);
-        display.print("Best: {}", m_best_score);
+        display.print("Best: {}", best_score());
     }
-}
-
-void Game2048::draw_game_over()
-{
-    display.setTextColor(COLOR_GAMEOVER);
-    int mid_y = m_grid_y + (GRID_SIZE * m_cell_h) / 2;
-
-    if (settings.general.utf8)
-    {
-        display.centerText(mid_y - 1, "╔══════════════════╗");
-        display.centerText(mid_y - 0, "║    GAME  OVER    ║");
-        display.centerText(mid_y + 1, "╚══════════════════╝");
-    }
-    else
-    {
-        display.centerText(mid_y - 1, "+------------------+");
-        display.centerText(mid_y - 0, "|    GAME  OVER    |");
-        display.centerText(mid_y + 1, "+------------------+");
-    }
-
-    display.setTextColor(TB_WHITE);
-    display.centerText(mid_y + 3, "R: Restart   ESC: Menu");
-}
-
-void Game2048::draw_win()
-{
-    display.setTextColor(COLOR_WIN);
-    int mid_y = m_grid_y + (GRID_SIZE * m_cell_h) / 2;
-
-    if (settings.general.utf8)
-    {
-        display.centerText(mid_y - 2, "╔══════════════════╗");
-        display.centerText(mid_y - 1, "║     YOU WIN!     ║");
-        display.centerText(mid_y - 0, "║   Score: {:>6}  ║", m_score);
-        display.centerText(mid_y + 1, "╚══════════════════╝");
-    }
-    else
-    {
-        display.centerText(mid_y - 2, "+------------------+");
-        display.centerText(mid_y - 1, "|     YOU WIN!     |");
-        display.centerText(mid_y - 0, "|   Score: {:>6}  |", m_score);
-        display.centerText(mid_y + 1, "+------------------+");
-    }
-
-    display.setTextColor(TB_WHITE);
-    display.centerText(mid_y + 3, "R: Restart   ESC: Menu");
 }
 
 SceneResult Game2048::handle_input(uint32_t key)
 {
-    if (key == TB_KEY_ESC)
-        return Scenes::GamesMenu;
+    if (auto r = handle_common_input(key, false))
+        return *r;
 
-    if (key == 'r' || key == 'R')
-    {
-        init_game();
-        return ScenesGame::Game2048;
-    }
-
-    if (m_game_over)
-        return ScenesGame::Game2048;
+    if (is_game_over())
+        return scene_id();
 
     bool moved = false;
-
     switch (key)
     {
         case TB_KEY_ARROW_LEFT:  moved = move(Direction::Left); break;
@@ -372,17 +314,12 @@ SceneResult Game2048::handle_input(uint32_t key)
     {
         add_new_tile();
 
-        if (!m_won && check_win())
-        {
-            m_won = true;
-            // Update best score
-            if (m_score > m_best_score)
-                m_best_score = m_score;
-        }
+        if (!is_won() && check_win())
+            set_game_state(GameState::Won);
 
         if (!is_move_possible())
-            m_game_over = true;
+            set_game_state(GameState::GameOver);
     }
 
-    return ScenesGame::Game2048;
+    return scene_id();
 }

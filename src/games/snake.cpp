@@ -20,31 +20,30 @@ static constexpr uintattr_t COL_SNAKE_HEAD = TB_GREEN | TB_BOLD;
 static constexpr uintattr_t COL_SNAKE_BODY = TB_GREEN;
 static constexpr uintattr_t COL_FOOD       = TB_RED | TB_BOLD;
 static constexpr uintattr_t COL_HUD        = TB_CYAN | TB_BOLD;
-static constexpr uintattr_t COL_GAMEOVER   = TB_RED | TB_BOLD;
-static constexpr uintattr_t COL_PAUSED     = TB_YELLOW | TB_BOLD;
 
 // Speed
 static constexpr int SPEED_STEP_MS   = 10;  // ms reduction per milestone
 static constexpr int SPEED_MILESTONE = 5;   // points between speed-ups
 
-Result<> SnakeGame::on_begin()
+Result<> SnakeGame::on_game_begin()
 {
     set_footer("Arrows: Move | P: Pause | ESC: Back");
-
-    init_game();
     return Ok();
 }
 
-void SnakeGame::render()
+void SnakeGame::render_game()
 {
     update();
 
     draw_border();
     draw_hud();
 
-    if (m_dead)
+    if (is_game_over())
     {
-        draw_game_over();
+        draw_game_over_overlay({
+            { "Score", std::to_string(score()) },
+            { "Length", std::to_string(m_snake.size()) },
+        });
         return;
     }
 
@@ -61,27 +60,16 @@ void SnakeGame::render()
         is_head = false;
     }
 
-    if (m_paused)
-        draw_paused();
+    if (is_paused())
+        draw_paused_overlay();
 }
 
 SceneResult SnakeGame::handle_input(uint32_t key)
 {
-    if (key == TB_KEY_ESC)
-        return Scenes::GamesMenu;
-
-    if (m_dead)
-    {
-        if (key == 'r' || key == 'R')
-            init_game();
-        return ScenesGame::Snake;
-    }
-
-    if (key == 'p' || key == 'P')
-    {
-        m_paused = !m_paused;
-        return ScenesGame::Snake;
-    }
+    if (auto r = handle_common_input(key))
+        return *r;
+    if (is_game_over())
+        return scene_id();
 
     // Direction (prevent 180-degree reversal)
     switch (key)
@@ -105,7 +93,7 @@ SceneResult SnakeGame::handle_input(uint32_t key)
         default: break;
     }
 
-    return ScenesGame::Snake;
+    return scene_id();
 }
 
 void SnakeGame::init_game()
@@ -144,9 +132,8 @@ void SnakeGame::init_game()
     }
 
     m_snake.clear();
-    m_score    = 0;
-    m_dead     = false;
-    m_paused   = false;
+    reset_score();
+
     m_dir      = SnakeDir::Right;
     m_next_dir = SnakeDir::Right;
     m_speed_ms = static_cast<int>(settings.game_snake.snake_max_speed);
@@ -163,7 +150,7 @@ void SnakeGame::init_game()
 
 void SnakeGame::update()
 {
-    if (m_dead || m_paused)
+    if (is_game_over() || is_paused())
         return;
 
     m_dir = m_next_dir;
@@ -186,7 +173,7 @@ void SnakeGame::update()
 
     if (head.x < inner_x0 || head.x > inner_x1 || head.y < inner_y0 || head.y > inner_y1)
     {
-        m_dead = true;
+        set_game_state(GameState::GameOver);
         return;
     }
 
@@ -195,7 +182,7 @@ void SnakeGame::update()
     {
         if (*it == head)
         {
-            m_dead = true;
+            set_game_state(GameState::GameOver);
             return;
         }
     }
@@ -205,10 +192,10 @@ void SnakeGame::update()
     if (head == m_food)
     {
         // Grow (don't pop tail)
-        m_score++;
+        add_score(1);
 
         // Speed up every SPEED_MILESTONE points
-        if (m_score % SPEED_MILESTONE == 0)
+        if (score() % SPEED_MILESTONE == 0)
             m_speed_ms = std::max(static_cast<int>(settings.game_snake.snake_min_speed), m_speed_ms - SPEED_STEP_MS);
 
         spawn_food();
@@ -305,54 +292,5 @@ void SnakeGame::draw_hud()
     // Score line above the board (or at row 0 if board is near the top)
     const int hud_y = std::max(0, m_board_y - 2);
     display.setCursor(m_board_x, hud_y);
-    display.print(" Score: {}   Length: {} ", m_score, m_snake.size());
-}
-
-void SnakeGame::draw_game_over()
-{
-    display.setTextColor(COL_GAMEOVER);
-    const int mid_y = m_board_y + m_board_h / 2;
-
-    // clang-format off
-    if (settings.general.utf8)
-    {
-        display.centerText(mid_y - 2, "╔══════════════════╗");
-        display.centerText(mid_y - 1, "║    GAME  OVER    ║");
-        display.centerText(mid_y,     "║  Score:  {:>6}  ║", m_score);
-        display.centerText(mid_y + 1, "║  Length: {:>6}  ║", m_snake.size());
-        display.centerText(mid_y + 2, "╚══════════════════╝");
-    }
-    else
-    {
-        display.centerText(mid_y - 2, "+------------------+");
-        display.centerText(mid_y - 1, "|    GAME  OVER    |");
-        display.centerText(mid_y,     "|  Score:  {:>6}  |", m_score);
-        display.centerText(mid_y + 1, "|  Length: {:>6}  |", m_snake.size());
-        display.centerText(mid_y + 2, "+------------------+");
-    }
-    // clang-format on
-
-    display.setTextColor(TB_WHITE);
-    display.centerText(mid_y + 4, "R: Restart   ESC: Menu");
-}
-
-void SnakeGame::draw_paused()
-{
-    display.setTextColor(COL_PAUSED);
-    const int mid_y = m_board_y + m_board_h / 2;
-
-    // clang-format off
-    if (settings.general.utf8)
-    {
-        display.centerText(mid_y - 1, "╔════════════╗");
-        display.centerText(mid_y,     "║   PAUSED   ║");
-        display.centerText(mid_y + 1, "╚════════════╝");
-    }
-    else
-    {
-        display.centerText(mid_y - 1, "+------------+");
-        display.centerText(mid_y,     "|   PAUSED   |");
-        display.centerText(mid_y + 1, "+------------+");
-    }
-    // clang-format on
+    display.print(" Score: {}   Length: {} ", score(), m_snake.size());
 }

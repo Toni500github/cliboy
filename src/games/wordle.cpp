@@ -172,7 +172,7 @@ std::string WordleGame::get_random_guess()
     return str_toupper(m_words_list[dist(rng)]);
 }
 
-void WordleGame::reset_game()
+void WordleGame::init_game()
 {
     m_buf.clear();
     m_grid        = WordleStates{};
@@ -180,10 +180,11 @@ void WordleGame::reset_game()
     m_is_correct  = false;
     m_is_selected = false;
     m_is_invalid  = false;
-    m_guess       = get_random_guess();
+    if (!m_words_list.empty())
+        m_guess = get_random_guess();
 }
 
-Result<> WordleGame::on_begin()
+Result<> WordleGame::on_game_begin()
 {
     std::ifstream f(settings.game_wordle.wordle_txt_path);
     if (!f)
@@ -199,7 +200,7 @@ Result<> WordleGame::on_begin()
     return Ok();
 }
 
-void WordleGame::render()
+void WordleGame::render_game()
 {
     if (!playback.isMusicPlaying())
         playback.playMusic(WordleSounds::BGM);
@@ -244,7 +245,7 @@ void WordleGame::render()
                 display.clearDisplay();
                 draw_end_game(true);
                 sleep_for(duration<float>(settings.game_wordle.delay_show_endgame));
-                reset_game();
+                init_game();
                 display.clearDisplay();
             }
         }
@@ -257,7 +258,7 @@ void WordleGame::render()
         display.clearDisplay();
         draw_end_game(false);
         sleep_for(duration<float>(settings.game_wordle.delay_show_endgame));
-        reset_game();
+        init_game();
         display.clearDisplay();
     }
 
@@ -292,5 +293,5 @@ SceneResult WordleGame::handle_input(uint32_t key)
         m_is_invalid = false;
     }
 
-    return ScenesGame::Wordle;
+    return scene_id();
 }

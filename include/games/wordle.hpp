@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "scenes.hpp"
+#include "game.hpp"
 
 enum class TileState
 {
@@ -21,12 +21,16 @@ struct Tile
 using RowStates    = std::array<TileState, 5>;
 using WordleStates = std::array<std::array<Tile, 5>, 6>;
 
-class WordleGame : public Scene
+class WordleGame : public BaseGame
 {
 public:
-    Result<>    on_begin() override;
-    void        render() override;
     SceneResult handle_input(uint32_t key) override;
+
+protected:
+    void        init_game() override;
+    void        render_game() override;
+    Result<>    on_game_begin() override;
+    SceneResult scene_id() const override { return ScenesGame::Wordle; }
 
 private:
     std::string              m_buf;
@@ -49,5 +53,4 @@ private:
     void        draw_wordle_grid(const WordleStates& grid);
     void        draw_not_valid(const std::string& word);
     void        draw_end_game(bool won);
-    void        reset_game();
 };

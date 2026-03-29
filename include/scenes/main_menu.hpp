@@ -16,6 +16,7 @@ public:
     void        end(SceneResult) override {}
     void        render() override;
     SceneResult handle_input(uint32_t key) override;
+    SceneResult scene_id() const override { return Scenes::MainMenu; }
 
 private:
     int                  m_selected_item = 0;

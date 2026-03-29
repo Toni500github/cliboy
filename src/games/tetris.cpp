@@ -21,25 +21,21 @@ static uint32_t CH_CORNER_BR = U'╝';
 static uint32_t CH_BLOCK     = U'█';
 
 // Colors (using termbox2 color constants)
-static constexpr uintattr_t COLOR_I        = TB_CYAN | TB_BOLD;
-static constexpr uintattr_t COLOR_O        = TB_YELLOW | TB_BOLD;
-static constexpr uintattr_t COLOR_T        = TB_MAGENTA | TB_BOLD;
-static constexpr uintattr_t COLOR_S        = TB_GREEN | TB_BOLD;
-static constexpr uintattr_t COLOR_Z        = TB_RED | TB_BOLD;
-static constexpr uintattr_t COLOR_J        = TB_BLUE | TB_BOLD;
-static constexpr uintattr_t COLOR_L        = TB_YELLOW | TB_BOLD;  // Orange-ish
-static constexpr uintattr_t COLOR_HUD      = TB_CYAN | TB_BOLD;
-static constexpr uintattr_t COLOR_GAMEOVER = TB_RED | TB_BOLD;
-static constexpr uintattr_t COLOR_PAUSED   = TB_YELLOW | TB_BOLD;
+static constexpr uintattr_t COLOR_I   = TB_CYAN | TB_BOLD;
+static constexpr uintattr_t COLOR_O   = TB_YELLOW | TB_BOLD;
+static constexpr uintattr_t COLOR_T   = TB_MAGENTA | TB_BOLD;
+static constexpr uintattr_t COLOR_S   = TB_GREEN | TB_BOLD;
+static constexpr uintattr_t COLOR_Z   = TB_RED | TB_BOLD;
+static constexpr uintattr_t COLOR_J   = TB_BLUE | TB_BOLD;
+static constexpr uintattr_t COLOR_L   = TB_YELLOW | TB_BOLD;  // Orange-ish
+static constexpr uintattr_t COLOR_HUD = TB_CYAN | TB_BOLD;
 
 // Scoring
 static constexpr int SCORES[] = { 0, 40, 100, 300, 1200 };  // 1, 2, 3, 4 lines
 
-Result<> TetrisGame::on_begin()
+Result<> TetrisGame::on_game_begin()
 {
     set_footer("← →: Move | ↑: Rotate | ↓: Soft Drop | Space: Hard Drop | P: Pause | ESC: Back");
-
-    init_game();
     return Ok();
 }
 
@@ -84,11 +80,9 @@ void TetrisGame::init_game()
         CH_BLOCK     = '#';
     }
 
-    m_score         = 0;
+    reset_score();
     m_lines_cleared = 0;
     m_level         = 0;
-    m_game_over     = false;
-    m_paused        = false;
     m_fall_timer    = 0;
     m_last_update   = 0;
 
@@ -299,7 +293,7 @@ void TetrisGame::merge_piece()
     spawn_new_piece();
 
     if (collides(piece))
-        m_game_over = true;
+        set_game_state(GameState::GameOver);
 }
 
 void TetrisGame::clear_lines_and_update_score()
@@ -333,7 +327,7 @@ void TetrisGame::clear_lines_and_update_score()
     if (lines_cleared > 0)
     {
         m_lines_cleared += lines_cleared;
-        m_score += calculate_score(lines_cleared);
+        add_score(calculate_score(lines_cleared));
         update_level();
         playback.playSfx(TetrisSounds::LINE_CLEAR);
     }
@@ -370,14 +364,14 @@ void TetrisGame::spawn_new_piece()
     m_current_piece.y = 0;
 }
 
-void TetrisGame::render()
+void TetrisGame::render_game()
 {
     auto now =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
             .count();
 
     // Update fall timer (only if not game over and not paused)
-    if (!m_game_over && !m_paused)
+    if (!is_game_over() && !is_paused())
     {
         if (m_last_update == 0)
         {
@@ -402,10 +396,13 @@ void TetrisGame::render()
     draw_next_piece();
     draw_hud();
 
-    if (m_game_over)
-        draw_game_over();
-    else if (m_paused)
-        draw_paused();
+    if (is_game_over())
+        draw_game_over_overlay({
+            { "Score", std::to_string(score()) },
+            { "Lines", std::to_string(m_lines_cleared) },
+        });
+    else if (is_paused())
+        draw_paused_overlay();
     else if (!playback.isMusicPlaying())
         playback.playMusic(TetrisSounds::BGM);
 }
@@ -544,7 +541,7 @@ void TetrisGame::draw_hud()
     int hud_y = next_y + NEXT_SIZE * m_cell_size + m_cell_size * 2;
 
     display.setCursor(hud_x, hud_y);
-    display.print("Score: {}", m_score);
+    display.print("Score: {}", score());
 
     display.setCursor(hud_x, hud_y + 1);
     display.print("Lines: {}", m_lines_cleared);
@@ -553,77 +550,14 @@ void TetrisGame::draw_hud()
     display.print("Level: {}", m_level);
 }
 
-void TetrisGame::draw_game_over()
-{
-    display.setTextColor(COLOR_GAMEOVER);
-    int mid_y = m_grid_y + m_grid_h / 2;
-
-    if (settings.general.utf8)
-    {
-        display.centerText(mid_y - 2, "╔══════════════════╗");
-        display.centerText(mid_y - 1, "║    GAME  OVER    ║");
-        display.centerText(mid_y - 0, "║   Score: {:>6}  ║", m_score);
-        display.centerText(mid_y + 1, "║   Lines: {:>6}  ║", m_lines_cleared);
-        display.centerText(mid_y + 2, "╚══════════════════╝");
-    }
-    else
-    {
-        display.centerText(mid_y - 2, "+------------------+");
-        display.centerText(mid_y - 1, "|    GAME  OVER    |");
-        display.centerText(mid_y - 0, "|   Score: {:>6}  |", m_score);
-        display.centerText(mid_y + 1, "|   Lines: {:>6}  |", m_lines_cleared);
-        display.centerText(mid_y + 2, "+------------------+");
-    }
-
-    display.setTextColor(TB_WHITE);
-    display.centerText(mid_y + 4, "R: Restart   ESC: Menu");
-}
-
-void TetrisGame::draw_paused()
-{
-    display.setTextColor(COLOR_PAUSED);
-    int mid_y = m_grid_y + m_grid_h / 2;
-
-    if (settings.general.utf8)
-    {
-        display.centerText(mid_y - 1, "╔════════════╗");
-        display.centerText(mid_y - 0, "║   PAUSED   ║");
-        display.centerText(mid_y + 1, "╚════════════╝");
-    }
-    else
-    {
-        display.centerText(mid_y - 1, "+------------+");
-        display.centerText(mid_y - 0, "|   PAUSED   |");
-        display.centerText(mid_y + 1, "+------------+");
-    }
-}
-
 SceneResult TetrisGame::handle_input(uint32_t key)
 {
-    if (key == TB_KEY_ESC)
-        return Scenes::GamesMenu;
+    if (auto r = handle_common_input(key))
+        return *r;
 
-    if (m_game_over)
-    {
-        if (key == 'r' || key == 'R')
-            init_game();
-        return ScenesGame::Tetris;
-    }
+    if (is_paused() || is_game_over())
+        return scene_id();
 
-    if (key == 'p' || key == 'P')
-    {
-        m_paused = !m_paused;
-        if (m_paused)
-            playback.pauseMusic();
-        else
-            playback.resumeMusic();
-        return ScenesGame::Tetris;
-    }
-
-    if (m_paused)
-        return ScenesGame::Tetris;
-
-    // Game controls
     switch (key)
     {
         case TB_KEY_ARROW_LEFT:  move_piece(-1, 0); break;
@@ -633,6 +567,5 @@ SceneResult TetrisGame::handle_input(uint32_t key)
         case TB_KEY_SPACE:       hard_drop(); break;
         default:                 break;
     }
-
-    return ScenesGame::Tetris;
+    return scene_id();
 }

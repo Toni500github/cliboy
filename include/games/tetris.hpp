@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "scenes.hpp"
+#include "game.hpp"
 #include "terminal_display.hpp"
 
 using TetrominoShape = std::array<std::array<uint8_t, 4>, 4>;
@@ -28,15 +28,12 @@ struct Tetromino
     int            x, y;  // Position on grid (top-left corner)
 };
 
-class TetrisGame : public Scene
+class TetrisGame : public BaseGame
 {
 public:
     TetrisGame()
-        : m_score(0),
-          m_lines_cleared(0),
+        : m_lines_cleared(0),
           m_level(0),
-          m_game_over(false),
-          m_paused(false),
           m_fall_timer(0),
           m_last_update(0),
           m_grid_x(0),
@@ -46,23 +43,22 @@ public:
           m_grid_h(0) {};
     ~TetrisGame() override = default;
 
-    void        render() override;
     SceneResult handle_input(uint32_t key) override;
     int         frame_ms() override { return 16; }  // ~60 FPS for smooth input
 
 protected:
-    Result<> on_begin() override;
+    void        init_game() override;
+    void        render_game() override;
+    Result<>    on_game_begin() override;
+    SceneResult scene_id() const override { return ScenesGame::Tetris; }
 
 private:
     // Game state
     std::vector<std::vector<uint32_t>> m_grid;  // Color values for each cell
     Tetromino                          m_current_piece;
     Tetromino                          m_next_piece;
-    int                                m_score;
     int                                m_lines_cleared;
     int                                m_level;
-    bool                               m_game_over;
-    bool                               m_paused;
     uint32_t                           m_fall_timer;
     uint32_t                           m_last_update;
 
@@ -74,7 +70,6 @@ private:
     int m_grid_h;
 
     // Helper functions
-    void           init_game();
     Tetromino      spawn_piece(TetrominoType type);
     Tetromino      get_random_piece();
     TetrominoShape get_shape_for_type(TetrominoType type);
@@ -95,7 +90,5 @@ private:
     void draw_current_piece();
     void draw_next_piece();
     void draw_hud();
-    void draw_game_over();
-    void draw_paused();
     void draw_border();
 };

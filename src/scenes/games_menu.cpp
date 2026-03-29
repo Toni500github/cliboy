@@ -87,7 +87,7 @@ SceneResult GamesMenuScene::handle_input(uint32_t key)
         case TB_KEY_ENTER: return static_cast<ScenesGame>(m_selected_game);
     }
 
-    return Scenes::GamesMenu;
+    return scene_id();
 }
 
 void GamesMenuScene::end(SceneResult next_scen)

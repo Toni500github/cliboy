@@ -28,5 +28,5 @@ SceneResult CreditsScene::handle_input(uint32_t key)
 {
     if (key == TB_KEY_ESC)
         return Scenes::MainMenu;
-    return Scenes::Credits;
+    return scene_id();
 }

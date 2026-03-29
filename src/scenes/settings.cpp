@@ -504,5 +504,5 @@ SceneResult SettingsScene::handle_input(uint32_t key)
         }
     }
 
-    return Scenes::SettingsMenu;
+    return scene_id();
 }

@@ -74,5 +74,5 @@ SceneResult MainMenuScene::handle_input(uint32_t key)
         case TB_KEY_ENTER: return static_cast<Scenes>(m_selected_item);
     }
 
-    return Scenes::MainMenu;
+    return scene_id();
 }
