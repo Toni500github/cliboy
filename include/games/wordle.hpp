@@ -49,8 +49,10 @@ private:
 
     std::string get_random_guess();
     RowStates   get_states(const std::string& str);
-    bool        is_valid(const std::string& word);
+    bool        is_valid(const std::string& word) const;
     void        draw_wordle_grid(const WordleStates& grid);
     void        draw_not_valid(const std::string& word);
+    void        update_game();
     void        draw_end_game(bool won);
+    void        run_end_game_sequence(bool won);
 };
