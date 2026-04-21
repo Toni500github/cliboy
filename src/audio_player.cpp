@@ -94,6 +94,15 @@ void AudioPlayer::setMusicVolume(float volume)
         ma_sound_set_volume(&m_music, volume);
 }
 
+void AudioPlayer::unloadMusic()
+{
+    if (m_music_loaded)
+    {
+        ma_sound_uninit(&m_music);
+        m_music_loaded = false;
+    }
+}
+
 // -------------------------------------
 // SFX
 // -------------------------------------
@@ -132,15 +141,6 @@ void AudioPlayer::setSfxVolume(float volume)
     m_sfx_volume = volume;
     if (m_sfx_loaded)
         ma_sound_set_volume(&m_sfx, volume);
-}
-
-void AudioPlayer::unloadMusic()
-{
-    if (m_music_loaded)
-    {
-        ma_sound_uninit(&m_music);
-        m_music_loaded = false;
-    }
 }
 
 void AudioPlayer::unloadSfx()

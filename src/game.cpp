@@ -3,7 +3,7 @@
 static std::string str_repeat(const std::string& s, size_t n)
 {
     std::string out;
-    out.reserve(s.size() * std::max(0UL, n));
+    out.reserve(s.size() * std::max<size_t>(0, n));
     for (size_t i = 0; i < n; ++i)
         out += s;
     return out;
@@ -21,8 +21,8 @@ static std::string rpad(const std::string& s, size_t width)
 static std::string centre_in(const std::string& s, size_t width)
 {
     size_t total_pad = width - s.size();
-    size_t pad_l     = std::max(0UL, total_pad / 2);
-    size_t pad_r     = std::max(0UL, total_pad - pad_l);
+    size_t pad_l     = std::max<size_t>(0, total_pad / 2);
+    size_t pad_r     = std::max<size_t>(0, total_pad - pad_l);
     return std::string(pad_l, ' ') + s + std::string(pad_r, ' ');
 }
 
