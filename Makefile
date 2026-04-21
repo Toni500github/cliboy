@@ -33,8 +33,8 @@ endif
 
 NAME		 = cliboy
 TARGET		?= $(NAME)
-OLDVERSION	 = 0.1.1
-VERSION    	 = 0.2.0
+OLDVERSION	 = 0.2.0
+VERSION    	 = 0.2.1
 SRC	 	 = $(wildcard src/*.cpp src/*/*.cpp)
 OBJ	 	 = $(SRC:.cpp=.o)
 LDLIBS 		+= -lpthread
