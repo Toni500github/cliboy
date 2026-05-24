@@ -23,8 +23,8 @@
  *
  */
 
-#include <cstdio>
 #include <cstdlib>
+#include <format>
 
 #include "audio_player.hpp"
 #include "games/2048.hpp"
@@ -38,6 +38,7 @@
 #include "scenes/settings.hpp"
 #include "settings.hpp"
 #include "terminal_display.hpp"
+#include "util.hpp"
 
 AudioPlayer     playback;
 TerminalDisplay display;
@@ -109,12 +110,15 @@ int game_loop()
         const Result<>& r = active_scene->begin();
         if (!r.ok())
         {
+            show_error("Interal error", std::format("Error while initing a scene/game: {}\n", r.error_v()));
             tb_shutdown();
-            fprintf(stderr, "Error while initing a scene/game: %s\n", r.error_v().c_str());
             return 1;
         }
 
         active_scene->renderAll();
+
+        if (playback.hasError())
+            show_error("Audio Error", playback.takeError());
 
         // Acquire key input
         tb_event ev;

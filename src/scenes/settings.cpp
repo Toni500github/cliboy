@@ -68,7 +68,7 @@ static const SettingEntry entries[] = {
     // General
     {
         "General settings",
-        "ASCII characters gameplay",
+        "Use ASCII characters for drawing",
         SettingKind::Bool,
         [] { return fmt_bool(!settings.general.utf8); },
         [](int) { settings.general.utf8 = !settings.general.utf8; },

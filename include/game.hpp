@@ -27,8 +27,40 @@ struct OverlayRow
 class BaseGame : public Scene
 {
 public:
+    // --------------------------------------------------------
+    // Overlay API
+    // --------------------------------------------------------
+
+    struct OverlayConfig
+    {
+        std::string              title;
+        uintattr_t               title_color = TB_RED | TB_BOLD;
+        std::vector<std::string> lines;  // free-form body text
+        std::vector<OverlayRow>  rows;   // label: value pairs
+        std::string              hint = "R: Restart   ESC: Menu";
+    };
+
+    // Red "GAME OVER" box.
+    void drawGameOverOverlay(const std::vector<OverlayRow>& rows) const
+    {
+        drawOverlay({ "GAME OVER", TB_RED | TB_BOLD, {}, rows, "R: Restart   ESC: Menu" });
+    }
+
+    // Green "YOU WIN!" box.
+    void drawWinOverlay(const std::vector<OverlayRow>& rows) const
+    {
+        drawOverlay({ "YOU WIN!", TB_GREEN | TB_BOLD, {}, rows, "R: Restart   ESC: Menu" });
+    }
+
+    // Yellow "PAUSED" box (no rows, different hint).
+    void drawPausedOverlay() const { drawOverlay({ "PAUSED", TB_YELLOW | TB_BOLD, {}, {}, "P: Resume   ESC: Menu" }); }
+
     // final: derived classes use the hook below
     Result<> onBegin() final;
+
+    // Draw an overlay centred on the screen.
+    // center_y overrides the automatic vertical midpoint when >= 0.
+    static void drawOverlay(const OverlayConfig& cfg, int center_y = -1);
 
 protected:
     // --------------------------------------------------------
@@ -67,37 +99,6 @@ protected:
     int  bestScore() const { return m_best_score; }
     void resetScore() { m_score = 0; }
     void addScore(int delta);  // auto updates best
-
-    // --------------------------------------------------------
-    // Overlay API
-    // --------------------------------------------------------
-
-    struct OverlayConfig
-    {
-        std::string             title;
-        uintattr_t              title_color = TB_RED | TB_BOLD;
-        std::vector<OverlayRow> rows;
-        std::string             hint = "R: Restart   ESC: Menu";
-    };
-
-    // Draw an overlay centred on the screen.
-    // center_y overrides the automatic vertical midpoint when >= 0.
-    void drawOverlay(const OverlayConfig& cfg, int center_y = -1) const;
-
-    // Red "GAME OVER" box.
-    void drawGameOverOverlay(const std::vector<OverlayRow>& rows) const
-    {
-        drawOverlay({ "GAME OVER", TB_RED | TB_BOLD, rows, "R: Restart   ESC: Menu" });
-    }
-
-    // Green "YOU WIN!" box.
-    void drawWinOverlay(const std::vector<OverlayRow>& rows) const
-    {
-        drawOverlay({ "YOU WIN!", TB_GREEN | TB_BOLD, rows, "R: Restart   ESC: Menu" });
-    }
-
-    // Yellow "PAUSED" box (no rows, different hint).
-    void drawPausedOverlay() const { drawOverlay({ "PAUSED", TB_YELLOW | TB_BOLD, {}, "P: Resume   ESC: Menu" }); }
 
     // --------------------------------------------------------
     // Common input handler

@@ -1,7 +1,7 @@
 #include "audio_player.hpp"
 
-#include <cstdio>
 #include <filesystem>
+#include <format>
 #include <string>
 
 #include "settings.hpp"
@@ -23,7 +23,7 @@ bool AudioPlayer::begin()
     ma_result result = ma_engine_init(nullptr, &m_engine);
     if (result != MA_SUCCESS)
     {
-        fprintf(stderr, "[audio] Failed to init engine: %s\n", ma_result_description(result));
+        m_last_error = std::format("Failed to init engine: {}", ma_result_description(result));
         return false;
     }
 
@@ -42,8 +42,8 @@ void AudioPlayer::playMusic(const char* audio)
 
     const fs::path& path = fs::path(settings.general.assets_path) / "audios" / audio;
 
-    // Already playing this exact track — do nothing
-    if (m_music_loaded && m_current_music == path && ma_sound_is_playing(&m_music))
+    // Already playing this exact track
+    if (m_current_music == path)
         return;
 
     unloadMusic();
@@ -54,7 +54,7 @@ void AudioPlayer::playMusic(const char* audio)
 
     if (result != MA_SUCCESS)
     {
-        fprintf(stderr, "[audio] Failed to load music '%s': %s\n", path.c_str(), ma_result_description(result));
+        m_last_error = std::format("Failed to load music '{}': {}", path.c_str(), ma_result_description(result));
         return;
     }
 
@@ -123,7 +123,7 @@ void AudioPlayer::playSfx(const char* audio)
 
     if (result != MA_SUCCESS)
     {
-        fprintf(stderr, "[audio] Failed to load sfx '%s': %s\n", path.c_str(), ma_result_description(result));
+        m_last_error = std::format("Failed to load sfx '{}': {}", path.c_str(), ma_result_description(result));
         return;
     }
 

@@ -57,14 +57,21 @@ public:
     void setMusicVolume(float volume);
     void setSfxVolume(float volume);
 
-private:
-    void unloadMusic();
-    void unloadSfx();
+    // Errors
+    bool        hasError() const { return !m_last_error.empty(); }
+    std::string takeError()
+    {
+        std::string e = m_last_error;
+        m_last_error.clear();
+        return e;
+    }
 
+private:
     ma_engine m_engine{};
     ma_sound  m_music{};
     ma_sound  m_sfx{};
 
+    std::string m_last_error;
     std::string m_current_music;
 
     bool  m_engine_ready = false;
@@ -72,6 +79,9 @@ private:
     bool  m_sfx_loaded   = false;
     float m_music_volume = 1.0f;
     float m_sfx_volume   = 1.0f;
+
+    void unloadMusic();
+    void unloadSfx();
 };
 
 extern AudioPlayer playback;

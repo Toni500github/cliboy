@@ -1,9 +1,10 @@
 #include <algorithm>
 #include <cstdint>
-#include <cstdio>
 #include <cstdlib>
 #include <filesystem>
 #include <format>
+
+#include "util.hpp"
 
 #define TB_IMPL 1
 #include "settings.hpp"
@@ -120,23 +121,23 @@ void TerminalDisplay::setCursor(const int x, const int y)
 
 void TerminalDisplay::setFont(FigletType figlet_type, const std::string_view font)
 {
-    if (!std::filesystem::exists(settings.general.assets_path))
-    {
+    auto exit_fail = [&](const std::string& title, const std::string& msg) {
+        show_error(title, msg);
         clearDisplay();
         tb_shutdown();
-        fprintf(stderr, "assets path '%s' doesn't exist\n", settings.general.assets_path.c_str());
         std::exit(-1);
-    }
+    };
+
+    if (!std::filesystem::exists(settings.general.assets_path))
+        exit_fail("Assets Error", std::format("assets path '{}' doesn't exist", settings.general.assets_path));
 
     const std::string& path = std::format("{}/fonts/{}.flf", settings.general.assets_path, font);
-    m_flf_font              = flf_font::make_shared(path);
+    if (!std::filesystem::exists(path))
+        exit_fail("Assets Error", std::format("Font at path '{}' doesn't exist", path));
+
+    m_flf_font = flf_font::make_shared(path);
     if (!m_flf_font)
-    {
-        clearDisplay();
-        tb_shutdown();
-        fprintf(stderr, "Failed to open font '%s' at path '%s'\n", font.data(), path.c_str());
-        std::exit(-1);
-    }
+        exit_fail("Assets Error", std::format("Failed to open font '{}' at path '{}'", font, path));
 
     switch (figlet_type)
     {

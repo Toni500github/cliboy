@@ -160,6 +160,9 @@ bool for_2d_until(int width, int height, Func&& func)
     return false;
 }
 
+// In game.cpp
+void show_error(const std::string& title, const std::string& msg);
+
 /* Spilt a string into a vector using a delimeter
  * @param text The string to split
  * @param delim The delimeter used for spliting the text
