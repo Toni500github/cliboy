@@ -9,11 +9,11 @@ DEBUG 		?= 1
 # https://stackoverflow.com/a/1079861
 # WAY easier way to build debug and release builds
 ifeq ($(DEBUG), 1)
-        BUILDDIR  := build/debug
+    BUILDDIR  := build/debug
 	LTO_FLAGS  = -fno-lto
-        CXXFLAGS  := -ggdb3 -Wall -Wextra -pedantic -Wno-unused-parameter \
-			-DDEBUG=1 -fno-omit-frame-pointer $(DEBUG_CXXFLAGS) $(CXXFLAGS)
-        LDFLAGS	  += -fno-lto -Wl,-rpath,$(BUILDDIR)
+    CXXFLAGS  := -ggdb3 -Wall -Wextra -pedantic -Wno-unused-parameter \
+		-DDEBUG=1 -fno-omit-frame-pointer $(DEBUG_CXXFLAGS) $(CXXFLAGS)
+    LDFLAGS	  += -fno-lto -Wl,-rpath,$(BUILDDIR)
 else
 	# Check if an optimization flag is not already set
 	ifneq ($(filter -O%,$(CXXFLAGS)),)
@@ -22,7 +22,7 @@ else
     		CXXFLAGS := -O3 $(CXXFLAGS)
 	endif
 	LDFLAGS   += $(LTO_FLAGS)
-        BUILDDIR  := build/release
+    BUILDDIR  := build/release
 endif
 
 UNAME_S := $(shell uname -s)

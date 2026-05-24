@@ -1,9 +1,12 @@
 #include "audio_player.hpp"
 
 #include <cstdio>
+#include <filesystem>
 #include <string>
 
 #include "settings.hpp"
+
+namespace fs = std::filesystem;
 
 AudioPlayer::~AudioPlayer()
 {
@@ -37,7 +40,7 @@ void AudioPlayer::playMusic(const char* audio)
     if (!m_engine_ready)
         return;
 
-    const std::string path = settings.general.assets_path + "/audios/" + audio;
+    const fs::path& path = fs::path(settings.general.assets_path) / "audios" / audio;
 
     // Already playing this exact track — do nothing
     if (m_music_loaded && m_current_music == path && ma_sound_is_playing(&m_music))
@@ -114,7 +117,7 @@ void AudioPlayer::playSfx(const char* audio)
 
     unloadSfx();
 
-    const std::string path = settings.general.assets_path + "/audios/" + audio;
+    const fs::path& path = fs::path(settings.general.assets_path) / "audios" / audio;
 
     ma_result result = ma_sound_init_from_file(&m_engine, path.c_str(), MA_SOUND_FLAG_DECODE, nullptr, nullptr, &m_sfx);
 

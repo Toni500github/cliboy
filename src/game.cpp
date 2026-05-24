@@ -93,9 +93,7 @@ void BaseGame::draw_overlay(const OverlayConfig& cfg, int center_y) const
 
     int y = center_y;
 
-    // --------------------------------------------------------
     // Time to draw
-    // --------------------------------------------------------
     display.setTextColor(cfg.title_color);
 
     // Top border: ╔══════════╗
@@ -149,5 +147,5 @@ std::optional<SceneResult> BaseGame::handle_common_input(uint32_t key, bool cons
         return scene_id();
     }
 
-    return std::nullopt;  // key not consumed — caller handles it
+    return std::nullopt;  // key not consumed, the caller handles it
 }
