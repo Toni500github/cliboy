@@ -27,13 +27,13 @@ static constexpr uintattr_t COLOR_1024  = 0xff4f75 | TB_BOLD;
 static constexpr uintattr_t COLOR_2048  = 0x808080 | TB_BOLD;
 static constexpr uintattr_t COLOR_HUD   = TB_CYAN | TB_BOLD;
 
-Result<> Game2048::on_game_begin()
+Result<> Game2048::onGameBegin()
 {
-    set_footer("Arrows: Move | R: Restart | ESC: Back");
+    setFooter("Arrows: Move | R: Restart | ESC: Back");
     return Ok();
 }
 
-void Game2048::init_game()
+void Game2048::initGame()
 {
     // Calculate cell size based on terminal dimensions
     int max_cell_w = (display.getWidth() / 2) / GRID_SIZE;
@@ -66,14 +66,14 @@ void Game2048::init_game()
 
     m_grid = {};
 
-    reset_score();
+    resetScore();
 
     // Add starting tiles
-    add_new_tile();
-    add_new_tile();
+    addNewTile();
+    addNewTile();
 }
 
-void Game2048::add_new_tile()
+void Game2048::addNewTile()
 {
     static std::mt19937 rng{ std::random_device{}() };
 
@@ -123,7 +123,7 @@ bool Game2048::move(Direction dir)
             if (line[k] == line[k + 1])
             {
                 line[k] *= 2;
-                add_score(line[k]);
+                addScore(line[k]);
                 line.erase(line.begin() + k + 1);
                 changed = true;
             }
@@ -153,7 +153,7 @@ bool Game2048::move(Direction dir)
     return changed;
 }
 
-bool Game2048::is_move_possible() const
+bool Game2048::isMovePossible() const
 {
     // Check for any empty cell
     if (for_2d_until(GRID_SIZE, GRID_SIZE, [&](int row, int col) { return m_grid[row][col] == 0; }))
@@ -171,12 +171,12 @@ bool Game2048::is_move_possible() const
     });
 }
 
-bool Game2048::check_win() const
+bool Game2048::checkWin() const
 {
     return for_2d_until(GRID_SIZE, GRID_SIZE, [&](int row, int col) { return m_grid[row][col] >= WIN_VALUE; });
 }
 
-uintattr_t Game2048::get_color_for_value(int value) const
+uintattr_t Game2048::getColorForValue(int value) const
 {
     switch (value)
     {
@@ -196,29 +196,29 @@ uintattr_t Game2048::get_color_for_value(int value) const
     }
 }
 
-std::string Game2048::format_number(int value) const
+std::string Game2048::formatNumber(int value) const
 {
     if (value == 0)
         return "";
     return std::format("{:^{}}", value, m_cell_w);
 }
 
-void Game2048::render_game()
+void Game2048::renderGame()
 {
     if (!playback.isMusicPlaying())
         playback.playMusic(Game2048Sounds::BGM);
 
-    draw_border();
-    draw_grid();
-    draw_hud();
+    drawBorder();
+    drawGrid();
+    drawHud();
 
-    if (is_game_over())
-        draw_game_over_overlay({ { "Score", std::to_string(score()) } });
-    else if (is_won())
-        draw_win_overlay({ { "Score", std::to_string(score()) } });
+    if (isGameOver())
+        drawGameOverOverlay({ { "Score", std::to_string(score()) } });
+    else if (isWon())
+        drawWinOverlay({ { "Score", std::to_string(score()) } });
 }
 
-void Game2048::draw_border()
+void Game2048::drawBorder()
 {
     display.setTextColor(COLOR_HUD);
 
@@ -250,24 +250,24 @@ void Game2048::draw_border()
     display.drawPixel(x2, y2, CH_CORNER_BR);
 }
 
-void Game2048::draw_grid()
+void Game2048::drawGrid()
 {
-    for_2d(GRID_SIZE, GRID_SIZE, [&](int row, int col) { draw_cell(row, col, m_grid[row][col]); });
+    for_2d(GRID_SIZE, GRID_SIZE, [&](int row, int col) { drawCell(row, col, m_grid[row][col]); });
 }
 
-void Game2048::draw_cell(int row, int col, int value)
+void Game2048::drawCell(int row, int col, int value)
 {
     int x = m_grid_x + col * m_cell_w;
     int y = m_grid_y + row * m_cell_h;
 
     // Background
-    display.setTextBgColor(get_color_for_value(value));
+    display.setTextBgColor(getColorForValue(value));
     display.drawFilledRect(x, y, m_cell_w, m_cell_h, ' ');
 
     // Value
     if (value != 0)
     {
-        const std::string& str = format_number(value);
+        const std::string& str = formatNumber(value);
         display.setTextColor(TB_BLACK | TB_BOLD);
         display.setCursor(x + (m_cell_w / 2) - (str.length() / 2), y + (m_cell_h / 2));
         display.print(str);
@@ -275,7 +275,7 @@ void Game2048::draw_cell(int row, int col, int value)
     display.resetColors();
 }
 
-void Game2048::draw_hud()
+void Game2048::drawHud()
 {
     display.setTextColor(COLOR_HUD);
 
@@ -285,20 +285,20 @@ void Game2048::draw_hud()
     display.setCursor(hud_x, hud_y);
     display.print("Score: {}", score());
 
-    if (best_score() > 0)
+    if (bestScore() > 0)
     {
         display.setCursor(hud_x + 15, hud_y);
-        display.print("Best: {}", best_score());
+        display.print("Best: {}", bestScore());
     }
 }
 
-SceneResult Game2048::handle_input(uint32_t key)
+SceneResult Game2048::handleInput(uint32_t key)
 {
-    if (auto r = handle_common_input(key, false))
+    if (auto r = handleCommonInput(key, false))
         return *r;
 
-    if (is_game_over())
-        return scene_id();
+    if (isGameOver())
+        return sceneID();
 
     bool moved = false;
     switch (key)
@@ -312,14 +312,14 @@ SceneResult Game2048::handle_input(uint32_t key)
 
     if (moved)
     {
-        add_new_tile();
+        addNewTile();
 
-        if (!is_won() && check_win())
-            set_game_state(GameState::Won);
+        if (!isWon() && checkWin())
+            setGameState(GameState::Won);
 
-        if (!is_move_possible())
-            set_game_state(GameState::GameOver);
+        if (!isMovePossible())
+            setGameState(GameState::GameOver);
     }
 
-    return scene_id();
+    return sceneID();
 }

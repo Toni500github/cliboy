@@ -43,14 +43,14 @@ public:
           m_grid_h(0) {};
     ~TetrisGame() override = default;
 
-    SceneResult handle_input(uint32_t key) override;
-    int         frame_ms() override { return 16; }  // ~60 FPS for smooth input
+    SceneResult handleInput(uint32_t key) override;
+    int         frameMs() override { return 16; }  // ~60 FPS for smooth input
 
 protected:
-    void        init_game() override;
-    void        render_game() override;
-    Result<>    on_game_begin() override;
-    SceneResult scene_id() const override { return ScenesGame::Tetris; }
+    void        initGame() override;
+    void        renderGame() override;
+    Result<>    onGameBegin() override;
+    SceneResult sceneID() const override { return ScenesGame::Tetris; }
 
 private:
     // Game state
@@ -70,25 +70,25 @@ private:
     int m_grid_h;
 
     // Helper functions
-    Tetromino      spawn_piece(TetrominoType type);
-    Tetromino      get_random_piece();
-    TetrominoShape get_shape_for_type(TetrominoType type);
-    uintattr_t     get_color_for_type(TetrominoType type);
+    Tetromino      spawnPiece(TetrominoType type);
+    Tetromino      getRandomPiece();
+    TetrominoShape getShapeForType(TetrominoType type);
+    uintattr_t     getColorForType(TetrominoType type);
     bool           collides(const Tetromino& piece, int dx = 0, int dy = 0) const;
-    void           merge_piece();
-    void           clear_lines_and_update_score();
-    int            calculate_score(int lines);
-    void           update_level();
-    int            get_fall_delay_ms() const;
-    bool           move_piece(int dx, int dy);
-    void           rotate_piece();
-    void           hard_drop();
-    void           spawn_new_piece();
+    void           mergePiece();
+    void           clearLinesAndUpdateScore();
+    int            calculateScore(int lines);
+    void           updateLevel();
+    int            getFallDelayMs() const;
+    bool           movePiece(int dx, int dy);
+    void           rotatePiece();
+    void           hardDrop();
+    void           spawnNewPiece();
 
     // Drawing functions
-    void draw_grid();
-    void draw_current_piece();
-    void draw_next_piece();
-    void draw_hud();
-    void draw_border();
+    void drawGrid();
+    void drawCurrentPiece();
+    void drawNextPiece();
+    void drawHud();
+    void drawBorder();
 };

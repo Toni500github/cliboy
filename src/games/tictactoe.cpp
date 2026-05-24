@@ -12,12 +12,12 @@ static int CELL_SIZE      = 0;
 static int BOARD_OFFSET_X = 0;
 static int BOARD_OFFSET_Y = 0;
 
-bool TTTGame::is_board_full()
+bool TTTGame::isBoardFull()
 {
-    return !iterate_board([](char& c, int, int) -> bool { return c == ' '; });
+    return !iterateBoard([](char& c, int, int) -> bool { return c == ' '; });
 }
 
-void TTTGame::draw_piece(int row, int col, char piece)
+void TTTGame::drawPiece(int row, int col, char piece)
 {
     int x = BOARD_OFFSET_X + col * CELL_SIZE + CELL_SIZE / 4;
     int y = BOARD_OFFSET_Y + row * CELL_SIZE + CELL_SIZE / 4;
@@ -40,7 +40,7 @@ void TTTGame::draw_piece(int row, int col, char piece)
     display.resetColors();
 }
 
-void TTTGame::draw_game_screen()
+void TTTGame::drawGameScreen()
 {
     display.setTextBgColor(TB_WHITE);
 
@@ -66,9 +66,9 @@ void TTTGame::draw_game_screen()
 
     display.resetColors();
 
-    iterate_board([&](char& c, int r, int col) {
+    iterateBoard([&](char& c, int r, int col) {
         if (c != ' ')
-            draw_piece(r, col, c);
+            drawPiece(r, col, c);
     });
 
     const int cx = BOARD_OFFSET_X + m_cursor_x * CELL_SIZE + CELL_SIZE / 2;
@@ -85,14 +85,14 @@ void TTTGame::draw_game_screen()
     display.display();
 }
 
-void TTTGame::animate_line(int x0, int y0, int x1, int y1)
+void TTTGame::animateLine(int x0, int y0, int x1, int y1)
 {
     const int steps = 16;  // smoothness
     for (int i = 1; i <= steps; ++i)
     {
         int xi = x0 + (x1 - x0) * i / steps;
         int yi = y0 + (y1 - y0) * i / steps;
-        draw_game_screen();  // redraw board and pieces
+        drawGameScreen();  // redraw board and pieces
         display.setTextBgColor(TB_WHITE);
         display.drawLine(x0, y0, xi, yi, ' ');
         display.display();
@@ -101,16 +101,16 @@ void TTTGame::animate_line(int x0, int y0, int x1, int y1)
     display.resetColors();
 }
 
-Player TTTGame::check_winner()
+Player TTTGame::checkWinner()
 {
     // check rows
     for (uint8_t row = 0; row < 3; ++row)
         if (m_board[row][0] != ' ' && m_board[row][0] == m_board[row][1] && m_board[row][1] == m_board[row][2])
         {
-            animate_line(BOARD_OFFSET_X,
-                         BOARD_OFFSET_Y + row * CELL_SIZE + CELL_SIZE / 2,
-                         BOARD_OFFSET_X + BOARD_SIZE,
-                         BOARD_OFFSET_Y + row * CELL_SIZE + CELL_SIZE / 2);
+            animateLine(BOARD_OFFSET_X,
+                        BOARD_OFFSET_Y + row * CELL_SIZE + CELL_SIZE / 2,
+                        BOARD_OFFSET_X + BOARD_SIZE,
+                        BOARD_OFFSET_Y + row * CELL_SIZE + CELL_SIZE / 2);
             return (Player)m_board[row][0];
         }
 
@@ -118,30 +118,30 @@ Player TTTGame::check_winner()
     for (uint8_t col = 0; col < 3; ++col)
         if (m_board[0][col] != ' ' && m_board[0][col] == m_board[1][col] && m_board[1][col] == m_board[2][col])
         {
-            animate_line(BOARD_OFFSET_X + col * CELL_SIZE + CELL_SIZE / 2,
-                         BOARD_OFFSET_Y,
-                         BOARD_OFFSET_X + col * CELL_SIZE + CELL_SIZE / 2,
-                         BOARD_OFFSET_Y + BOARD_SIZE);
+            animateLine(BOARD_OFFSET_X + col * CELL_SIZE + CELL_SIZE / 2,
+                        BOARD_OFFSET_Y,
+                        BOARD_OFFSET_X + col * CELL_SIZE + CELL_SIZE / 2,
+                        BOARD_OFFSET_Y + BOARD_SIZE);
             return (Player)m_board[0][col];
         }
 
     // check diagonals
     if (m_board[0][0] != ' ' && m_board[0][0] == m_board[1][1] && m_board[1][1] == m_board[2][2])
     {
-        animate_line(BOARD_OFFSET_X, BOARD_OFFSET_Y, BOARD_OFFSET_X + BOARD_SIZE, BOARD_OFFSET_Y + BOARD_SIZE);
+        animateLine(BOARD_OFFSET_X, BOARD_OFFSET_Y, BOARD_OFFSET_X + BOARD_SIZE, BOARD_OFFSET_Y + BOARD_SIZE);
         return (Player)m_board[0][0];
     }
 
     if (m_board[0][2] != ' ' && m_board[0][2] == m_board[1][1] && m_board[1][1] == m_board[2][0])
     {
-        animate_line(BOARD_OFFSET_X + BOARD_SIZE, BOARD_OFFSET_Y, BOARD_OFFSET_X, BOARD_OFFSET_Y + BOARD_SIZE);
+        animateLine(BOARD_OFFSET_X + BOARD_SIZE, BOARD_OFFSET_Y, BOARD_OFFSET_X, BOARD_OFFSET_Y + BOARD_SIZE);
         return (Player)m_board[0][2];
     }
 
     return Player::None;
 }
 
-void TTTGame::draw_winner(Player winner)
+void TTTGame::drawWinner(Player winner)
 {
     display.clearDisplay();
     display.setFont(FigletType::FullWidth, "starwars");
@@ -153,13 +153,13 @@ void TTTGame::draw_winner(Player winner)
     display.display();
 }
 
-void TTTGame::reset_game()
+void TTTGame::resetGame()
 {
     display.clearDisplay();
     display.resetColors();
     display.resetFont();
 
-    iterate_board([](char& c, int, int) { c = ' '; });
+    iterateBoard([](char& c, int, int) { c = ' '; });
 
     m_moves          = 0;
     m_cursor_y       = 0;
@@ -199,20 +199,20 @@ void TTTGame::render()
 
     m_current_player = player_to_place;
 
-    draw_game_screen();
+    drawGameScreen();
 
-    const Player winner = check_winner();
+    const Player winner = checkWinner();
     if (winner != Player::None)
     {
-        draw_winner(winner);
+        drawWinner(winner);
         display.display();
         sleep_for(duration<float>(settings.game_ttt.delay_show_endgame));
-        reset_game();
+        resetGame();
         render();
         return;
     }
 
-    if (is_board_full())
+    if (isBoardFull())
     {
         sleep_for(500ms);
         display.clearDisplay();
@@ -221,7 +221,7 @@ void TTTGame::render()
         display.resetFont();
         display.display();
         sleep_for(duration<float>(settings.game_ttt.delay_show_endgame));
-        reset_game();
+        resetGame();
         render();
         return;
     }
@@ -229,7 +229,7 @@ void TTTGame::render()
     display.display();
 }
 
-SceneResult TTTGame::handle_input(uint32_t key)
+SceneResult TTTGame::handleInput(uint32_t key)
 {
     switch (key)
     {
@@ -259,5 +259,5 @@ SceneResult TTTGame::handle_input(uint32_t key)
         case '\n':         m_choose_pos = true; break;
     }
 
-    return scene_id();
+    return sceneID();
 }

@@ -34,19 +34,19 @@ using SceneResult = std::variant<Scenes, ScenesGame>;
 class Scene
 {
 public:
-    virtual ~Scene()                               = default;
-    virtual void        render()                   = 0;
-    virtual SceneResult handle_input(uint32_t key) = 0;
-    virtual SceneResult scene_id() const           = 0;
+    virtual ~Scene()                              = default;
+    virtual void        render()                  = 0;
+    virtual SceneResult handleInput(uint32_t key) = 0;
+    virtual SceneResult sceneID() const           = 0;
     virtual void        end(SceneResult /*next_scene*/) { playback.stopMusic(); }
-    virtual int         frame_ms()
+    virtual int         frameMs()
     {
         // If -1, then the tb_peek_event will be blocking
         // else it run every ms
         return -1;
     }
 
-    virtual void render_footer()
+    virtual void renderFooter()
     {
         if (m_footer_text.empty())
             return;
@@ -62,26 +62,26 @@ public:
             return Ok();
 
         m_has_begun = true;
-        return on_begin();
+        return onBegin();
     }
 
-    void render_all()
+    void renderAll()
     {
         display.clearDisplay();
         display.resetFont();
 
         render();  // derived class implements this
 
-        render_footer();
+        renderFooter();
 
         display.display();
     }
 
-    bool has_begun() const { return m_has_begun; }
+    bool hasBegun() const { return m_has_begun; }
 
 protected:
-    virtual Result<> on_begin() { return Ok(); }
-    void             set_footer(std::string text, int padding = 3)
+    virtual Result<> onBegin() { return Ok(); }
+    void             setFooter(std::string text, int padding = 3)
     {
         m_footer_text    = std::move(text);
         m_footer_padding = padding;

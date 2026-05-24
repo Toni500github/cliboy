@@ -13,7 +13,7 @@
 
 // --------- helpers ---------
 
-uintattr_t WordleGame::bg_for(TileState s)
+uintattr_t WordleGame::bgFor(TileState s)
 {
     switch (s)
     {
@@ -25,7 +25,7 @@ uintattr_t WordleGame::bg_for(TileState s)
     return TB_DEFAULT;
 }
 
-uintattr_t WordleGame::fg_for(TileState s)
+uintattr_t WordleGame::fgFor(TileState s)
 {
     switch (s)
     {
@@ -38,7 +38,7 @@ uintattr_t WordleGame::fg_for(TileState s)
 }
 
 // Call this before draw_keyboard to build the current letter state map.
-LetterStates build_letter_states(const WordleStates& grid)
+LetterStates buildLetterStates(const WordleStates& grid)
 {
     LetterStates states;
     states.fill(TileState::Empty);
@@ -62,7 +62,7 @@ LetterStates build_letter_states(const WordleStates& grid)
     return states;
 }
 
-RowStates WordleGame::get_states(const std::string& str)
+RowStates WordleGame::getStates(const std::string& str)
 {
     RowStates states;
     states.fill(TileState::Absent);
@@ -97,12 +97,12 @@ RowStates WordleGame::get_states(const std::string& str)
     return states;
 }
 
-bool WordleGame::is_valid(const std::string& word) const
+bool WordleGame::isValid(const std::string& word) const
 {
     return !m_words_list.empty() && std::binary_search(m_words_list.begin(), m_words_list.end(), word);
 }
 
-bool WordleGame::is_correct(const RowStates& row)
+bool WordleGame::isCorrect(const RowStates& row)
 {
     for (auto state : row)
         if (state != TileState::Correct)
@@ -110,7 +110,7 @@ bool WordleGame::is_correct(const RowStates& row)
     return true;
 }
 
-std::string WordleGame::get_random_guess()
+std::string WordleGame::getRandomGuess()
 {
     static std::mt19937                rng{ std::random_device{}() };
     std::uniform_int_distribution<int> dist(0, m_words_list.size() - 1);
@@ -119,7 +119,7 @@ std::string WordleGame::get_random_guess()
 
 // --------- Initialisation ---------
 
-void WordleGame::init_game()
+void WordleGame::initGame()
 {
     m_buf.clear();
     m_grid        = WordleStates{};
@@ -135,10 +135,10 @@ void WordleGame::init_game()
             tile = Tile{ ' ', TileState::Empty };
 
     if (!m_words_list.empty())
-        m_guess = get_random_guess();
+        m_guess = getRandomGuess();
 }
 
-Result<> WordleGame::on_game_begin()
+Result<> WordleGame::onGameBegin()
 {
     std::ifstream f(settings.game_wordle.wordle_txt_path);
     if (!f)
@@ -148,14 +148,14 @@ Result<> WordleGame::on_game_begin()
     while (std::getline(f, word))
         m_words_list.push_back(word);
 
-    init_game();
-    set_footer(kFooterText);
+    initGame();
+    setFooter(kFooterText);
     return Ok();
 }
 
 // --------- Drawing ---------
 
-void WordleGame::draw_wordle_grid(const WordleStates& grid)
+void WordleGame::drawWordleGrid(const WordleStates& grid)
 {
     const char block = ' ';
 
@@ -173,13 +173,13 @@ void WordleGame::draw_wordle_grid(const WordleStates& grid)
 
             const Tile& t = grid[r][c];
 
-            display.setTextColor(bg_for(t.state));
-            display.setTextBgColor(bg_for(t.state));
+            display.setTextColor(bgFor(t.state));
+            display.setTextBgColor(bgFor(t.state));
             display.drawFilledRect(x, y, cell_w, cell_h, block);
             display.drawRect(x, y, cell_w, cell_h, block);
 
-            display.setTextColor(fg_for(t.state));
-            display.setTextBgColor(bg_for(t.state));
+            display.setTextColor(fgFor(t.state));
+            display.setTextBgColor(bgFor(t.state));
             display.setCursor(x + cell_w / 2, y + cell_h / 2);
             display.print("{}", t.ch);
         }
@@ -189,9 +189,9 @@ void WordleGame::draw_wordle_grid(const WordleStates& grid)
     display.display();
 }
 
-void WordleGame::draw_keyboard(const WordleStates& grid)
+void WordleGame::drawKeyboard(const WordleStates& grid)
 {
-    const LetterStates& letter_states = build_letter_states(grid);
+    const LetterStates& letter_states = buildLetterStates(grid);
 
     static constexpr const char* rows[3] = { "QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM" };
 
@@ -216,12 +216,12 @@ void WordleGame::draw_keyboard(const WordleStates& grid)
             const TileState state  = letter_states[letter - 'A'];
             const int       x      = start_x + c * (kb_cell_w + kb_gap_x);
 
-            display.setTextColor(bg_for(state));
-            display.setTextBgColor(bg_for(state));
+            display.setTextColor(bgFor(state));
+            display.setTextBgColor(bgFor(state));
             display.drawFilledRect(x, y, kb_cell_w, kb_cell_h, block);
 
-            display.setTextColor(fg_for(state));
-            display.setTextBgColor(bg_for(state));
+            display.setTextColor(fgFor(state));
+            display.setTextBgColor(bgFor(state));
             display.setCursor(x + kb_cell_w / 2, y + kb_cell_h / 2);
             display.print("{}", letter);
         }
@@ -231,7 +231,7 @@ void WordleGame::draw_keyboard(const WordleStates& grid)
     display.display();
 }
 
-void WordleGame::draw_not_valid(const std::string& word)
+void WordleGame::drawNotValid(const std::string& word)
 {
     if (!m_is_invalid)
         return;
@@ -245,7 +245,7 @@ void WordleGame::draw_not_valid(const std::string& word)
     display.display();
 }
 
-void WordleGame::draw_end_game(bool won)
+void WordleGame::drawEndGame(bool won)
 {
     display.setTextColor(won ? TB_GREEN : TB_RED);
     display.setFont(FigletType::FullWidth, "Big");
@@ -257,21 +257,21 @@ void WordleGame::draw_end_game(bool won)
     display.display();
 }
 
-void WordleGame::run_end_game_sequence(bool won)
+void WordleGame::runEndGameSequence(bool won)
 {
-    draw_wordle_grid(m_grid);
+    drawWordleGrid(m_grid);
     sleep_for(duration<float>(settings.game_wordle.delay_show_final_grid));
     display.clearDisplay();
 
-    draw_end_game(won);
+    drawEndGame(won);
     sleep_for(duration<float>(settings.game_wordle.delay_show_endgame));
 
-    init_game();
+    initGame();
     display.clearDisplay();
 }
 
 // Separated from rendering so render_game() only has to draw.
-void WordleGame::update_game()
+void WordleGame::updateGame()
 {
     if (!m_is_selected)
     {
@@ -285,7 +285,7 @@ void WordleGame::update_game()
     }
 
     // The player pressed Enter — validate the word.
-    if (!is_valid(str_tolower(m_buf)))
+    if (!isValid(str_tolower(m_buf)))
     {
         m_is_invalid   = true;
         m_is_selected  = false;
@@ -297,7 +297,7 @@ void WordleGame::update_game()
     m_invalid_word.clear();
     m_is_invalid = false;
 
-    const RowStates states = get_states(m_buf);
+    const RowStates states = getStates(m_buf);
     for (int c = 0; c < kWordLen; ++c)
     {
         m_grid[m_row][c].ch    = m_buf[c];
@@ -308,29 +308,29 @@ void WordleGame::update_game()
     m_buf.clear();
     ++m_row;
 
-    m_is_correct = is_correct(states);
+    m_is_correct = isCorrect(states);
     if (m_is_correct)
     {
-        run_end_game_sequence(true);
+        runEndGameSequence(true);
         return;
     }
 
     if (m_row == kMaxRows)
-        run_end_game_sequence(false);
+        runEndGameSequence(false);
 }
 
-void WordleGame::render_game()
+void WordleGame::renderGame()
 {
     if (!playback.isMusicPlaying())
         playback.playMusic(WordleSounds::BGM);
 
     display.clearDisplay();
-    update_game();
+    updateGame();
 
-    draw_wordle_grid(m_grid);
-    draw_keyboard(m_grid);
+    drawWordleGrid(m_grid);
+    drawKeyboard(m_grid);
 
-    draw_not_valid(m_invalid_word);
+    drawNotValid(m_invalid_word);
 
     display.resetFont();
     display.resetColors();
@@ -338,7 +338,7 @@ void WordleGame::render_game()
 }
 
 // Input
-SceneResult WordleGame::handle_input(uint32_t key)
+SceneResult WordleGame::handleInput(uint32_t key)
 {
     if (key == TB_KEY_ESC)
         return Scenes::GamesMenu;
@@ -353,5 +353,5 @@ SceneResult WordleGame::handle_input(uint32_t key)
         m_is_invalid = false;
     }
 
-    return scene_id();
+    return sceneID();
 }

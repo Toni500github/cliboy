@@ -32,13 +32,13 @@ using LetterStates = std::array<TileState, 26>;  // indexed by letter - 'A'
 class WordleGame : public BaseGame
 {
 public:
-    SceneResult handle_input(uint32_t key) override;
+    SceneResult handleInput(uint32_t key) override;
 
 protected:
-    void        init_game() override;
-    void        render_game() override;
-    Result<>    on_game_begin() override;
-    SceneResult scene_id() const override { return ScenesGame::Wordle; }
+    void        initGame() override;
+    void        renderGame() override;
+    Result<>    onGameBegin() override;
+    SceneResult sceneID() const override { return ScenesGame::Wordle; }
 
 private:
     static constexpr int cell_w = 5;
@@ -68,17 +68,17 @@ private:
     WordleStates             m_grid{};
     int                      m_row{};
 
-    static uintattr_t bg_for(TileState s);
-    static uintattr_t fg_for(TileState s);
-    static bool       is_correct(const RowStates& row);
+    static uintattr_t bgFor(TileState s);
+    static uintattr_t fgFor(TileState s);
+    static bool       isCorrect(const RowStates& row);
 
-    std::string get_random_guess();
-    RowStates   get_states(const std::string& str);
-    bool        is_valid(const std::string& word) const;
-    void        draw_wordle_grid(const WordleStates& grid);
-    void        draw_not_valid(const std::string& word);
-    void        draw_keyboard(const WordleStates& letter_states);
-    void        update_game();
-    void        draw_end_game(bool won);
-    void        run_end_game_sequence(bool won);
+    std::string getRandomGuess();
+    RowStates   getStates(const std::string& str);
+    bool        isValid(const std::string& word) const;
+    void        drawWordleGrid(const WordleStates& grid);
+    void        drawNotValid(const std::string& word);
+    void        drawKeyboard(const WordleStates& letter_states);
+    void        updateGame();
+    void        drawEndGame(bool won);
+    void        runEndGameSequence(bool won);
 };

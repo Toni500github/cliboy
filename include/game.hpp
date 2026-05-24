@@ -28,7 +28,7 @@ class BaseGame : public Scene
 {
 public:
     // final: derived classes use the hook below
-    Result<> on_begin() final;
+    Result<> onBegin() final;
 
 protected:
     // --------------------------------------------------------
@@ -36,37 +36,37 @@ protected:
     // --------------------------------------------------------
 
     // Called after init_game() once
-    virtual Result<> on_game_begin() { return Ok(); }
+    virtual Result<> onGameBegin() { return Ok(); }
 
     // (Re-) initialize all game data. Called by on_begin() and by
     // handle_common_input() when the player hits R
-    virtual void init_game() = 0;
+    virtual void initGame() = 0;
 
     // Called every frame from Scenes::render_all() via render()
-    virtual void render_game() = 0;
+    virtual void renderGame() = 0;
 
     // --------------------------------------------------------
     // GameState helpers
     // --------------------------------------------------------
-    GameState game_state() const { return m_game_state; }
+    GameState gameState() const { return m_game_state; }
 
-    bool is_playing() const { return m_game_state == GameState::Playing; }
-    bool is_paused() const { return m_game_state == GameState::Paused; }
-    bool is_won() const { return m_game_state == GameState::Won; }
-    bool is_game_over() const { return m_game_state == GameState::GameOver; }
+    bool isPlaying() const { return m_game_state == GameState::Playing; }
+    bool isPaused() const { return m_game_state == GameState::Paused; }
+    bool isWon() const { return m_game_state == GameState::Won; }
+    bool isGameOver() const { return m_game_state == GameState::GameOver; }
 
-    void set_game_state(GameState state) { m_game_state = state; }
+    void setGameState(GameState state) { m_game_state = state; }
 
-    void toggle_pause();
+    void togglePause();
 
     // --------------------------------------------------------
     // Optional helpers
     // Concrete games are free to use their own fields
     // --------------------------------------------------------
     int  score() const { return m_score; }
-    int  best_score() const { return m_best_score; }
-    void reset_score() { m_score = 0; }
-    void add_score(int delta);  // auto updates best
+    int  bestScore() const { return m_best_score; }
+    void resetScore() { m_score = 0; }
+    void addScore(int delta);  // auto updates best
 
     // --------------------------------------------------------
     // Overlay API
@@ -82,22 +82,22 @@ protected:
 
     // Draw an overlay centred on the screen.
     // center_y overrides the automatic vertical midpoint when >= 0.
-    void draw_overlay(const OverlayConfig& cfg, int center_y = -1) const;
+    void drawOverlay(const OverlayConfig& cfg, int center_y = -1) const;
 
     // Red "GAME OVER" box.
-    void draw_game_over_overlay(const std::vector<OverlayRow>& rows) const
+    void drawGameOverOverlay(const std::vector<OverlayRow>& rows) const
     {
-        draw_overlay({ "GAME OVER", TB_RED | TB_BOLD, rows, "R: Restart   ESC: Menu" });
+        drawOverlay({ "GAME OVER", TB_RED | TB_BOLD, rows, "R: Restart   ESC: Menu" });
     }
 
     // Green "YOU WIN!" box.
-    void draw_win_overlay(const std::vector<OverlayRow>& rows) const
+    void drawWinOverlay(const std::vector<OverlayRow>& rows) const
     {
-        draw_overlay({ "YOU WIN!", TB_GREEN | TB_BOLD, rows, "R: Restart   ESC: Menu" });
+        drawOverlay({ "YOU WIN!", TB_GREEN | TB_BOLD, rows, "R: Restart   ESC: Menu" });
     }
 
     // Yellow "PAUSED" box (no rows, different hint).
-    void draw_paused_overlay() const { draw_overlay({ "PAUSED", TB_YELLOW | TB_BOLD, {}, "P: Resume   ESC: Menu" }); }
+    void drawPausedOverlay() const { drawOverlay({ "PAUSED", TB_YELLOW | TB_BOLD, {}, "P: Resume   ESC: Menu" }); }
 
     // --------------------------------------------------------
     // Common input handler
@@ -108,14 +108,14 @@ protected:
     //
     // Keys handled:
     //   ESC          -> Scenes::GamesMenu
-    //   R / r        -> init_game() + reset state  (only when over or won)
-    //   P / p        -> toggle_pause()
+    //   R / r        -> initGame() + reset state  (only when over or won)
+    //   P / p        -> togglePause()
     // --------------------------------------------------------
-    std::optional<SceneResult> handle_common_input(uint32_t key, bool consume_p = true);
+    std::optional<SceneResult> handleCommonInput(uint32_t key, bool consume_p = true);
 
 private:
     // Scene::render() bridge
-    void render() final { render_game(); }
+    void render() final { renderGame(); }
 
     GameState m_game_state = GameState::Playing;
     int       m_score      = 0;

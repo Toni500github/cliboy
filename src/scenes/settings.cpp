@@ -328,7 +328,7 @@ static int row_of_entry(size_t       target,
     }
 }
 
-void SettingsScene::ensure_visible()
+void SettingsScene::ensureVisible()
 {
     // Scroll up: selected item is above the current window.
     if (m_selected_item < m_scroll_offset)
@@ -419,14 +419,14 @@ void SettingsScene::render()
     }
 
     if (m_editing)
-        set_footer("Type to edit | Backspace: Delete | Enter: Confirm | ESC: Cancel");
+        setFooter("Type to edit | Backspace: Delete | Enter: Confirm | ESC: Cancel");
     else
-        set_footer("↑↓: Navigate | ← →: Adjust | Enter: Edit string | ESC: Back");
+        setFooter("↑↓: Navigate | ← →: Adjust | Enter: Edit string | ESC: Back");
 
     display.display();
 }
 
-SceneResult SettingsScene::handle_input(uint32_t key)
+SceneResult SettingsScene::handleInput(uint32_t key)
 {
     static const size_t count = ARRAY_SIZE(entries);
 
@@ -468,11 +468,11 @@ SceneResult SettingsScene::handle_input(uint32_t key)
 
         case TB_KEY_ARROW_UP:
             m_selected_item = (m_selected_item - 1 + count) % count;
-            ensure_visible();
+            ensureVisible();
             break;
         case TB_KEY_ARROW_DOWN:
             m_selected_item = (m_selected_item + 1) % count;
-            ensure_visible();
+            ensureVisible();
             break;
 
         case TB_KEY_ARROW_LEFT:
@@ -504,5 +504,5 @@ SceneResult SettingsScene::handle_input(uint32_t key)
         }
     }
 
-    return scene_id();
+    return sceneID();
 }

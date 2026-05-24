@@ -1,4 +1,5 @@
 #include "game.hpp"
+#include "settings.hpp"
 
 static std::string str_repeat(const std::string& s, size_t n)
 {
@@ -26,13 +27,13 @@ static std::string centre_in(const std::string& s, size_t width)
     return std::string(pad_l, ' ') + s + std::string(pad_r, ' ');
 }
 
-Result<> BaseGame::on_begin()
+Result<> BaseGame::onBegin()
 {
-    init_game();
-    return on_game_begin();
+    initGame();
+    return onGameBegin();
 }
 
-void BaseGame::toggle_pause()
+void BaseGame::togglePause()
 {
     if (m_game_state == GameState::Playing)
     {
@@ -46,23 +47,34 @@ void BaseGame::toggle_pause()
     }
 }
 
-void BaseGame::add_score(int delta)
+void BaseGame::addScore(int delta)
 {
     m_score += delta;
     if (m_score > m_best_score)
         m_best_score = m_score;
 }
 
-void BaseGame::draw_overlay(const OverlayConfig& cfg, int center_y) const
+void BaseGame::drawOverlay(const OverlayConfig& cfg, int center_y) const
 {
-    const bool utf8 = settings.general.utf8;
-
-    const std::string H  = utf8 ? "═" : "-";
-    const std::string V  = utf8 ? "║" : "|";
-    const std::string TL = utf8 ? "╔" : "+";
-    const std::string TR = utf8 ? "╗" : "+";
-    const std::string BL = utf8 ? "╚" : "+";
-    const std::string BR = utf8 ? "╝" : "+";
+    std::string_view H, V, TL, TR, BL, BR;
+    if (settings.general.utf8)
+    {
+        H  = "═";
+        V  = "║";
+        TL = "╔";
+        TR = "╗";
+        BL = "╚";
+        BR = "╝";
+    }
+    else
+    {
+        H  = "-";
+        V  = "|";
+        TL = "+";
+        TR = "+";
+        BL = "+";
+        BR = "+";
+    }
 
     // Calculate inner width (content area, excluding the border chars)
     // Minimum to fit the title with 2 spaces padding either side.
@@ -97,7 +109,7 @@ void BaseGame::draw_overlay(const OverlayConfig& cfg, int center_y) const
     display.setTextColor(cfg.title_color);
 
     // Top border: ╔══════════╗
-    display.centerText(y++, "{}{}{}", TL, str_repeat(H, inner_w), TR);
+    display.centerText(y++, "{}{}{}", TL, str_repeat(H.data(), inner_w), TR);
 
     // Title row: ║  GAME OVER  ║
     display.centerText(y++, "{}{}{}", V, centre_in(cfg.title, inner_w), V);
@@ -113,7 +125,7 @@ void BaseGame::draw_overlay(const OverlayConfig& cfg, int center_y) const
     }
 
     // Bottom border: ╚══════════╝
-    display.centerText(y++, "{}{}{}", BL, str_repeat(H, inner_w), BR);
+    display.centerText(y++, "{}{}{}", BL, str_repeat(H.data(), inner_w), BR);
 
     // Hint line (one blank row gap below the box)
     if (!cfg.hint.empty())
@@ -125,26 +137,26 @@ void BaseGame::draw_overlay(const OverlayConfig& cfg, int center_y) const
     display.resetColors();
 }
 
-std::optional<SceneResult> BaseGame::handle_common_input(uint32_t key, bool consume_p)
+std::optional<SceneResult> BaseGame::handleCommonInput(uint32_t key, bool consume_p)
 {
     // Always let ESC go back to the game menu.
     if (key == TB_KEY_ESC)
         return Scenes::GamesMenu;
 
     // R restarts only when the game has ended (won or game over).
-    if ((key == 'r' || key == 'R') && (is_game_over() || is_won()))
+    if ((key == 'r' || key == 'R') && (isGameOver() || isWon()))
     {
         m_game_state = GameState::Playing;
-        reset_score();
-        init_game();
-        return scene_id();
+        resetScore();
+        initGame();
+        return sceneID();
     }
 
     // P toggles pause (only meaningful while playing or already paused).
-    if (consume_p && (key == 'p' || key == 'P') && !is_game_over() && !is_won())
+    if (consume_p && (key == 'p' || key == 'P') && !isGameOver() && !isWon())
     {
-        toggle_pause();
-        return scene_id();
+        togglePause();
+        return sceneID();
     }
 
     return std::nullopt;  // key not consumed, the caller handles it

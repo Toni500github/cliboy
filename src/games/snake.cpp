@@ -25,22 +25,22 @@ static constexpr uintattr_t COL_HUD        = TB_CYAN | TB_BOLD;
 static constexpr int SPEED_STEP_MS   = 10;  // ms reduction per milestone
 static constexpr int SPEED_MILESTONE = 5;   // points between speed-ups
 
-Result<> SnakeGame::on_game_begin()
+Result<> SnakeGame::onGameBegin()
 {
-    set_footer("Arrows: Move | P: Pause | ESC: Back");
+    setFooter("Arrows: Move | P: Pause | ESC: Back");
     return Ok();
 }
 
-void SnakeGame::render_game()
+void SnakeGame::renderGame()
 {
     update();
 
-    draw_border();
-    draw_hud();
+    drawBorder();
+    drawHud();
 
-    if (is_game_over())
+    if (isGameOver())
     {
-        draw_game_over_overlay({
+        drawGameOverOverlay({
             { "Score", std::to_string(score()) },
             { "Length", std::to_string(m_snake.size()) },
         });
@@ -60,43 +60,11 @@ void SnakeGame::render_game()
         is_head = false;
     }
 
-    if (is_paused())
-        draw_paused_overlay();
+    if (isPaused())
+        drawPausedOverlay();
 }
 
-SceneResult SnakeGame::handle_input(uint32_t key)
-{
-    if (auto r = handle_common_input(key))
-        return *r;
-    if (is_game_over())
-        return scene_id();
-
-    // Direction (prevent 180-degree reversal)
-    switch (key)
-    {
-        case TB_KEY_ARROW_UP:
-            if (m_dir != SnakeDir::Down)
-                m_next_dir = SnakeDir::Up;
-            break;
-        case TB_KEY_ARROW_DOWN:
-            if (m_dir != SnakeDir::Up)
-                m_next_dir = SnakeDir::Down;
-            break;
-        case TB_KEY_ARROW_LEFT:
-            if (m_dir != SnakeDir::Right)
-                m_next_dir = SnakeDir::Left;
-            break;
-        case TB_KEY_ARROW_RIGHT:
-            if (m_dir != SnakeDir::Left)
-                m_next_dir = SnakeDir::Right;
-            break;
-        default: break;
-    }
-
-    return scene_id();
-}
-
-void SnakeGame::init_game()
+void SnakeGame::initGame()
 {
     // ~75% of the terminal, centred.
     // Inner playfield is (board_w-2) × (board_h-2) after the border.
@@ -132,7 +100,7 @@ void SnakeGame::init_game()
     }
 
     m_snake.clear();
-    reset_score();
+    resetScore();
 
     m_dir      = SnakeDir::Right;
     m_next_dir = SnakeDir::Right;
@@ -145,12 +113,12 @@ void SnakeGame::init_game()
     m_snake.push_back({ sx - 1, sy });
     m_snake.push_back({ sx - 2, sy });
 
-    spawn_food();
+    spawnFood();
 }
 
 void SnakeGame::update()
 {
-    if (is_game_over() || is_paused())
+    if (isGameOver() || isPaused())
         return;
 
     m_dir = m_next_dir;
@@ -173,7 +141,7 @@ void SnakeGame::update()
 
     if (head.x < inner_x0 || head.x > inner_x1 || head.y < inner_y0 || head.y > inner_y1)
     {
-        set_game_state(GameState::GameOver);
+        setGameState(GameState::GameOver);
         return;
     }
 
@@ -182,7 +150,7 @@ void SnakeGame::update()
     {
         if (*it == head)
         {
-            set_game_state(GameState::GameOver);
+            setGameState(GameState::GameOver);
             return;
         }
     }
@@ -192,13 +160,13 @@ void SnakeGame::update()
     if (head == m_food)
     {
         // Grow (don't pop tail)
-        add_score(1);
+        addScore(1);
 
         // Speed up every SPEED_MILESTONE points
         if (score() % SPEED_MILESTONE == 0)
             m_speed_ms = std::max(static_cast<int>(settings.game_snake.snake_min_speed), m_speed_ms - SPEED_STEP_MS);
 
-        spawn_food();
+        spawnFood();
         playback.playSfx(SnakeSounds::FOOD);
     }
     else
@@ -207,7 +175,7 @@ void SnakeGame::update()
     }
 }
 
-void SnakeGame::spawn_food()
+void SnakeGame::spawnFood()
 {
     const int inner_x0 = m_board_x + 1;
     const int inner_y0 = m_board_y + 1;
@@ -255,7 +223,7 @@ void SnakeGame::spawn_food()
     m_food = candidate;
 }
 
-void SnakeGame::draw_border()
+void SnakeGame::drawBorder()
 {
     display.setTextColor(COL_BORDER);
 
@@ -285,7 +253,7 @@ void SnakeGame::draw_border()
     display.drawPixel(x + w - 1, y + h - 1, CH_CORNER_BR);
 }
 
-void SnakeGame::draw_hud()
+void SnakeGame::drawHud()
 {
     display.setTextColor(COL_HUD);
 
@@ -293,4 +261,36 @@ void SnakeGame::draw_hud()
     const int hud_y = std::max(0, m_board_y - 2);
     display.setCursor(m_board_x, hud_y);
     display.print(" Score: {}   Length: {} ", score(), m_snake.size());
+}
+
+SceneResult SnakeGame::handleInput(uint32_t key)
+{
+    if (auto r = handleCommonInput(key))
+        return *r;
+    if (isGameOver())
+        return sceneID();
+
+    // Direction (prevent 180-degree reversal)
+    switch (key)
+    {
+        case TB_KEY_ARROW_UP:
+            if (m_dir != SnakeDir::Down)
+                m_next_dir = SnakeDir::Up;
+            break;
+        case TB_KEY_ARROW_DOWN:
+            if (m_dir != SnakeDir::Up)
+                m_next_dir = SnakeDir::Down;
+            break;
+        case TB_KEY_ARROW_LEFT:
+            if (m_dir != SnakeDir::Right)
+                m_next_dir = SnakeDir::Left;
+            break;
+        case TB_KEY_ARROW_RIGHT:
+            if (m_dir != SnakeDir::Left)
+                m_next_dir = SnakeDir::Right;
+            break;
+        default: break;
+    }
+
+    return sceneID();
 }

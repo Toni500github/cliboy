@@ -6,17 +6,17 @@
 class GamesMenuScene : public Scene
 {
 public:
-    Result<> on_begin() override
+    Result<> onBegin() override
     {
         playback.playMusic(MenuSounds::BGM);
-        set_footer("Arrow Keys: Navigate | Enter: Play | ESC: Back");
+        setFooter("Arrow Keys: Navigate | Enter: Play | ESC: Back");
         return Ok();
     }
 
     void        render() override;
     void        end(SceneResult next_scene) override;
-    SceneResult handle_input(uint32_t key) override;
-    SceneResult scene_id() const override { return Scenes::GamesMenu; }
+    SceneResult sceneID() const override { return Scenes::GamesMenu; }
+    SceneResult handleInput(uint32_t key) override;
 
 private:
     int                  m_selected_game = 0;

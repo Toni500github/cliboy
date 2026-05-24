@@ -5,14 +5,14 @@
 class CreditsScene : public Scene
 {
 public:
-    Result<> on_begin() override
+    Result<> onBegin() override
     {
-        set_footer("ESC: Back");
+        setFooter("ESC: Back");
         return Ok();
     }
 
     void        render() override;
     void        end(SceneResult) override {}
-    SceneResult scene_id() const override { return Scenes::Credits; }
-    SceneResult handle_input(uint32_t key) override;
+    SceneResult sceneID() const override { return Scenes::Credits; }
+    SceneResult handleInput(uint32_t key) override;
 };

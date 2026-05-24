@@ -24,9 +24,9 @@ void CreditsScene::render()
     display.display();
 }
 
-SceneResult CreditsScene::handle_input(uint32_t key)
+SceneResult CreditsScene::handleInput(uint32_t key)
 {
     if (key == TB_KEY_ESC)
         return Scenes::MainMenu;
-    return scene_id();
+    return sceneID();
 }

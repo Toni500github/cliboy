@@ -97,40 +97,42 @@ struct [[nodiscard]] Result
     }
 
 private:
-    std::variant<T,E> m_value;
+    std::variant<T, E> m_value;
 };
 
 template <typename E>
 struct Result<Ok<void>, E>
 {
-    Result() : m_ok(true){}
-    Result(Ok<void>&&) : m_ok(true){}
+    Result() : m_ok(true) {}
+    Result(Ok<void>&&) : m_ok(true) {}
 
     template <typename U>
-    Result(const Err<U>& err) : m_ok(false), m_value(err.value){}
+    Result(const Err<U>& err) : m_ok(false), m_value(err.value)
+    {}
 
     template <typename U>
-    Result(Err<U>&& err) : m_ok(false), m_value(std::move(err.value)){}
+    Result(Err<U>&& err) : m_ok(false), m_value(std::move(err.value))
+    {}
 
-    bool ok() const {return m_ok;}
-    E& error() {return m_value;}
-    const E& error() const {return m_value;}
+    bool     ok() const { return m_ok; }
+    E&       error() { return m_value; }
+    const E& error() const { return m_value; }
 
     template <typename U = E, typename = typename U::value_type>
     typename U::value_type& error_v()
     {
-        return m_value;
+        return m_value.value;
     }
 
     template <typename U = E, typename = typename U::value_type>
     const typename U::value_type& error_v() const
     {
-        return m_value;
+        return m_value.value;
     }
 
 private:
     bool m_ok;
-    E m_value;
+    E    m_value;
 };
 
 template <typename E>

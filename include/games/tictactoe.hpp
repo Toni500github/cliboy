@@ -15,15 +15,15 @@ enum class Player
 class TTTGame : public Scene
 {
 public:
-    Result<> on_begin() override
+    Result<> onBegin() override
     {
-        reset_game();
-        set_footer("Arrow: Navigation | Enter: Place | ESC: Back");
+        resetGame();
+        setFooter("Arrow: Navigation | Enter: Place | ESC: Back");
         return Ok();
     }
     void        render() override;
-    SceneResult handle_input(uint32_t key) override;
-    SceneResult scene_id() const override { return ScenesGame::TicTacToe; }
+    SceneResult handleInput(uint32_t key) override;
+    SceneResult sceneID() const override { return ScenesGame::TicTacToe; }
 
 private:
     char   m_board[3][3]    = { { ' ', ' ', ' ' }, { ' ', ' ', ' ' }, { ' ', ' ', ' ' } };
@@ -33,17 +33,17 @@ private:
     int    m_old_pos_y{}, m_cursor_y{};
     int    m_moves = 0;
 
-    void draw_piece(int row, int col, char piece);
-    void draw_game_screen();
-    void draw_winner(Player winner);
+    void drawPiece(int row, int col, char piece);
+    void drawGameScreen();
+    void drawWinner(Player winner);
 
-    bool   is_board_full();
-    void   animate_line(int x0, int y0, int x1, int y1);
-    Player check_winner();
-    void   reset_game();
+    bool   isBoardFull();
+    void   animateLine(int x0, int y0, int x1, int y1);
+    Player checkWinner();
+    void   resetGame();
 
     template <typename Func>
-    auto iterate_board(Func&& fun)
+    auto iterateBoard(Func&& fun)
     {
         using Ret = std::invoke_result_t<Func, char&, int, int>;
 

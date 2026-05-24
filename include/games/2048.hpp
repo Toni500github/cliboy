@@ -25,13 +25,13 @@ public:
     Game2048() : m_grid_x(0), m_grid_y(0), m_cell_w(0), m_cell_h(0), m_cell_padding(0) {};
     ~Game2048() override = default;
 
-    SceneResult handle_input(uint32_t key) override;
+    SceneResult handleInput(uint32_t key) override;
 
 protected:
-    void        init_game() override;
-    void        render_game() override;
-    Result<>    on_game_begin() override;
-    SceneResult scene_id() const override { return ScenesGame::Game2048; }
+    void        initGame() override;
+    void        renderGame() override;
+    Result<>    onGameBegin() override;
+    SceneResult sceneID() const override { return ScenesGame::Game2048; }
 
 private:
     Grid m_grid;
@@ -44,16 +44,16 @@ private:
     int m_cell_padding;
 
     // Helper functions
-    void        add_new_tile();
+    void        addNewTile();
     bool        move(Direction d);
-    bool        is_move_possible() const;
-    bool        check_win() const;
-    uintattr_t  get_color_for_value(int value) const;
-    std::string format_number(int value) const;
+    bool        isMovePossible() const;
+    bool        checkWin() const;
+    uintattr_t  getColorForValue(int value) const;
+    std::string formatNumber(int value) const;
 
     // Drawing functions
-    void draw_grid();
-    void draw_cell(int row, int col, int value);
-    void draw_hud();
-    void draw_border();
+    void drawGrid();
+    void drawCell(int row, int col, int value);
+    void drawHud();
+    void drawBorder();
 };

@@ -7,8 +7,8 @@ class SettingsScene : public Scene
 public:
     void        render() override;
     void        end(SceneResult) override {}
-    SceneResult handle_input(uint32_t key) override;
-    SceneResult scene_id() const override { return Scenes::SettingsMenu; }
+    SceneResult sceneID() const override { return Scenes::SettingsMenu; }
+    SceneResult handleInput(uint32_t key) override;
 
 private:
     size_t      m_selected_item = 0;
@@ -18,5 +18,5 @@ private:
 
     // Adjusts m_scroll_offset so that m_selected_item is always in the
     // visible portion of the list.
-    void ensure_visible();
+    void ensureVisible();
 };

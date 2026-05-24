@@ -74,7 +74,7 @@ void GamesMenuScene::render()
     display.display();
 }
 
-SceneResult GamesMenuScene::handle_input(uint32_t key)
+SceneResult GamesMenuScene::handleInput(uint32_t key)
 {
     switch (key)
     {
@@ -87,7 +87,7 @@ SceneResult GamesMenuScene::handle_input(uint32_t key)
         case TB_KEY_ENTER: return static_cast<ScenesGame>(m_selected_game);
     }
 
-    return scene_id();
+    return sceneID();
 }
 
 void GamesMenuScene::end(SceneResult next_scen)

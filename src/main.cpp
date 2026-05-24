@@ -114,17 +114,17 @@ int game_loop()
             return 1;
         }
 
-        active_scene->render_all();
+        active_scene->renderAll();
 
         // Acquire key input
         tb_event ev;
-        tb_peek_event(&ev, active_scene->frame_ms());
+        tb_peek_event(&ev, active_scene->frameMs());
 
         uint32_t key = 0;
         if (ev.type == TB_EVENT_KEY)
             key = ev.key ? ev.key : ev.ch;
 
-        current_scene = active_scene->handle_input(key);
+        current_scene = active_scene->handleInput(key);
     }
     return 0;
 }

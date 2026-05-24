@@ -33,13 +33,13 @@ static constexpr uintattr_t COLOR_HUD = TB_CYAN | TB_BOLD;
 // Scoring
 static constexpr int SCORES[] = { 0, 40, 100, 300, 1200 };  // 1, 2, 3, 4 lines
 
-Result<> TetrisGame::on_game_begin()
+Result<> TetrisGame::onGameBegin()
 {
-    set_footer("← →: Move | ↑: Rotate | ↓: Soft Drop | Space: Hard Drop | P: Pause | ESC: Back");
+    setFooter("← →: Move | ↑: Rotate | ↓: Soft Drop | Space: Hard Drop | P: Pause | ESC: Back");
     return Ok();
 }
 
-void TetrisGame::init_game()
+void TetrisGame::initGame()
 {
     m_grid.assign(GRID_HEIGHT, std::vector<uint32_t>(GRID_WIDTH, 0));
 
@@ -80,18 +80,18 @@ void TetrisGame::init_game()
         CH_BLOCK     = '#';
     }
 
-    reset_score();
+    resetScore();
     m_lines_cleared = 0;
     m_level         = 0;
     m_fall_timer    = 0;
     m_last_update   = 0;
 
     // Create initial pieces
-    m_next_piece = get_random_piece();
-    spawn_new_piece();
+    m_next_piece = getRandomPiece();
+    spawnNewPiece();
 }
 
-Tetromino TetrisGame::get_random_piece()
+Tetromino TetrisGame::getRandomPiece()
 {
     static std::mt19937               rng{ std::random_device{}() };
     static std::vector<TetrominoType> bag;
@@ -105,21 +105,21 @@ Tetromino TetrisGame::get_random_piece()
 
     TetrominoType type = bag.back();
     bag.pop_back();
-    return spawn_piece(type);
+    return spawnPiece(type);
 }
 
-Tetromino TetrisGame::spawn_piece(TetrominoType type)
+Tetromino TetrisGame::spawnPiece(TetrominoType type)
 {
     Tetromino piece;
     piece.type  = type;
-    piece.shape = get_shape_for_type(type);
+    piece.shape = getShapeForType(type);
     piece.x     = (GRID_WIDTH - static_cast<int>(piece.shape[0].size())) / 2;
     piece.y     = 0;
 
     return piece;
 }
 
-TetrominoShape TetrisGame::get_shape_for_type(TetrominoType type)
+TetrominoShape TetrisGame::getShapeForType(TetrominoType type)
 {
     // clang-format off
     switch (type)
@@ -179,7 +179,7 @@ TetrominoShape TetrisGame::get_shape_for_type(TetrominoType type)
     // clang-format on
 }
 
-uintattr_t TetrisGame::get_color_for_type(TetrominoType type)
+uintattr_t TetrisGame::getColorForType(TetrominoType type)
 {
     switch (type)
     {
@@ -212,7 +212,7 @@ bool TetrisGame::collides(const Tetromino& piece, int dx, int dy) const
     return collides;
 }
 
-bool TetrisGame::move_piece(int dx, int dy)
+bool TetrisGame::movePiece(int dx, int dy)
 {
     if (!collides(m_current_piece, dx, dy))
     {
@@ -223,7 +223,7 @@ bool TetrisGame::move_piece(int dx, int dy)
     return false;
 }
 
-void TetrisGame::rotate_piece()
+void TetrisGame::rotatePiece()
 {
     // Create rotated shape
     const size_t size = m_current_piece.shape.size();
@@ -263,16 +263,16 @@ void TetrisGame::rotate_piece()
     m_current_piece.x     = original_x;
 }
 
-void TetrisGame::hard_drop()
+void TetrisGame::hardDrop()
 {
-    while (move_piece(0, 1))
+    while (movePiece(0, 1))
     {
         // Keep dropping
     }
-    merge_piece();
+    mergePiece();
 }
 
-void TetrisGame::merge_piece()
+void TetrisGame::mergePiece()
 {
     const Tetromino&      piece = m_current_piece;
     const TetrominoShape& shape = piece.shape;
@@ -285,18 +285,18 @@ void TetrisGame::merge_piece()
         int grid_x = piece.x + col;
 
         if (grid_y >= 0 && grid_y < GRID_HEIGHT && grid_x >= 0 && grid_x < GRID_WIDTH)
-            m_grid[grid_y][grid_x] = get_color_for_type(piece.type);
+            m_grid[grid_y][grid_x] = getColorForType(piece.type);
     });
 
-    clear_lines_and_update_score();
+    clearLinesAndUpdateScore();
 
-    spawn_new_piece();
+    spawnNewPiece();
 
     if (collides(piece))
-        set_game_state(GameState::GameOver);
+        setGameState(GameState::GameOver);
 }
 
-void TetrisGame::clear_lines_and_update_score()
+void TetrisGame::clearLinesAndUpdateScore()
 {
     int lines_cleared = 0;
 
@@ -327,26 +327,26 @@ void TetrisGame::clear_lines_and_update_score()
     if (lines_cleared > 0)
     {
         m_lines_cleared += lines_cleared;
-        add_score(calculate_score(lines_cleared));
-        update_level();
+        addScore(calculateScore(lines_cleared));
+        updateLevel();
         playback.playSfx(TetrisSounds::LINE_CLEAR);
     }
 }
 
-int TetrisGame::calculate_score(int lines)
+int TetrisGame::calculateScore(int lines)
 {
     int lines_idx = std::min(lines, 4);
     return SCORES[lines_idx] * (m_level + 1);
 }
 
-void TetrisGame::update_level()
+void TetrisGame::updateLevel()
 {
     int new_level = m_lines_cleared / 10;
     if (new_level > m_level)
         m_level = new_level;
 }
 
-int TetrisGame::get_fall_delay_ms() const
+int TetrisGame::getFallDelayMs() const
 {
     // Classic Tetris speed curve
     // Level 0: 500ms, Level 1: 400ms, etc.
@@ -354,24 +354,24 @@ int TetrisGame::get_fall_delay_ms() const
     return std::max(50, delay);
 }
 
-void TetrisGame::spawn_new_piece()
+void TetrisGame::spawnNewPiece()
 {
     m_current_piece = m_next_piece;
-    m_next_piece    = get_random_piece();
+    m_next_piece    = getRandomPiece();
 
     // Reset position
     m_current_piece.x = (GRID_WIDTH - static_cast<int>(m_current_piece.shape[0].size())) / 2;
     m_current_piece.y = 0;
 }
 
-void TetrisGame::render_game()
+void TetrisGame::renderGame()
 {
     auto now =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
             .count();
 
     // Update fall timer (only if not game over and not paused)
-    if (!is_game_over() && !is_paused())
+    if (!isGameOver() && !isPaused())
     {
         if (m_last_update == 0)
         {
@@ -380,34 +380,34 @@ void TetrisGame::render_game()
         }
         else
         {
-            if (now - m_fall_timer >= static_cast<uint32_t>(get_fall_delay_ms()))
+            if (now - m_fall_timer >= static_cast<uint32_t>(getFallDelayMs()))
             {
-                if (!move_piece(0, 1))
-                    merge_piece();
+                if (!movePiece(0, 1))
+                    mergePiece();
                 m_fall_timer = now;
             }
         }
         m_last_update = now;
     }
 
-    draw_border();
-    draw_grid();
-    draw_current_piece();
-    draw_next_piece();
-    draw_hud();
+    drawBorder();
+    drawGrid();
+    drawCurrentPiece();
+    drawNextPiece();
+    drawHud();
 
-    if (is_game_over())
-        draw_game_over_overlay({
+    if (isGameOver())
+        drawGameOverOverlay({
             { "Score", std::to_string(score()) },
             { "Lines", std::to_string(m_lines_cleared) },
         });
-    else if (is_paused())
-        draw_paused_overlay();
+    else if (isPaused())
+        drawPausedOverlay();
     else if (!playback.isMusicPlaying())
         playback.playMusic(TetrisSounds::BGM);
 }
 
-void TetrisGame::draw_border()
+void TetrisGame::drawBorder()
 {
     display.setTextColor(COLOR_HUD);
 
@@ -440,7 +440,7 @@ void TetrisGame::draw_border()
     display.drawPixel(x2, y2, CH_CORNER_BR);
 }
 
-void TetrisGame::draw_grid()
+void TetrisGame::drawGrid()
 {
     for_2d(GRID_WIDTH, GRID_HEIGHT, [&](int col, int row) {
         uint32_t cell = m_grid[row][col];
@@ -456,12 +456,12 @@ void TetrisGame::draw_grid()
     });
 }
 
-void TetrisGame::draw_current_piece()
+void TetrisGame::drawCurrentPiece()
 {
     const Tetromino&      piece = m_current_piece;
     const TetrominoShape& shape = piece.shape;
 
-    display.setTextColor(get_color_for_type(piece.type));
+    display.setTextColor(getColorForType(piece.type));
 
     for_2d(shape.size(), shape[0].size(), [&](int col, int row) {
         if (shape[row][col])
@@ -477,7 +477,7 @@ void TetrisGame::draw_current_piece()
     });
 }
 
-void TetrisGame::draw_next_piece()
+void TetrisGame::drawNextPiece()
 {
     const Tetromino&      piece = m_next_piece;
     const TetrominoShape& shape = piece.shape;
@@ -517,7 +517,7 @@ void TetrisGame::draw_next_piece()
     display.drawPixel(next_x2, next_y2, CH_CORNER_BR);
 
     // Draw the piece
-    display.setTextColor(get_color_for_type(piece.type));
+    display.setTextColor(getColorForType(piece.type));
 
     for_2d(shape.size(), shape[0].size(), [&](int col, int row) {
         if (shape[row][col])
@@ -531,7 +531,7 @@ void TetrisGame::draw_next_piece()
     });
 }
 
-void TetrisGame::draw_hud()
+void TetrisGame::drawHud()
 {
     display.setTextColor(COLOR_HUD);
 
@@ -550,22 +550,22 @@ void TetrisGame::draw_hud()
     display.print("Level: {}", m_level);
 }
 
-SceneResult TetrisGame::handle_input(uint32_t key)
+SceneResult TetrisGame::handleInput(uint32_t key)
 {
-    if (auto r = handle_common_input(key))
+    if (auto r = handleCommonInput(key))
         return *r;
 
-    if (is_paused() || is_game_over())
-        return scene_id();
+    if (isPaused() || isGameOver())
+        return sceneID();
 
     switch (key)
     {
-        case TB_KEY_ARROW_LEFT:  move_piece(-1, 0); break;
-        case TB_KEY_ARROW_RIGHT: move_piece(1, 0); break;
-        case TB_KEY_ARROW_DOWN:  move_piece(0, 1); break;
-        case TB_KEY_ARROW_UP:    rotate_piece(); break;
-        case TB_KEY_SPACE:       hard_drop(); break;
+        case TB_KEY_ARROW_LEFT:  movePiece(-1, 0); break;
+        case TB_KEY_ARROW_RIGHT: movePiece(1, 0); break;
+        case TB_KEY_ARROW_DOWN:  movePiece(0, 1); break;
+        case TB_KEY_ARROW_UP:    rotatePiece(); break;
+        case TB_KEY_SPACE:       hardDrop(); break;
         default:                 break;
     }
-    return scene_id();
+    return sceneID();
 }
