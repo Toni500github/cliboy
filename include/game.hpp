@@ -41,26 +41,29 @@ public:
     };
 
     // Red "GAME OVER" box.
-    void drawGameOverOverlay(const std::vector<OverlayRow>& rows) const
+    void drawGameOverOverlay(const std::vector<OverlayRow>& rows, int center_y = -1) const
     {
-        drawOverlay({ "GAME OVER", TB_RED | TB_BOLD, {}, rows, "R: Restart   ESC: Menu" });
+        drawOverlay({ "GAME OVER", TB_RED | TB_BOLD, {}, rows, "R: Restart   ESC: Menu" }, center_y);
     }
 
     // Green "YOU WIN!" box.
-    void drawWinOverlay(const std::vector<OverlayRow>& rows) const
+    void drawWinOverlay(const std::vector<OverlayRow>& rows, int center_y = -1) const
     {
-        drawOverlay({ "YOU WIN!", TB_GREEN | TB_BOLD, {}, rows, "R: Restart   ESC: Menu" });
+        drawOverlay({ "YOU WIN!", TB_GREEN | TB_BOLD, {}, rows, "R: Restart   ESC: Menu" }, center_y);
     }
 
     // Yellow "PAUSED" box (no rows, different hint).
-    void drawPausedOverlay() const { drawOverlay({ "PAUSED", TB_YELLOW | TB_BOLD, {}, {}, "P: Resume   ESC: Menu" }); }
+    void drawPausedOverlay(int center_y = -1) const
+    {
+        drawOverlay({ "PAUSED", TB_YELLOW | TB_BOLD, {}, {}, "P: Resume   ESC: Menu" }, center_y);
+    }
 
     // final: derived classes use the hook below
     Result<> onBegin() final;
 
     // Draw an overlay centred on the screen.
     // center_y overrides the automatic vertical midpoint when >= 0.
-    static void drawOverlay(const OverlayConfig& cfg, int center_y = -1);
+    static void drawOverlay(const OverlayConfig& cfg, int center_y);
 
 protected:
     // --------------------------------------------------------

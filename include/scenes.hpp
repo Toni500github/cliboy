@@ -23,6 +23,7 @@ enum class ScenesGame
 {
     Tetris,
     TicTacToe,
+    Minesweeper,
     Snake,
     Wordle,
     Game2048,

@@ -357,7 +357,7 @@ void SettingsScene::render()
     display.clearDisplay();
 
     // Title
-    display.setTextColor(TB_WHITE | TB_BOLD);
+    display.setTextColor(TB_YELLOW | TB_BOLD);
     display.setFont(FigletType::FullWidth, "Small Slant");
     display.centerText(display.pctY(0.05f), "Settings");
     display.resetFont();

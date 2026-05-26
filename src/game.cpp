@@ -35,7 +35,7 @@ void show_error(const std::string& title, const std::string& msg)
 {
     display.clearDisplay();
 
-    BaseGame::drawOverlay({ title, TB_RED | TB_BOLD, { msg }, {}, "Press ENTER to continue" });
+    BaseGame::drawOverlay({ title, TB_RED | TB_BOLD, { msg }, {}, "Press ENTER to continue" }, -1);
 
     display.display();
 

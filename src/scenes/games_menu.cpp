@@ -36,6 +36,7 @@ void GamesMenuScene::render()
     static constexpr GameEntry game_items[] = {
         { "Tetris",              "stack & clear lines",  TB_RED    | TB_BOLD },
         { "Tic Tac Toe",         "3 in a row",           TB_BLUE   | TB_BOLD },
+        { "Minesweeper",         "3 in a row",           TB_BLUE   | TB_BOLD },
         { "Snake",               "eat, grow, survive",   TB_GREEN  | TB_BOLD },
         { "Wordle",              "5-letter word guess",  TB_YELLOW | TB_BOLD },
         { "2048",                "merge to 2048",        TB_CYAN   | TB_BOLD },

@@ -28,6 +28,7 @@
 
 #include "audio_player.hpp"
 #include "games/2048.hpp"
+#include "games/minesweeper.hpp"
 #include "games/snake.hpp"
 #include "games/tetris.hpp"
 #include "games/tictactoe.hpp"
@@ -59,11 +60,12 @@ int game_loop()
     CreditsScene   credits;
     SettingsScene  settings_menu;
 
-    TetrisGame game_tetris;
-    TTTGame    game_ttt;
-    WordleGame game_wordle;
-    SnakeGame  game_snake;
-    Game2048   game_2048;
+    TetrisGame  game_tetris;
+    TTTGame     game_ttt;
+    Minesweeper game_minesweeper;
+    WordleGame  game_wordle;
+    SnakeGame   game_snake;
+    Game2048    game_2048;
 
     SceneResult current_scene = Scenes::MainMenu;
     Scene*      active_scene  = nullptr;
@@ -90,6 +92,7 @@ int game_loop()
                 {
                     case ScenesGame::Tetris:    next_scene = &game_tetris; break;
                     case ScenesGame::TicTacToe: next_scene = &game_ttt; break;
+                    case ScenesGame::Minesweeper: next_scene = &game_minesweeper; break;
                     case ScenesGame::Wordle:    next_scene = &game_wordle; break;
                     case ScenesGame::Game2048:  next_scene = &game_2048; break;
                     case ScenesGame::Snake:     next_scene = &game_snake; break;
