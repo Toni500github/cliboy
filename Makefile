@@ -31,14 +31,14 @@ ifeq ($(UNAME_S),Linux)
 	LDLIBS += -ldl
 endif
 
-NAME		 = cliboy
-TARGET		?= $(NAME)
-OLDVERSION	 = 0.2.0
-VERSION    	 = 0.2.1
-SRC	 	 = $(wildcard src/*.cpp src/*/*.cpp)
-OBJ	 	 = $(SRC:.cpp=.o)
-LDLIBS 		+= -lpthread
-CXXFLAGS        += $(LTO_FLAGS) -fvisibility-inlines-hidden -fvisibility=hidden -Iinclude -Iinclude/libs -std=$(CXXSTD) $(VARS) -DVERSION=\"$(VERSION)\"
+NAME         = cliboy
+TARGET      ?= $(NAME)
+OLDVERSION   = 0.2.1
+VERSION      = 0.2.2
+SRC          = $(wildcard src/*.cpp src/*/*.cpp)
+OBJ          = $(SRC:.cpp=.o)
+LDLIBS      += -lpthread
+CXXFLAGS    += $(LTO_FLAGS) -fvisibility-inlines-hidden -fvisibility=hidden -Iinclude -Iinclude/libs -std=$(CXXSTD) $(VARS) -DVERSION=\"$(VERSION)\"
 
 all: miniaudio $(TARGET)
 
