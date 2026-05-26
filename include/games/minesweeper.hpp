@@ -12,10 +12,9 @@ public:
     {
         Beginner,      // 9x9, 10 mines
         Intermediate,  // 16x16, 40 mines
-        Expert         // 30x16, 99 mines
+        Expert,        // 30x16, 99 mines
+        Count
     };
-
-    explicit Minesweeper(Difficulty diff = Difficulty::Beginner);
 
     SceneResult handleInput(uint32_t key) override;
     int         frameMs() override { return 100; };  // 10fps
@@ -54,6 +53,7 @@ private:
     int               m_flags_placed   = 0;
     int               m_cells_revealed = 0;
     bool              m_first_click    = true;  // mine placement deferred to first reveal
+    bool              m_choosing_diff  = true;
 
     std::chrono::steady_clock::time_point m_segment_start;
     std::chrono::seconds                  m_elapsed_before_pause{};
@@ -75,6 +75,7 @@ private:
     void handleReveal();  // Space/Enter handler
 
     int  drawHud();
+    void drawDifficultMenu();
     void drawGrid();
     void drawCell(int gx, int gy);
 };

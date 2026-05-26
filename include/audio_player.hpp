@@ -25,6 +25,11 @@ namespace WordleSounds
 constexpr const char* BGM = "wordle.mp3";
 }
 
+namespace MinesweeperSounds
+{
+constexpr const char* BGM = "minesweeper.mp3";
+}
+
 namespace MenuSounds
 {
 constexpr const char* BGM = "bg_music.mp3";

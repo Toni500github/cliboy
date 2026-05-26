@@ -8,6 +8,7 @@
 #include <random>
 #include <utility>
 
+#include "audio_player.hpp"
 #include "terminal_display.hpp"
 #include "util.hpp"
 
@@ -55,14 +56,6 @@ constexpr int k_dy[] = { -1, -1, -1, 0, 0, 1, 1, 1 };
 
 }  // namespace
 
-// Construction / lifecycle
-Minesweeper::Minesweeper(Difficulty diff)
-    : m_diff(diff),
-      m_cols(k_diff[int(diff)].cols),
-      m_rows(k_diff[int(diff)].rows),
-      m_total_mines(k_diff[int(diff)].mines)
-{}
-
 Result<> Minesweeper::onGameBegin()
 {
     setFooter("Arrows:Move | Space:Reveal | F:Flag | R:Restart | P:Pause");
@@ -71,6 +64,10 @@ Result<> Minesweeper::onGameBegin()
 
 void Minesweeper::initGame()
 {
+    m_cols        = k_diff[idx(m_diff)].cols;
+    m_rows        = k_diff[idx(m_diff)].rows;
+    m_total_mines = k_diff[idx(m_diff)].mines;
+
     m_grid.assign(m_cols * m_rows, Cell{});
     m_cursor_x             = m_cols / 2;
     m_cursor_y             = m_rows / 2;
@@ -164,6 +161,35 @@ void Minesweeper::drawCell(int gx, int gy)
     display.resetColors();
 }
 
+void Minesweeper::drawDifficultMenu()
+{
+    display.clearDisplay();
+
+    display.setFont(FigletType::FullWidth, "starwars");
+    display.setTextColor(TB_MAGENTA | TB_BOLD);
+    display.centerText(display.pctY(0.3), "Difficulty");
+    display.resetFont();
+
+    if (m_diff == Difficulty::Beginner)
+    {
+        display.setTextColor(TB_GREEN | TB_BOLD);
+        display.centerText(display.pctY(0.5), "< Beginner (9x9, 10 mines) >");
+    }
+    else if (m_diff == Difficulty::Intermediate)
+    {
+        display.setTextColor(TB_YELLOW | TB_BOLD);
+        display.centerText(display.pctY(0.5), "< Intermediate (16x16, 40 mines) >");
+    }
+    else if (m_diff == Difficulty::Expert)
+    {
+        display.setTextColor(TB_RED | TB_BOLD);
+        display.centerText(display.pctY(0.5), "< Expert (30x16, 99 mines) >");
+    }
+
+    display.resetColors();
+    display.display();
+}
+
 void Minesweeper::drawGrid()
 {
     for_2d(m_cols, m_rows, [&](int gx, int gy) { drawCell(gx, gy); });
@@ -171,6 +197,12 @@ void Minesweeper::drawGrid()
 
 void Minesweeper::renderGame()
 {
+    if (m_choosing_diff)
+    {
+        drawDifficultMenu();
+        return;
+    }
+
     if (!isPlaying() && m_timer_running)
     {
         m_elapsed_before_pause +=
@@ -205,9 +237,7 @@ void Minesweeper::renderGame()
     }
 
     if (!playback.isMusicPlaying())
-    {
-        playback.playMusic(TetrisSounds::BGM);
-    }
+        playback.playMusic(MinesweeperSounds::BGM);
 }
 
 // Mine placement
@@ -304,6 +334,7 @@ void Minesweeper::chord(int x, int y)
         Cell& nc = at(nx, ny);
         if (nc.is_flagged || nc.is_revealed)
             continue;
+
         if (nc.is_mine)
         {
             triggerLoss();
@@ -380,6 +411,25 @@ void Minesweeper::handleReveal()
 
 SceneResult Minesweeper::handleInput(uint32_t key)
 {
+    if (m_choosing_diff)
+    {
+        switch (key)
+        {
+            case TB_KEY_ARROW_UP:
+            case TB_KEY_ARROW_LEFT:
+                m_diff = Difficulty((idx(m_diff) - 1 + idx(Difficulty::Count)) % idx(Difficulty::Count));
+                break;
+            case TB_KEY_ARROW_DOWN:
+            case TB_KEY_ARROW_RIGHT: m_diff = Difficulty((idx(m_diff) + 1) % idx(Difficulty::Count)); break;
+            case TB_KEY_ENTER:
+                m_choosing_diff = false;
+                initGame();
+                break;
+            case TB_KEY_ESC: return Scenes::GamesMenu;
+        }
+        return sceneID();
+    }
+
     if (const auto r = handleCommonInput(key))
         return *r;
 
@@ -392,14 +442,13 @@ SceneResult Minesweeper::handleInput(uint32_t key)
     if (!isPlaying())
         return sceneID();
 
-    if (key == TB_KEY_ARROW_UP)
-        m_cursor_y = std::max(0, m_cursor_y - 1);
-    else if (key == TB_KEY_ARROW_DOWN)
-        m_cursor_y = std::min(m_rows - 1, m_cursor_y + 1);
-    else if (key == TB_KEY_ARROW_LEFT)
-        m_cursor_x = std::max(0, m_cursor_x - 1);
-    else if (key == TB_KEY_ARROW_RIGHT)
-        m_cursor_x = std::min(m_cols - 1, m_cursor_x + 1);
+    switch (key)
+    {
+        case TB_KEY_ARROW_UP:    m_cursor_y = std::max(0, m_cursor_y - 1); break;
+        case TB_KEY_ARROW_DOWN:  m_cursor_y = std::min(m_rows - 1, m_cursor_y + 1); break;
+        case TB_KEY_ARROW_LEFT:  m_cursor_x = std::max(0, m_cursor_x - 1); break;
+        case TB_KEY_ARROW_RIGHT: m_cursor_x = std::min(m_cols - 1, m_cursor_x + 1); break;
+    }
 
     if (key == TB_KEY_SPACE || key == TB_KEY_ENTER)
         handleReveal();
