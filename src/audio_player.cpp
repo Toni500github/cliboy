@@ -43,11 +43,11 @@ void AudioPlayer::playMusic(const char* audio)
     const fs::path& path = fs::path(settings.general.assets_path) / "audios" / audio;
 
     // Already playing this exact track
-    if (m_current_music == path)
+    if (m_current_music == path.string())
         return;
 
     unloadMusic();
-    m_current_music = path;
+    m_current_music = path.string();
 
     ma_result result =
         ma_sound_init_from_file(&m_engine, path.c_str(), MA_SOUND_FLAG_STREAM, nullptr, nullptr, &m_music);
