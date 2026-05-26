@@ -18,3 +18,7 @@ $ ./build/release/cliboy
 
 ## Gameplay
 https://github.com/user-attachments/assets/27018a73-6d5f-4989-b4a8-5df82db9a68e
+
+## AI Usage
+some games may be created with the help of AI.
+Always making they work and are decent.
