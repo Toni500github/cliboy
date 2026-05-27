@@ -38,7 +38,7 @@ private:
     static constexpr int k_cell_w = 2;
 
     // Config, fixed per difficulty
-    Difficulty m_diff;
+    Difficulty m_diff = Difficulty::Beginner;
     int        m_cols;
     int        m_rows;
     int        m_total_mines;
