@@ -391,7 +391,7 @@ void SettingsScene::render()
             last_section = e.section;
             display.setTextColor(TB_CYAN | TB_BOLD);
             display.setCursor(col_label, render_row);
-            display.print("── {} ──", e.section);
+            display.print(settings.general.utf8 ? "── {} ──" : "-- {} --", e.section);
             display.resetColors();
             render_row += row_step;
         }

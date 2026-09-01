@@ -13,7 +13,7 @@ struct GameEntry
 void GamesMenuScene::render()
 {
     if (!playback.isMusicPlaying())
-        playback.playMusic(MenuSounds::BGM);
+        playback.playMusic(MenuSounds::BGM, true);
 
     display.clearDisplay();
 
@@ -24,22 +24,18 @@ void GamesMenuScene::render()
 
     // Separator
     display.setTextColor(TB_CYAN);
-    display.drawLine(display.pctX(0.20f),
-                     display.pctY(0.12f),
-                     display.pctX(0.80f),
-                     display.pctY(0.12f),
-                     settings.general.utf8 ? U'─' : '-');
+    display.drawLine(display.pctX(0.20f), display.pctY(0.12f), display.pctX(0.80f), display.pctY(0.12f), borders.H);
     display.resetColors();
 
     // Game list
     // clang-format off
     static constexpr GameEntry game_items[] = {
-        { "Tetris",              "stack & clear lines",  TB_RED     | TB_BOLD },
-        { "Tic Tac Toe",         "3 in a row",           TB_BLUE    | TB_BOLD },
-        { "Minesweeper",         "Flag the mine",        TB_MAGENTA | TB_BOLD },
-        { "Snake",               "eat, grow, survive",   TB_GREEN   | TB_BOLD },
-        { "Wordle",              "5-letter word guess",  TB_YELLOW  | TB_BOLD },
-        { "2048",                "merge to 2048",        TB_CYAN    | TB_BOLD },
+        { "Tetris",      "stack & clear lines",  TB_RED     | TB_BOLD },
+        { "Tic Tac Toe", "3 in a row",           TB_BLUE    | TB_BOLD },
+        { "Minesweeper", "Flag the mine",        TB_MAGENTA | TB_BOLD },
+        { "Snake",       "eat, grow, survive",   TB_GREEN   | TB_BOLD },
+        { "Wordle",      "5-letter word guess",  TB_YELLOW  | TB_BOLD },
+        { "2048",        "merge to 2048",        TB_CYAN    | TB_BOLD },
     };
     // clang-format on
 

@@ -4,14 +4,6 @@
 #include <random>
 #include <string>
 
-// Border characters
-static uint32_t CH_BORDER_H  = U'═';
-static uint32_t CH_BORDER_V  = U'║';
-static uint32_t CH_CORNER_TL = U'╔';
-static uint32_t CH_CORNER_TR = U'╗';
-static uint32_t CH_CORNER_BL = U'╚';
-static uint32_t CH_CORNER_BR = U'╝';
-
 // Colors
 static constexpr uintattr_t COLOR_EMPTY = TB_DEFAULT;
 static constexpr uintattr_t COLOR_2     = TB_WHITE | TB_BOLD;
@@ -44,25 +36,6 @@ void Game2048::initGame()
     // Center the grid
     m_grid_x = (display.getWidth() - (GRID_SIZE * m_cell_w)) / 2;
     m_grid_y = (display.getHeight() - (GRID_SIZE * m_cell_h)) / 2;
-
-    if (settings.general.utf8)
-    {
-        CH_BORDER_H  = U'═';
-        CH_BORDER_V  = U'║';
-        CH_CORNER_TL = U'╔';
-        CH_CORNER_TR = U'╗';
-        CH_CORNER_BL = U'╚';
-        CH_CORNER_BR = U'╝';
-    }
-    else
-    {
-        CH_BORDER_H  = '-';
-        CH_BORDER_V  = '|';
-        CH_CORNER_TL = '+';
-        CH_CORNER_TR = '+';
-        CH_CORNER_BL = '+';
-        CH_CORNER_BR = '+';
-    }
 
     m_grid = {};
 
@@ -229,25 +202,25 @@ void Game2048::drawBorder()
 
     // Top border
     for (int x = x1 + 1; x < x2; ++x)
-        display.drawPixel(x, y1, CH_BORDER_H);
+        display.drawPixel(x, y1, borders.H);
 
     // Bottom border
     for (int x = x1 + 1; x < x2; ++x)
-        display.drawPixel(x, y2, CH_BORDER_H);
+        display.drawPixel(x, y2, borders.H);
 
     // Left border
     for (int y = y1 + 1; y < y2; ++y)
-        display.drawPixel(x1, y, CH_BORDER_V);
+        display.drawPixel(x1, y, borders.V);
 
     // Right border
     for (int y = y1 + 1; y < y2; ++y)
-        display.drawPixel(x2, y, CH_BORDER_V);
+        display.drawPixel(x2, y, borders.V);
 
     // Corners
-    display.drawPixel(x1, y1, CH_CORNER_TL);
-    display.drawPixel(x2, y1, CH_CORNER_TR);
-    display.drawPixel(x1, y2, CH_CORNER_BL);
-    display.drawPixel(x2, y2, CH_CORNER_BR);
+    display.drawPixel(x1, y1, corners.TL);
+    display.drawPixel(x2, y1, corners.TR);
+    display.drawPixel(x1, y2, corners.BL);
+    display.drawPixel(x2, y2, corners.BR);
 }
 
 void Game2048::drawGrid()

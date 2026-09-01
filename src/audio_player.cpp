@@ -35,15 +35,16 @@ bool AudioPlayer::begin()
 // Music
 // -------------------------------------
 
-void AudioPlayer::playMusic(const char* audio)
+void AudioPlayer::playMusic(const char* audio, bool force)
 {
     if (!m_engine_ready)
         return;
 
-    const fs::path& path = fs::path(settings.general.assets_path) / "audios" / audio;
+    const fs::path path = fs::path(settings.general.assets_path) / "audios" / audio;
 
     // Already playing this exact track
-    if (m_current_music == path.string())
+    // Unless forcing to use it
+    if (!force && m_current_music == path.string())
         return;
 
     unloadMusic();
@@ -54,7 +55,7 @@ void AudioPlayer::playMusic(const char* audio)
 
     if (result != MA_SUCCESS)
     {
-        m_last_error = std::format("Failed to load music '{}': {}", path.string().c_str(), ma_result_description(result));
+        m_last_error = std::format("Failed to load music '{}': {}", path.string(), ma_result_description(result));
         return;
     }
 
@@ -117,13 +118,14 @@ void AudioPlayer::playSfx(const char* audio)
 
     unloadSfx();
 
-    const fs::path& path = fs::path(settings.general.assets_path) / "audios" / audio;
+    const fs::path path = fs::path(settings.general.assets_path) / "audios" / audio;
 
-    ma_result result = ma_sound_init_from_file(&m_engine, path.string().c_str(), MA_SOUND_FLAG_DECODE, nullptr, nullptr, &m_sfx);
+    ma_result result =
+        ma_sound_init_from_file(&m_engine, path.string().c_str(), MA_SOUND_FLAG_DECODE, nullptr, nullptr, &m_sfx);
 
     if (result != MA_SUCCESS)
     {
-        m_last_error = std::format("Failed to load sfx '{}': {}", path.string().c_str(), ma_result_description(result));
+        m_last_error = std::format("Failed to load sfx '{}': {}", path.string(), ma_result_description(result));
         return;
     }
 

@@ -16,12 +16,12 @@ enum class GameState
     GameOver
 };
 
-struct OverlayRow
+struct overlay_row_t
 {
     std::string label;  // e.g "Score"
     std::string value;  // 1234
 
-    OverlayRow(std::string lbl, std::string vl) : label(std::move(lbl)), value(std::move(vl)) {}
+    overlay_row_t(std::string lbl, std::string vl) : label(std::move(lbl)), value(std::move(vl)) {}
 };
 
 class BaseGame : public Scene
@@ -33,21 +33,21 @@ public:
 
     struct OverlayConfig
     {
-        std::string              title;
-        uintattr_t               title_color = TB_RED | TB_BOLD;
-        std::vector<std::string> lines;  // free-form body text
-        std::vector<OverlayRow>  rows;   // label: value pairs
-        std::string              hint = "R: Restart   ESC: Menu";
+        std::string                title;
+        uintattr_t                 title_color = TB_RED | TB_BOLD;
+        std::vector<std::string>   lines;  // free-form body text
+        std::vector<overlay_row_t> rows;   // label: value pairs
+        std::string                hint = "R: Restart   ESC: Menu";
     };
 
     // Red "GAME OVER" box.
-    void drawGameOverOverlay(const std::vector<OverlayRow>& rows, int center_y = -1) const
+    void drawGameOverOverlay(const std::vector<overlay_row_t>& rows, int center_y = -1) const
     {
         drawOverlay({ "GAME OVER", TB_RED | TB_BOLD, {}, rows, "R: Restart   ESC: Menu" }, center_y);
     }
 
     // Green "YOU WIN!" box.
-    void drawWinOverlay(const std::vector<OverlayRow>& rows, int center_y = -1) const
+    void drawWinOverlay(const std::vector<overlay_row_t>& rows, int center_y = -1) const
     {
         drawOverlay({ "YOU WIN!", TB_GREEN | TB_BOLD, {}, rows, "R: Restart   ESC: Menu" }, center_y);
     }

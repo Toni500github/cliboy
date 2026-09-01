@@ -8,7 +8,7 @@ struct Settings
     struct general_settings_t
     {
         std::string assets_path = "./assets";
-        bool        utf8        = true;
+        bool        utf8        = false;
     } general;
 
     struct colors_t

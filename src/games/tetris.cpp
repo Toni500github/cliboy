@@ -12,23 +12,18 @@ static constexpr int GRID_WIDTH  = 10;
 static constexpr int GRID_HEIGHT = 20;
 static constexpr int NEXT_SIZE   = 4;  // Size of next piece preview area
 
-static uint32_t CH_BORDER_H  = U'═';
-static uint32_t CH_BORDER_V  = U'║';
-static uint32_t CH_CORNER_TL = U'╔';
-static uint32_t CH_CORNER_TR = U'╗';
-static uint32_t CH_CORNER_BL = U'╚';
-static uint32_t CH_CORNER_BR = U'╝';
-static uint32_t CH_BLOCK     = U'█';
-
 // Colors (using termbox2 color constants)
-static constexpr uintattr_t COLOR_I   = TB_CYAN | TB_BOLD;
-static constexpr uintattr_t COLOR_O   = TB_YELLOW | TB_BOLD;
-static constexpr uintattr_t COLOR_T   = TB_MAGENTA | TB_BOLD;
-static constexpr uintattr_t COLOR_S   = TB_GREEN | TB_BOLD;
-static constexpr uintattr_t COLOR_Z   = TB_RED | TB_BOLD;
-static constexpr uintattr_t COLOR_J   = TB_BLUE | TB_BOLD;
-static constexpr uintattr_t COLOR_L   = TB_YELLOW | TB_BOLD;  // Orange-ish
-static constexpr uintattr_t COLOR_HUD = TB_CYAN | TB_BOLD;
+enum Colors : uintattr_t
+{
+    I   = TB_CYAN | TB_BOLD,
+    O   = TB_YELLOW | TB_BOLD,
+    T   = TB_MAGENTA | TB_BOLD,
+    S   = TB_GREEN | TB_BOLD,
+    Z   = TB_RED | TB_BOLD,
+    J   = TB_BLUE | TB_BOLD,
+    L   = TB_YELLOW | TB_BOLD,  // Orange-ish
+    HUD = TB_CYAN | TB_BOLD
+};
 
 // Scoring
 static constexpr int SCORES[] = { 0, 40, 100, 300, 1200 };  // 1, 2, 3, 4 lines
@@ -58,27 +53,6 @@ void TetrisGame::initGame()
     // Center the grid
     m_grid_x = (display.getWidth() - m_grid_w - NEXT_SIZE * m_cell_size - 8) / 2;
     m_grid_y = (display.getHeight() - m_grid_h) / 2;
-
-    if (settings.general.utf8)
-    {
-        CH_BORDER_H  = U'═';
-        CH_BORDER_V  = U'║';
-        CH_CORNER_TL = U'╔';
-        CH_CORNER_TR = U'╗';
-        CH_CORNER_BL = U'╚';
-        CH_CORNER_BR = U'╝';
-        CH_BLOCK     = U'█';
-    }
-    else
-    {
-        CH_BORDER_H  = '-';
-        CH_BORDER_V  = '|';
-        CH_CORNER_TL = '+';
-        CH_CORNER_TR = '+';
-        CH_CORNER_BL = '+';
-        CH_CORNER_BR = '+';
-        CH_BLOCK     = '#';
-    }
 
     resetScore();
     m_lines_cleared = 0;
@@ -183,13 +157,13 @@ uintattr_t TetrisGame::getColorForType(TetrominoType type)
 {
     switch (type)
     {
-        case TetrominoType::I: return COLOR_I;
-        case TetrominoType::O: return COLOR_O;
-        case TetrominoType::T: return COLOR_T;
-        case TetrominoType::S: return COLOR_S;
-        case TetrominoType::Z: return COLOR_Z;
-        case TetrominoType::J: return COLOR_J;
-        case TetrominoType::L: return COLOR_L;
+        case TetrominoType::I: return Colors::I;
+        case TetrominoType::O: return Colors::O;
+        case TetrominoType::T: return Colors::T;
+        case TetrominoType::S: return Colors::S;
+        case TetrominoType::Z: return Colors::Z;
+        case TetrominoType::J: return Colors::J;
+        case TetrominoType::L: return Colors::L;
         default:               return TB_WHITE;
     }
 }
@@ -409,7 +383,7 @@ void TetrisGame::renderGame()
 
 void TetrisGame::drawBorder()
 {
-    display.setTextColor(COLOR_HUD);
+    display.setTextColor(Colors::HUD);
 
     // Main grid border
     int x1 = m_grid_x - 1;
@@ -419,25 +393,25 @@ void TetrisGame::drawBorder()
 
     // Top border
     for (int x = x1 + 1; x < x2; ++x)
-        display.drawPixel(x, y1, CH_BORDER_H);
+        display.drawPixel(x, y1, borders.H);
 
     // Bottom border
     for (int x = x1 + 1; x < x2; ++x)
-        display.drawPixel(x, y2, CH_BORDER_H);
+        display.drawPixel(x, y2, borders.H);
 
     // Left border
     for (int y = y1 + 1; y < y2; ++y)
-        display.drawPixel(x1, y, CH_BORDER_V);
+        display.drawPixel(x1, y, borders.V);
 
     // Right border
     for (int y = y1 + 1; y < y2; ++y)
-        display.drawPixel(x2, y, CH_BORDER_V);
+        display.drawPixel(x2, y, borders.V);
 
     // Corners
-    display.drawPixel(x1, y1, CH_CORNER_TL);
-    display.drawPixel(x2, y1, CH_CORNER_TR);
-    display.drawPixel(x1, y2, CH_CORNER_BL);
-    display.drawPixel(x2, y2, CH_CORNER_BR);
+    display.drawPixel(x1, y1, corners.TL);
+    display.drawPixel(x2, y1, corners.TR);
+    display.drawPixel(x1, y2, corners.BL);
+    display.drawPixel(x2, y2, corners.BR);
 }
 
 void TetrisGame::drawGrid()
@@ -451,7 +425,7 @@ void TetrisGame::drawGrid()
         for_2d(m_cell_size, m_cell_size, [&](int dx, int dy) {
             int x = m_grid_x + col * m_cell_size + dx;
             int y = m_grid_y + row * m_cell_size + dy;
-            display.drawPixel(x, y, CH_BLOCK);
+            display.drawPixel(x, y, characters.BLOCK);
         });
     });
 }
@@ -471,7 +445,7 @@ void TetrisGame::drawCurrentPiece()
                 int y = m_grid_y + (piece.y + row) * m_cell_size + dy;
 
                 if (y >= m_grid_y && y < m_grid_y + m_grid_h)
-                    display.drawPixel(x, y, CH_BLOCK);
+                    display.drawPixel(x, y, characters.BLOCK);
             });
         };
     });
@@ -482,12 +456,11 @@ void TetrisGame::drawNextPiece()
     const Tetromino&      piece = m_next_piece;
     const TetrominoShape& shape = piece.shape;
 
-    display.setTextColor(COLOR_HUD);
+    display.setTextColor(Colors::HUD);
 
-    int next_x = m_grid_x + m_grid_w + m_cell_size * 2;
-    int next_y = m_grid_y + m_cell_size;
+    const int next_x = m_grid_x + m_grid_w + m_cell_size * 2;
+    const int next_y = m_grid_y + m_cell_size;
 
-    // Draw "NEXT" label
     display.setCursor(next_x, next_y - 1);
     display.print("NEXT");
 
@@ -503,18 +476,18 @@ void TetrisGame::drawNextPiece()
     // Simple border
     for (int x = next_x1 + 1; x < next_x2; ++x)
     {
-        display.drawPixel(x, next_y1, CH_BORDER_H);
-        display.drawPixel(x, next_y2, CH_BORDER_H);
+        display.drawPixel(x, next_y1, borders.H);
+        display.drawPixel(x, next_y2, borders.H);
     }
     for (int y = next_y1 + 1; y < next_y2; ++y)
     {
-        display.drawPixel(next_x1, y, CH_BORDER_V);
-        display.drawPixel(next_x2, y, CH_BORDER_V);
+        display.drawPixel(next_x1, y, borders.V);
+        display.drawPixel(next_x2, y, borders.V);
     }
-    display.drawPixel(next_x1, next_y1, CH_CORNER_TL);
-    display.drawPixel(next_x2, next_y1, CH_CORNER_TR);
-    display.drawPixel(next_x1, next_y2, CH_CORNER_BL);
-    display.drawPixel(next_x2, next_y2, CH_CORNER_BR);
+    display.drawPixel(next_x1, next_y1, corners.TL);
+    display.drawPixel(next_x2, next_y1, corners.TR);
+    display.drawPixel(next_x1, next_y2, corners.BL);
+    display.drawPixel(next_x2, next_y2, corners.BR);
 
     // Draw the piece
     display.setTextColor(getColorForType(piece.type));
@@ -525,7 +498,7 @@ void TetrisGame::drawNextPiece()
             for_2d(m_cell_size, m_cell_size, [&](int dx, int dy) {
                 int x = next_x + col * m_cell_size + dx;
                 int y = next_y + row * m_cell_size + dy;
-                display.drawPixel(x, y, CH_BLOCK);
+                display.drawPixel(x, y, characters.BLOCK);
             });
         };
     });
@@ -533,7 +506,7 @@ void TetrisGame::drawNextPiece()
 
 void TetrisGame::drawHud()
 {
-    display.setTextColor(COLOR_HUD);
+    display.setTextColor(Colors::HUD);
 
     int next_y = m_grid_y + m_cell_size;
 

@@ -3,23 +3,15 @@
 #include <algorithm>
 #include <string>
 
-// Characters
-static uint32_t CH_SNAKE_HEAD = U'◉';
-static uint32_t CH_SNAKE_BODY = U'█';
-static uint32_t CH_FOOD       = U'●';
-static uint32_t CH_BORDER_H   = U'═';
-static uint32_t CH_BORDER_V   = U'║';
-static uint32_t CH_CORNER_TL  = U'╔';
-static uint32_t CH_CORNER_TR  = U'╗';
-static uint32_t CH_CORNER_BL  = U'╚';
-static uint32_t CH_CORNER_BR  = U'╝';
-
 // Colors
-static constexpr uintattr_t COL_BORDER     = TB_WHITE;
-static constexpr uintattr_t COL_SNAKE_HEAD = TB_GREEN | TB_BOLD;
-static constexpr uintattr_t COL_SNAKE_BODY = TB_GREEN;
-static constexpr uintattr_t COL_FOOD       = TB_RED | TB_BOLD;
-static constexpr uintattr_t COL_HUD        = TB_CYAN | TB_BOLD;
+enum Colors : uintattr_t
+{
+    Border    = TB_WHITE,
+    SnakeHead = TB_GREEN | TB_BOLD,
+    SnakeBody = TB_GREEN,
+    Food      = TB_RED | TB_BOLD,
+    Hud       = TB_CYAN | TB_BOLD,
+};
 
 // Speed
 static constexpr int SPEED_STEP_MS   = 10;  // ms reduction per milestone
@@ -46,22 +38,23 @@ void SnakeGame::renderGame()
         });
         return;
     }
+    else if (isPaused())
+        drawPausedOverlay();
+    else if (!playback.isMusicPlaying())
+        playback.playMusic(MenuSounds::BGM, true);
 
     // Food
-    display.setTextColor(COL_FOOD);
-    display.drawPixel(m_food.x, m_food.y, CH_FOOD);
+    display.setTextColor(Colors::Food);
+    display.drawPixel(m_food.x, m_food.y, characters.FOOD);
 
     // Snake (head first so its character sits on top)
     bool is_head = true;
     for (const auto& seg : m_snake)
     {
-        display.setTextColor(is_head ? COL_SNAKE_HEAD : COL_SNAKE_BODY);
-        display.drawPixel(seg.x, seg.y, is_head ? CH_SNAKE_HEAD : CH_SNAKE_BODY);
+        display.setTextColor(is_head ? Colors::SnakeHead : Colors::SnakeBody);
+        display.drawPixel(seg.x, seg.y, is_head ? characters.SNAKE_HEAD : characters.SNAKE_BODY);
         is_head = false;
     }
-
-    if (isPaused())
-        drawPausedOverlay();
 }
 
 void SnakeGame::initGame()
@@ -73,31 +66,6 @@ void SnakeGame::initGame()
 
     m_board_x = (display.getWidth() - m_board_w) / 2;
     m_board_y = (display.getHeight() - m_board_h) / 2;
-
-    if (settings.general.utf8)
-    {
-        CH_SNAKE_HEAD = U'◉';
-        CH_SNAKE_BODY = U'█';
-        CH_FOOD       = U'●';
-        CH_BORDER_H   = U'═';
-        CH_BORDER_V   = U'║';
-        CH_CORNER_TL  = U'╔';
-        CH_CORNER_TR  = U'╗';
-        CH_CORNER_BL  = U'╚';
-        CH_CORNER_BR  = U'╝';
-    }
-    else
-    {
-        CH_SNAKE_HEAD = 'O';
-        CH_SNAKE_BODY = '#';
-        CH_FOOD       = '*';
-        CH_BORDER_H   = '-';
-        CH_BORDER_V   = '|';
-        CH_CORNER_TL  = '+';
-        CH_CORNER_TR  = '+';
-        CH_CORNER_BL  = '+';
-        CH_CORNER_BR  = '+';
-    }
 
     m_snake.clear();
     resetScore();
@@ -225,7 +193,7 @@ void SnakeGame::spawnFood()
 
 void SnakeGame::drawBorder()
 {
-    display.setTextColor(COL_BORDER);
+    display.setTextColor(Colors::Border);
 
     const int x = m_board_x;
     const int y = m_board_y;
@@ -235,27 +203,27 @@ void SnakeGame::drawBorder()
     // Horizontal edges
     for (int col = x + 1; col < x + w - 1; ++col)
     {
-        display.drawPixel(col, y, CH_BORDER_H);
-        display.drawPixel(col, y + h - 1, CH_BORDER_H);
+        display.drawPixel(col, y, borders.H);
+        display.drawPixel(col, y + h - 1, borders.H);
     }
 
     // Vertical edges
     for (int row = y + 1; row < y + h - 1; ++row)
     {
-        display.drawPixel(x, row, CH_BORDER_V);
-        display.drawPixel(x + w - 1, row, CH_BORDER_V);
+        display.drawPixel(x, row, borders.V);
+        display.drawPixel(x + w - 1, row, borders.V);
     }
 
     // Corners
-    display.drawPixel(x, y, CH_CORNER_TL);
-    display.drawPixel(x + w - 1, y, CH_CORNER_TR);
-    display.drawPixel(x, y + h - 1, CH_CORNER_BL);
-    display.drawPixel(x + w - 1, y + h - 1, CH_CORNER_BR);
+    display.drawPixel(x, y, corners.TL);
+    display.drawPixel(x + w - 1, y, corners.TR);
+    display.drawPixel(x, y + h - 1, corners.BL);
+    display.drawPixel(x + w - 1, y + h - 1, corners.BR);
 }
 
 void SnakeGame::drawHud()
 {
-    display.setTextColor(COL_HUD);
+    display.setTextColor(Colors::Hud);
 
     // Score line above the board (or at row 0 if board is near the top)
     const int hud_y = std::max(0, m_board_y - 2);

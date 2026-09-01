@@ -23,11 +23,7 @@ void MainMenuScene::render()
 
     // Thin separator line
     display.setTextColor(TB_CYAN);
-    display.drawLine(display.pctX(0.20f),
-                     display.pctY(0.36f),
-                     display.pctX(0.80f),
-                     display.pctY(0.36f),
-                     settings.general.utf8 ? U'─' : '-');
+    display.drawLine(display.pctX(0.20f), display.pctY(0.36f), display.pctX(0.80f), display.pctY(0.36f), borders.H);
     display.resetColors();
 
     // Menu items display

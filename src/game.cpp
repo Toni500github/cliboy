@@ -102,7 +102,7 @@ void BaseGame::drawOverlay(const OverlayConfig& cfg, int center_y)
         inner_w = std::max(inner_w, line.size() + 4);
 
     // Each info row: "  Label: " + value + "  "
-    for (const OverlayRow& row : cfg.rows)
+    for (const overlay_row_t& row : cfg.rows)
     {
         size_t row_content = 2                        // leading spaces
                              + row.label.size() + 2   // ": "
@@ -153,7 +153,7 @@ void BaseGame::drawOverlay(const OverlayConfig& cfg, int center_y)
     }
 
     // Info rows: ║  Score:   42  ║
-    for (const OverlayRow& row : cfg.rows)
+    for (const overlay_row_t& row : cfg.rows)
     {
         // Build "  Label: " prefix, then right-align the value in the remaining space.
         const std::string prefix = "  " + row.label + ": ";

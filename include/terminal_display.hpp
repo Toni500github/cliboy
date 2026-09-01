@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "libfiglet/libfiglet.hpp"
-
 #define TB_OPT_ATTR_W 32
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
@@ -32,6 +31,34 @@ enum class FigletType
     Kerning,
     Smushed
 };
+
+// Border characters
+struct borders_t
+{
+    uint32_t H = U'═';
+    uint32_t V = U'║';
+};
+extern borders_t borders;
+
+struct corners_t
+{
+    uint32_t TL = U'╔';
+    uint32_t TR = U'╗';
+    uint32_t BL = U'╚';
+    uint32_t BR = U'╝';
+};
+extern corners_t corners;
+
+struct chars_t
+{
+    uint32_t BLOCK      = U'█';
+    uint32_t SNAKE_HEAD = U'◉';
+    uint32_t SNAKE_BODY = BLOCK;
+    uint32_t FOOD       = U'●';
+};
+extern chars_t characters;
+
+void change_chars(bool is_utf8);
 
 // A similiar clone of Adafruit_SSD130 for terminals
 class TerminalDisplay

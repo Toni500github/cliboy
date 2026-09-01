@@ -19,6 +19,33 @@ size_t utf8_len(const std::string& s)
     return utf8len(reinterpret_cast<const utf8_int8_t*>(s.c_str()));
 }
 
+void change_chars(bool is_utf8)
+{
+    if (is_utf8)
+    {
+        borders = { U'═', U'║' };
+        corners = {
+            U'╔',
+            U'╗',
+            U'╚',
+            U'╝',
+        };
+        characters = {
+            .BLOCK      = U'█',
+            .SNAKE_HEAD = U'◉',
+            .FOOD       = U'●',
+        };
+    }
+    else
+    {
+        borders    = { '-', '|' };
+        corners    = { '+', '+', '+', '+' };
+        characters = { .BLOCK = '#', .SNAKE_HEAD = 'O', .FOOD = '*' };
+    }
+
+    characters.SNAKE_BODY = characters.BLOCK;
+}
+
 static void enable_ansi_colors()
 {
 #ifdef _WIN32

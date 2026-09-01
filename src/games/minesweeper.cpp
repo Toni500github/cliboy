@@ -14,46 +14,46 @@
 
 namespace
 {
+    constexpr const struct DiffConf
+    {
+        int cols;
+        int rows;
+        int mines;
+    } k_diff[] = { { 9, 9, 10 }, { 16, 16, 40 }, { 30, 16, 99 } };
 
-struct DiffConf
-{
-    int cols;
-    int rows;
-    int mines;
-};
-constexpr DiffConf k_diff[] = { { 9, 9, 10 }, { 16, 16, 40 }, { 30, 16, 99 } };
+    constexpr int k_max_secs = 999;  // seconds, capped for display
 
-constexpr int k_max_secs = 999;  // seconds, capped for display
+    constexpr uintattr_t k_num_fg[] = {
+        0x000000,  // 0  unused
+        0x4499FF,  // 1  blue
+        0x44BB44,  // 2  green
+        0xFF5555,  // 3  red
+        0x4444CC,  // 4  dark blue
+        0xBB4444,  // 5  maroon
+        0x44BBBB,  // 6  teal
+        0xBBBBBB,  // 7  light grey
+        0x888888,  // 8  dark grey
+    };
 
-constexpr uintattr_t k_num_fg[] = {
-    0x000000,  // 0  unused
-    0x4499FF,  // 1  blue
-    0x44BB44,  // 2  green
-    0xFF5555,  // 3  red
-    0x4444CC,  // 4  dark blue
-    0xBB4444,  // 5  maroon
-    0x44BBBB,  // 6  teal
-    0xBBBBBB,  // 7  light grey
-    0x888888,  // 8  dark grey
-};
+    // Palette
+    enum Colors : uintattr_t
+    {
+        HiddenFg   = 0x8888aa,
+        HiddenBg   = 0x2e2e50,
+        FlagFg     = 0xFF7777,
+        FlagBg     = 0x2e2e50,
+        RevealedBg = 0x1a1a2e,
+        MineFg     = 0xFF4444,
+        MineBg     = 0x4a0000,
+        CursorFg   = 0x1a1a2e,
+        CursorBg   = 0xCCCCFF,
+        Accent     = 0xFFAA33,
+        Hud        = 0xDDDDDD,
+    };
 
-// Palette
-constexpr uintattr_t C_HIDDEN_FG   = 0x8888aa;
-constexpr uintattr_t C_HIDDEN_BG   = 0x2e2e50;
-constexpr uintattr_t C_FLAG_FG     = 0xFF7777;
-constexpr uintattr_t C_FLAG_BG     = 0x2e2e50;
-constexpr uintattr_t C_REVEALED_BG = 0x1a1a2e;
-constexpr uintattr_t C_MINE_FG     = 0xFF4444;
-constexpr uintattr_t C_MINE_BG     = 0x4a0000;
-constexpr uintattr_t C_CURSOR_FG   = 0x1a1a2e;
-constexpr uintattr_t C_CURSOR_BG   = 0xCCCCFF;
-constexpr uintattr_t C_ACCENT      = 0xFFAA33;
-constexpr uintattr_t C_HUD         = 0xDDDDDD;
-
-// 8-directional neighbour offsets (same ordering used throughout)
-constexpr int k_dx[] = { -1, 0, 1, -1, 1, -1, 0, 1 };
-constexpr int k_dy[] = { -1, -1, -1, 0, 0, 1, 1, 1 };
-
+    // 8-directional neighbour offsets (same ordering used throughout)
+    constexpr int k_dx[] = { -1, 0, 1, -1, 1, -1, 0, 1 };
+    constexpr int k_dy[] = { -1, -1, -1, 0, 0, 1, 1, 1 };
 }  // namespace
 
 Result<> Minesweeper::onGameBegin()
@@ -94,10 +94,10 @@ int Minesweeper::drawHud()
     const int elapsed_secs = std::min(int(elapsed.count()), k_max_secs);
     const int mines_left   = m_total_mines - m_flags_placed;
 
-    display.setTextColor(C_ACCENT);
+    display.setTextColor(Colors::Accent);
     display.centerText(m_grid_y - 2, "Minesweeper");
 
-    display.setTextColor(C_HUD);
+    display.setTextColor(Colors::Hud);
     display.centerText(m_grid_y - 1, "Mines: {:2}    Time: {:03}", mines_left, elapsed_secs);
 
     display.resetColors();
@@ -119,37 +119,37 @@ void Minesweeper::drawCell(int gx, int gy)
     {
         if (c.is_flagged)
         {
-            fg  = cursor ? C_CURSOR_FG : C_FLAG_FG;
-            bg  = cursor ? C_FLAG_FG : C_FLAG_BG;
+            fg  = cursor ? Colors::CursorFg : Colors::FlagFg;
+            bg  = cursor ? Colors::FlagFg : Colors::FlagBg;
             ch0 = 'F';
             ch1 = ' ';
         }
         else
         {
-            fg  = cursor ? C_CURSOR_FG : C_HIDDEN_FG;
-            bg  = cursor ? C_CURSOR_BG : C_HIDDEN_BG;
+            fg  = cursor ? Colors::CursorFg : Colors::HiddenFg;
+            bg  = cursor ? Colors::CursorBg : Colors::HiddenBg;
             ch0 = '#';
             ch1 = '#';
         }
     }
     else if (c.is_mine)
     {
-        fg  = C_MINE_FG;
-        bg  = cursor ? 0xFF2222 : C_MINE_BG;
+        fg  = Colors::MineFg;
+        bg  = cursor ? 0xFF2222 : Colors::MineBg;
         ch0 = '*';
         ch1 = ' ';
     }
     else if (c.adjacent == 0)
     {
-        fg  = cursor ? C_CURSOR_FG : C_REVEALED_BG;
-        bg  = cursor ? C_CURSOR_BG : C_REVEALED_BG;
+        fg  = cursor ? Colors::CursorFg : Colors::RevealedBg;
+        bg  = cursor ? Colors::CursorBg : Colors::RevealedBg;
         ch0 = ' ';
         ch1 = ' ';
     }
     else
     {
-        fg  = cursor ? C_CURSOR_FG : k_num_fg[c.adjacent];
-        bg  = cursor ? C_CURSOR_BG : C_REVEALED_BG;
+        fg  = cursor ? Colors::CursorFg : k_num_fg[c.adjacent];
+        bg  = cursor ? Colors::CursorBg : Colors::RevealedBg;
         ch0 = ' ';
         ch1 = static_cast<uint32_t>('0' + c.adjacent);
     }

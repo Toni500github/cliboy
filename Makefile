@@ -1,10 +1,10 @@
-CXX       	?= g++
+CXX     ?= g++
 TAR		?= bsdtar
-PREFIX	  	?= /usr
-VARS  	  	?=
-CXXSTD		?= c++20
+PREFIX 	?= /usr
+VARS  	?=
+CXXSTD	?= c++20
 
-DEBUG 		?= 1
+DEBUG 	?= 1
 
 # https://stackoverflow.com/a/1079861
 # WAY easier way to build debug and release builds

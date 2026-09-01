@@ -60,7 +60,7 @@ IndentCaseLabels: true
 Cpp11BracedListStyle: false
 
 # Namespace indentation
-NamespaceIndentation: None
+NamespaceIndentation: All
 
 # Format comments
 ReflowComments: IndentOnly

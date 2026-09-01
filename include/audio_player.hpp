@@ -6,33 +6,33 @@
 
 namespace TetrisSounds
 {
-constexpr const char* BGM        = "tetris.mp3";
-constexpr const char* LINE_CLEAR = "sfx_tetris_clear_line.wav";
+    constexpr const char* BGM        = "tetris.mp3";
+    constexpr const char* LINE_CLEAR = "sfx_tetris_clear_line.wav";
 }  // namespace TetrisSounds
 
 namespace SnakeSounds
 {
-constexpr const char* FOOD = "sfx_snake_food.mp3";
+    constexpr const char* FOOD = "sfx_snake_food.mp3";
 }
 
 namespace Game2048Sounds
 {
-constexpr const char* BGM = "2048.mp3";
+    constexpr const char* BGM = "2048.mp3";
 }
 
 namespace WordleSounds
 {
-constexpr const char* BGM = "wordle.mp3";
+    constexpr const char* BGM = "wordle.mp3";
 }
 
 namespace MinesweeperSounds
 {
-constexpr const char* BGM = "minesweeper.mp3";
+    constexpr const char* BGM = "minesweeper.mp3";
 }
 
 namespace MenuSounds
 {
-constexpr const char* BGM = "bg_music.mp3";
+    constexpr const char* BGM = "bg_music.mp3";
 }
 
 class AudioPlayer
@@ -48,7 +48,7 @@ public:
     bool begin();
 
     // Background music - loops continuously, one track at a time
-    void playMusic(const char* path);
+    void playMusic(const char* path, bool force = false);
     void stopMusic();
     void pauseMusic();
     void resumeMusic();

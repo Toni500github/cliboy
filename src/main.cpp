@@ -45,6 +45,10 @@ AudioPlayer     playback;
 TerminalDisplay display;
 Settings        settings;
 
+borders_t borders;
+corners_t corners;
+chars_t   characters;
+
 template <class... Ts>
 struct overloaded : Ts...
 {
@@ -73,6 +77,8 @@ int game_loop()
 
     while (running)
     {
+        change_chars(settings.general.utf8);
+
         Scene* next_scene = nullptr;
 
         // clang-format off
@@ -110,13 +116,11 @@ int game_loop()
             break;
 
         // Run only once forever
-        const Result<>& r = active_scene->begin();
-        if (!r.ok())
-        {
-            show_error("Interal error", std::format("Error while initing a scene/game: {}\n", r.error_v()));
+        MUST_OK(active_scene->begin(), {
+            show_error("Interal error", std::format("Error while initing a scene/game: {}\n", _r.error_v()));
             tb_shutdown();
             return 1;
-        }
+        });
 
         active_scene->renderAll();
 

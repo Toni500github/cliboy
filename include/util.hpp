@@ -20,6 +20,33 @@ constexpr std::size_t operator""_len(const char*, std::size_t ln) noexcept
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
+// if Result is not ok(), return it's error
+#define TRY(expr)                     \
+    do                                \
+    {                                 \
+        auto&& _r = (expr);           \
+        if (!_r.ok())                 \
+            return Err(_r.error_v()); \
+    } while (0)
+
+// TRY() with std::format()
+#define TRY_MSG(expr, fmtstr, ...)                                       \
+    do                                                                   \
+    {                                                                    \
+        auto&& _r = (expr);                                              \
+        if (!_r.ok())                                                    \
+            return Err(fmtstr __VA_OPT__(, ) __VA_ARGS__, _r.error_v()); \
+    } while (0)
+
+// if Result is not ok(), execute on_err code
+#define MUST_OK(expr, on_err) \
+    do                        \
+    {                         \
+        auto&& _r = (expr);   \
+        if (!_r.ok())         \
+            on_err;           \
+    } while (0)
+
 // shotout to the better c++ server for these helper structs
 template <typename T = bool>
 struct Ok
